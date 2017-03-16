@@ -4,8 +4,20 @@ using UnityEngine;
 
 public class BattleInterface : MonoBehaviour
 {
+    public GameObject defaultRecentlyShotTileMarker;
+    static GameObject recentlyShotTileMarker;
+    static float markerDescentSpeed;
     //The battle currently managed by the interface 
     static Battle battle;
+    //The indicator used to show tiles currently being fired at
+    static GameObject recentlyShotTileIndicator;
+    //The tile which was most recently shot
+    static Vector2 recentlyShot;
+
+    void Awake()
+    {
+        recentlyShotTileMarker = defaultRecentlyShotTileMarker;
+    }
 
     void Update()
     {
@@ -45,6 +57,8 @@ public class BattleInterface : MonoBehaviour
                         break;
                     case BattleState.CHOOSING_TILE_TO_SHOOT:
                         Vector2 candidateTargetPosition = battle.defendingPlayer.board.WorldToTilePosition(InputController.currentInputPosition);
+                        recentlyShot = candidateTargetPosition;
+
                         bool shotSuccessful = battle.ShootAtTile(candidateTargetPosition);
 
                         if (shotSuccessful)
@@ -59,7 +73,14 @@ public class BattleInterface : MonoBehaviour
             {
                 AIPlayerActions();
             }
+
+            if (battle.state == BattleState.FIRING)
+            {
+                recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
+            }
         }
+
+
     }
 
     static void AIPlayerActions()
@@ -84,10 +105,14 @@ public class BattleInterface : MonoBehaviour
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     Vector2 positionToShoot = battle.ChooseTileToAttackForAIPlayer();
+                    recentlyShot = positionToShoot;
                     while (!battle.ShootAtTile(positionToShoot))
                     {
-                        positionToShoot = battle.ChooseTileToAttackForAIPlayer(); ;
+                        positionToShoot = battle.ChooseTileToAttackForAIPlayer();
+                        recentlyShot = positionToShoot;
                     }
+
+
 
                     if (GameController.singleplayer && !battle.defendingPlayer.AI)
                     {
@@ -114,6 +139,7 @@ public class BattleInterface : MonoBehaviour
     public static void Dettach()
     {
         battle = null;
+        Destroy(recentlyShotTileIndicator);
     }
 
     public static void Disable()
@@ -181,8 +207,19 @@ public class BattleInterface : MonoBehaviour
 
     static void OnBattleStateChange(BattleState switchingFrom, BattleState switchingTo)
     {
+        switch (switchingFrom)
+        {
+            case BattleState.FIRING:
+                Destroy(recentlyShotTileIndicator);
+                break;
+        }
+
         switch (switchingTo)
         {
+            case BattleState.FIRING:
+                recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
+                recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)recentlyShot.x, (int)recentlyShot.y].worldPosition + Vector3.up * 3f;
+                break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();
                 Cameraman.TakePosition("Overhead View");
