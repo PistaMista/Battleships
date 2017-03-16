@@ -139,7 +139,7 @@ public class Board : ScriptableObject
                 {
                     if (tiles[x, y].containedShip.sunk)
                     {
-                        tiles[x, y].SetMarker(Color.gray);
+                        tiles[x, y].SetMarker(new Color(180f / 255f, 0f, 0f));
                     }
                     else
                     {
