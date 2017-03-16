@@ -171,8 +171,15 @@ public class Battle : MonoBehaviour
                     defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit = true;
                     if (defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip)
                     {
-                        attackingPlayer.hits[defendingPlayer.ID].Add(tile);
-                        defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.Hit();
+                        if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.sunk)
+                        {
+                            attackingPlayer.hits[defendingPlayer.ID].Add(tile);
+                            defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.Hit();
+                        }
+                        else
+                        {
+                            attackingPlayer.misses[defendingPlayer.ID].Add(tile);
+                        }
                     }
                     else
                     {
