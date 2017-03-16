@@ -74,7 +74,7 @@ public class BattleInterface : MonoBehaviour
                 AIPlayerActions();
             }
 
-            if (battle.state == BattleState.FIRING)
+            if (battle.state == BattleState.SHOWING_HIT_TILE)
             {
                 recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
             }
@@ -209,7 +209,7 @@ public class BattleInterface : MonoBehaviour
     {
         switch (switchingFrom)
         {
-            case BattleState.FIRING:
+            case BattleState.SHOWING_HIT_TILE:
                 Destroy(recentlyShotTileIndicator);
                 break;
         }
@@ -217,8 +217,13 @@ public class BattleInterface : MonoBehaviour
         switch (switchingTo)
         {
             case BattleState.FIRING:
+                battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
+
+                break;
+            case BattleState.SHOWING_HIT_TILE:
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
                 recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)recentlyShot.x, (int)recentlyShot.y].worldPosition + Vector3.up * 3f;
+                battle.ChangeState(BattleState.TURN_FINISHED, 1f);
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();

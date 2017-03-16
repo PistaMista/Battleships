@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum BattleState { CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_FINISHED, FRIENDLY_SHIP_PREVIEW }
+public enum BattleState { CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_FINISHED, FRIENDLY_SHIP_PREVIEW, SHOWING_HIT_TILE }
 
 public class Battle : MonoBehaviour
 {
@@ -164,6 +164,9 @@ public class Battle : MonoBehaviour
             {
                 if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
                 {
+                    targetState = BattleState.TURN_FINISHED;
+                    switchTime = 0.5f;
+
                     ChangeState(BattleState.FIRING);
                     defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit = true;
                     if (defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip)
@@ -186,8 +189,7 @@ public class Battle : MonoBehaviour
                         playersAlive--;
                     }
 
-                    targetState = BattleState.TURN_FINISHED;
-                    switchTime = 0.5f;
+
 
                     return true;
                 }
@@ -199,10 +201,7 @@ public class Battle : MonoBehaviour
 
     public void ChangeState(BattleState state)
     {
-        if (onBattleStateChange != null)
-        {
-            onBattleStateChange(this.state, state);
-        }
+        BattleState lastState = this.state;
 
         this.targetState = state;
         this.state = state;
@@ -211,6 +210,11 @@ public class Battle : MonoBehaviour
             case BattleState.TURN_FINISHED:
                 NextPlayer();
                 break;
+        }
+
+        if (onBattleStateChange != null)
+        {
+            onBattleStateChange(lastState, state);
         }
     }
 
