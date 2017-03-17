@@ -21,9 +21,7 @@ public class Sea : MonoBehaviour
     public MeshRenderer meshRenderer;
     public MeshFilter meshFilter;
     public float elevationCap;
-
-    [Range(0.05f, 0.2f)]
-    public float updateDelay;
+    public static float updateDelay;
 
     void Start()
     {
@@ -34,6 +32,7 @@ public class Sea : MonoBehaviour
         StartCoroutine(Cycle());
         //Place the sea in the middle of the map
         transform.position = new Vector3(-(float)dimensions * spacing / 2f - spacing / 4f, 0, -(float)dimensions * spacing / 2f - spacing / 4f);
+        updateDelay = 1.5f;
     }
 
     void PlacePoints()
@@ -104,7 +103,7 @@ public class Sea : MonoBehaviour
     {
         List<int> triangles = new List<int>();
 
-        
+
 
         //Calculate the triangles
         //Calculate triangles for the first half
@@ -142,7 +141,7 @@ public class Sea : MonoBehaviour
         }
 
 
-        meshFilter.mesh.triangles = triangles.ToArray ();
+        meshFilter.mesh.triangles = triangles.ToArray();
         triangles = null;
     }
 

@@ -71,14 +71,6 @@ public class BattleInterface : MonoBehaviour
 
             if (battle.state == BattleState.SHOWING_HIT_TILE)
             {
-                if (GameController.humanPlayers <= 1 && !battle.defendingPlayer.AI || GameController.humanPlayers == 0)
-                {
-                    battle.defendingPlayer.board.Set(BoardState.FRIENDLY);
-                }
-                else
-                {
-                    battle.defendingPlayer.board.Set(BoardState.ENEMY);
-                }
                 recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation + 0.1f, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
             }
         }
@@ -227,11 +219,23 @@ public class BattleInterface : MonoBehaviour
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
                 recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)recentlyShot.x, (int)recentlyShot.y].worldPosition + Vector3.up * 3f;
                 battle.ChangeState(BattleState.TURN_FINISHED, 1f);
+                if (GameController.humanPlayers <= 1 && !battle.defendingPlayer.AI || GameController.humanPlayers == 0)
+                {
+                    battle.defendingPlayer.board.Set(BoardState.FRIENDLY);
+                }
+                else
+                {
+                    battle.defendingPlayer.board.Set(BoardState.ENEMY);
+                }
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();
                 Cameraman.TakePosition("Overhead View");
                 Interface.SwitchMenu("Overhead");
+                Sea.updateDelay = 1.75f;
+                break;
+            case BattleState.CHOOSING_TILE_TO_SHOOT:
+                Sea.updateDelay = 0.45f;
                 break;
         }
     }
@@ -247,5 +251,6 @@ public class BattleInterface : MonoBehaviour
         Cameraman.TakePosition("Overhead View");
         Interface.SwitchMenu("Overhead");
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
+        Sea.updateDelay = 1.75f;
     }
 }

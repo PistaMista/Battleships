@@ -93,12 +93,11 @@ public class PlayerSelector : MonoBehaviour
         {
             //GameController.NewBattle(selectedPlayers.ToArray(), true);
             GameController.PlayerInitializer[] initializers = new GameController.PlayerInitializer[selectedPlayers.Count];
-            List<Color> playerColors = new List<Color>(selectedPlayers.Keys);
-            List<bool> aiPlayers = new List<bool>(selectedPlayers.Values);
 
-            for (int i = 0; i < initializers.Length; i++)
+            for (int i = 0; i < centerAnchors.Count; i++)
             {
-                initializers[i] = new GameController.PlayerInitializer(playerColors[i], aiPlayers[i]);
+
+                initializers[i] = new GameController.PlayerInitializer(centerAnchors[i].color, selectedPlayers[centerAnchors[i].color]);
             }
 
             GameController.NewBattle(initializers, true);
