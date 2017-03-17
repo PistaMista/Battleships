@@ -167,7 +167,7 @@ public class Battle : MonoBehaviour
                     targetState = BattleState.TURN_FINISHED;
                     switchTime = 0.5f;
 
-                    ChangeState(BattleState.FIRING);
+
                     defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit = true;
                     if (defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip)
                     {
@@ -197,7 +197,7 @@ public class Battle : MonoBehaviour
                     }
 
 
-
+                    ChangeState(BattleState.FIRING);
                     return true;
                 }
             }

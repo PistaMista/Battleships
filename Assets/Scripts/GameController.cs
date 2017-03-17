@@ -65,6 +65,8 @@ public class GameController : MonoBehaviour
     public static List<Battle> secondaryBattles;
     //Is there only one human player?
     public static bool singleplayer = false;
+    //How many human players there are?
+    public static int humanPlayers;
     public static bool switchTimesNill = false;
 
     void Awake()
@@ -92,7 +94,7 @@ public class GameController : MonoBehaviour
     {
         Player[] players = new Player[playersToAdd.Length];
         //state = GameState.PLACING_SHIPS;
-        int humanPlayers = 0;
+        humanPlayers = 0;
         //For all players create their own board
         for (int i = 0; i < players.Length; i++)
         {
@@ -134,7 +136,6 @@ public class GameController : MonoBehaviour
                 secondaryBattle.End();
             }
 
-            singleplayer = humanPlayers <= 1;
             secondaryBattles = new List<Battle>();
         }
         else

@@ -61,11 +61,6 @@ public class BattleInterface : MonoBehaviour
 
                         bool shotSuccessful = battle.ShootAtTile(candidateTargetPosition);
 
-                        if (shotSuccessful)
-                        {
-                            battle.defendingPlayer.board.ShowToEnemy(battle.attackingPlayer);
-                        }
-
                         break;
                 }
             }
@@ -76,6 +71,14 @@ public class BattleInterface : MonoBehaviour
 
             if (battle.state == BattleState.SHOWING_HIT_TILE)
             {
+                if (GameController.humanPlayers <= 1 && !battle.defendingPlayer.AI || GameController.humanPlayers == 0)
+                {
+                    battle.defendingPlayer.board.ShowToFriendly();
+                }
+                else
+                {
+                    battle.defendingPlayer.board.ShowToEnemy(battle.attackingPlayer);
+                }
                 recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation + 0.1f, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
             }
         }
@@ -114,14 +117,7 @@ public class BattleInterface : MonoBehaviour
 
 
 
-                    if (GameController.singleplayer && !battle.defendingPlayer.AI)
-                    {
-                        battle.defendingPlayer.board.ShowToFriendly();
-                    }
-                    else
-                    {
-                        battle.defendingPlayer.board.ShowToEnemy(battle.attackingPlayer);
-                    }
+
                     break;
             }
         }
@@ -186,7 +182,7 @@ public class BattleInterface : MonoBehaviour
         player.board.SetGridEnabled(true);
         player.SetMacroMarker(-1);
 
-        if (player == battle.attackingPlayer || (GameController.singleplayer && !player.AI))
+        if (player == battle.attackingPlayer || (GameController.humanPlayers == 1 && !player.AI) || GameController.humanPlayers == 0)
         {
             player.board.ShowToFriendly();
         }
@@ -218,7 +214,10 @@ public class BattleInterface : MonoBehaviour
         {
             case BattleState.FIRING:
                 battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
-
+                foreach (Player player in battle.players)
+                {
+                    player.board.SetGridEnabled(false, false);
+                }
                 break;
             case BattleState.SHOWING_HIT_TILE:
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);

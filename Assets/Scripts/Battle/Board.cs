@@ -127,8 +127,37 @@ public class Board : ScriptableObject
         }
     }
 
+    public void SetGridEnabled(bool active, bool hideShips)
+    {
+        if (active != gridRendered)
+        {
+            gridRendered = active;
+            if (active)
+            {
+                DrawGrid(dimensions, gridMaterial);
+            }
+            else
+            {
+                Destroy(grid);
+                if (hideShips)
+                {
+                    foreach (Ship ship in shipOwner.ships)
+                    {
+                        ship.gameObject.SetActive(false);
+                    }
+                }
+
+                foreach (BoardTile tile in tiles)
+                {
+                    tile.SetMarker(Color.clear);
+                }
+            }
+        }
+    }
+
     public void ShowToFriendly()
     {
+        SetGridEnabled(true);
         shipOwner.ShipsShown(true);
 
         for (int x = 0; x < dimensions; x++)
@@ -155,12 +184,9 @@ public class Board : ScriptableObject
                 }
                 else
                 {
-                    if (GameController.mainBattle.players.Length <= 3)
+                    if (tiles[x, y].hit)
                     {
-                        if (tiles[x, y].hit)
-                        {
-                            tiles[x, y].SetMarker(Color.black);
-                        }
+                        tiles[x, y].SetMarker(Color.black);
                     }
                 }
             }
@@ -169,6 +195,7 @@ public class Board : ScriptableObject
 
     public void ShowToEnemy(Player enemy)
     {
+        SetGridEnabled(true);
         Vector2[] hits = enemy.hits[shipOwner.ID].ToArray();
         Vector2[] misses = enemy.misses[shipOwner.ID].ToArray();
 

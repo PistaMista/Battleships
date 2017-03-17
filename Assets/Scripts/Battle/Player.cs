@@ -90,6 +90,10 @@ public class Player : MonoBehaviour
         if (ships.Count == 0)
         {
             alive = false;
+            if (!AI)
+            {
+                GameController.humanPlayers--;
+            }
         }
     }
 }
