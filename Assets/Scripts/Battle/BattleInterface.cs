@@ -59,7 +59,7 @@ public class BattleInterface : MonoBehaviour
                         Vector2 candidateTargetPosition = battle.defendingPlayer.board.WorldToTilePosition(InputController.currentInputPosition);
                         recentlyShot = candidateTargetPosition;
 
-                        bool shotSuccessful = battle.ShootAtTile(candidateTargetPosition);
+                        battle.ShootAtTile(candidateTargetPosition);
 
                         break;
                 }
@@ -73,11 +73,11 @@ public class BattleInterface : MonoBehaviour
             {
                 if (GameController.humanPlayers <= 1 && !battle.defendingPlayer.AI || GameController.humanPlayers == 0)
                 {
-                    battle.defendingPlayer.board.ShowToFriendly();
+                    battle.defendingPlayer.board.Set(BoardState.FRIENDLY);
                 }
                 else
                 {
-                    battle.defendingPlayer.board.ShowToEnemy(battle.attackingPlayer);
+                    battle.defendingPlayer.board.Set(BoardState.ENEMY);
                 }
                 recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation + 0.1f, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
             }
@@ -114,10 +114,6 @@ public class BattleInterface : MonoBehaviour
                         positionToShoot = battle.ChooseTileToAttackForAIPlayer();
                         recentlyShot = positionToShoot;
                     }
-
-
-
-
                     break;
             }
         }
@@ -164,7 +160,7 @@ public class BattleInterface : MonoBehaviour
     {
         foreach (Player player in battle.players)
         {
-            player.board.CamouflageBoard();
+            player.board.Set(BoardState.OVERHEAD);
             if (player == battle.attackingPlayer)
             {
                 player.SetMacroMarker(0);
@@ -179,16 +175,15 @@ public class BattleInterface : MonoBehaviour
 
     static void ViewPlayer(Player player)
     {
-        player.board.SetGridEnabled(true);
         player.SetMacroMarker(-1);
 
         if (player == battle.attackingPlayer || (GameController.humanPlayers == 1 && !player.AI) || GameController.humanPlayers == 0)
         {
-            player.board.ShowToFriendly();
+            player.board.Set(BoardState.FRIENDLY);
         }
         else
         {
-            player.board.ShowToEnemy(battle.attackingPlayer);
+            player.board.Set(BoardState.ENEMY);
         }
         Cameraman.TakePosition("Board " + (player.ID + 1), 0.6f);
     }
@@ -213,11 +208,20 @@ public class BattleInterface : MonoBehaviour
         switch (switchingTo)
         {
             case BattleState.FIRING:
+                Interface.SwitchMenu("Firing Screen");
                 battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
+
                 foreach (Player player in battle.players)
                 {
-                    player.board.SetGridEnabled(false, false);
+                    player.board.Set(BoardState.DISABLED);
+                    player.SetMacroMarker(-1);
                 }
+
+                if ((GameController.humanPlayers == 1 && !battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
+                {
+                    battle.defendingPlayer.board.Set(BoardState.SHIPS);
+                }
+
                 break;
             case BattleState.SHOWING_HIT_TILE:
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);

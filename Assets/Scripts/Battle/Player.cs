@@ -24,6 +24,8 @@ public class Player : MonoBehaviour
     public GameObject macroMarker;
     //The ships owned by this player
     public List<Ship> ships;
+    //The battle this player is taking part in
+    public Battle battle;
 
     void Awake()
     {

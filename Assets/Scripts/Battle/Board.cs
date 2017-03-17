@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum BoardState { OVERHEAD, GRID_ONLY, ENEMY, FRIENDLY, SHIPS, DISABLED }
+
 public class Board : ScriptableObject
 {
     public struct BoardTile
@@ -10,29 +12,20 @@ public class Board : ScriptableObject
         public bool hit;
         public Vector3 worldPosition;
         GameObject marker;
-        public void SetMarker(Color color)
+        public void SetMarker(Color color, Transform parent)
         {
+            Destroy(marker);
             if (color.a != 0)
             {
-                if (marker == null)
-                {
-                    marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    marker.transform.position = worldPosition;
-                    marker.transform.localScale = new Vector3(0.9f, 0.1f, 0.9f);
-                }
+                marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                marker.transform.position = worldPosition;
+                marker.transform.parent = parent;
+                marker.transform.localScale = new Vector3(0.9f, 0.1f, 0.9f);
 
                 color.a = 0.6f;
                 Renderer renderer = marker.GetComponent<Renderer>();
                 renderer.material = GameController.playerBoardMarkerMaterial;
                 renderer.material.SetColor("_Color", color);
-            }
-            else
-            {
-                if (marker)
-                {
-                    Destroy(marker);
-                    marker = null;
-                }
             }
         }
     }
@@ -70,13 +63,12 @@ public class Board : ScriptableObject
         this.dimensions = dimensions;
         this.gridMaterial = gridMaterial;
 
-        gridRendered = true;
-        SetGridEnabled(false);
+        //gridRendered = true;
+        Set(BoardState.DISABLED);
     }
 
     void DrawGrid(int dimensions, Material gridMaterial)
     {
-        Destroy(grid);
         grid = new GameObject("RenderGrid");
 
         for (int x = 1; x < dimensions; x++)
@@ -102,128 +94,90 @@ public class Board : ScriptableObject
         grid.transform.position = position;
     }
 
-    public void SetGridEnabled(bool active)
+    public void Set(BoardState state)
     {
-        if (active != gridRendered)
+        Destroy(grid);
+        gridRendered = true;
+        switch (state)
         {
-            gridRendered = active;
-            if (active)
-            {
-                DrawGrid(dimensions, gridMaterial);
-            }
-            else
-            {
-                Destroy(grid);
-                foreach (Ship ship in shipOwner.ships)
+            case BoardState.DISABLED:
+                gridRendered = false;
+                break;
+            case BoardState.GRID_ONLY:
+                DrawGrid(dimensions, GameController.playerBoardGridMaterial);
+                break;
+            case BoardState.ENEMY:
+                DrawGrid(dimensions, GameController.playerBoardGridMaterial);
+                Vector2[] hits = shipOwner.battle.attackingPlayer.hits[shipOwner.ID].ToArray();
+                Vector2[] misses = shipOwner.battle.attackingPlayer.misses[shipOwner.ID].ToArray();
+
+                foreach (Vector2 pos in hits)
                 {
-                    ship.gameObject.SetActive(false);
+                    SetMarker(pos, Color.red);
                 }
 
-                foreach (BoardTile tile in tiles)
+                foreach (Vector2 pos in misses)
                 {
-                    tile.SetMarker(Color.clear);
+                    SetMarker(pos, Color.black);
                 }
-            }
-        }
-    }
-
-    public void SetGridEnabled(bool active, bool hideShips)
-    {
-        if (active != gridRendered)
-        {
-            gridRendered = active;
-            if (active)
-            {
-                DrawGrid(dimensions, gridMaterial);
-            }
-            else
-            {
-                Destroy(grid);
-                if (hideShips)
+                break;
+            case BoardState.FRIENDLY:
+                DrawGrid(dimensions, GameController.playerBoardGridMaterial);
+                for (int x = 0; x < dimensions; x++)
                 {
-                    foreach (Ship ship in shipOwner.ships)
+                    for (int y = 0; y < dimensions; y++)
                     {
-                        ship.gameObject.SetActive(false);
-                    }
-                }
-
-                foreach (BoardTile tile in tiles)
-                {
-                    tile.SetMarker(Color.clear);
-                }
-            }
-        }
-    }
-
-    public void ShowToFriendly()
-    {
-        SetGridEnabled(true);
-        shipOwner.ShipsShown(true);
-
-        for (int x = 0; x < dimensions; x++)
-        {
-            for (int y = 0; y < dimensions; y++)
-            {
-                if (tiles[x, y].containedShip)
-                {
-                    if (tiles[x, y].containedShip.sunk)
-                    {
-                        tiles[x, y].SetMarker(new Color(180f / 255f, 0f, 0f));
-                    }
-                    else
-                    {
-                        if (tiles[x, y].hit)
+                        BoardTile tile = tiles[x, y];
+                        if (tile.containedShip)
                         {
-                            tiles[x, y].SetMarker(Color.red);
+                            if (tile.containedShip.sunk)
+                            {
+                                SetMarker(tile, new Color(180f / 255f, 0f, 0f));
+                            }
+                            else
+                            {
+                                if (tile.hit)
+                                {
+                                    SetMarker(tile, Color.red);
+                                }
+                                else
+                                {
+                                    SetMarker(tile, Color.green);
+                                }
+                            }
                         }
                         else
                         {
-                            tiles[x, y].SetMarker(Color.green);
+                            if (tile.hit)
+                            {
+                                SetMarker(tile, Color.black);
+                            }
                         }
+
+                        tiles[x, y] = tile;
                     }
                 }
-                else
-                {
-                    if (tiles[x, y].hit)
-                    {
-                        tiles[x, y].SetMarker(Color.black);
-                    }
-                }
-            }
+
+                shipOwner.ShipsShown(true);
+                break;
+            case BoardState.OVERHEAD:
+                grid = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                grid.transform.position = position;
+                grid.transform.localScale = new Vector3(1f, 1f / (float)dimensions, 1f) * (float)dimensions;
+                grid.name = "Player Icon";
+                Renderer tmp = grid.GetComponent<Renderer>();
+                tmp.material = gridMaterial;
+                tmp.material.SetColor("_Color", shipOwner.color);
+                tmp.material.SetColor("_EmissionColor", Color.clear);
+
+                gridRendered = false;
+                shipOwner.ShipsShown(false);
+                break;
+            case BoardState.SHIPS:
+                gridRendered = false;
+                shipOwner.ShipsShown(true);
+                break;
         }
-    }
-
-    public void ShowToEnemy(Player enemy)
-    {
-        SetGridEnabled(true);
-        Vector2[] hits = enemy.hits[shipOwner.ID].ToArray();
-        Vector2[] misses = enemy.misses[shipOwner.ID].ToArray();
-
-        foreach (Vector2 pos in hits)
-        {
-            SetMarkerAt(pos, Color.red);
-        }
-
-        foreach (Vector2 pos in misses)
-        {
-            SetMarkerAt(pos, Color.black);
-        }
-    }
-
-    public void CamouflageBoard()
-    {
-        SetGridEnabled(false);
-        Destroy(grid);
-        grid = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        grid.transform.position = position;
-        grid.transform.localScale = new Vector3(1f, 1f / (float)dimensions, 1f) * (float)dimensions;
-        grid.name = "Player Icon";
-        Renderer tmp = grid.GetComponent<Renderer>();
-        tmp.material = gridMaterial;
-        tmp.material.SetColor("_Color", shipOwner.color);
-        tmp.material.SetColor("_EmissionColor", Color.clear);
-
-        shipOwner.ShipsShown(false);
     }
 
     public Vector2 WorldToTilePosition(Vector3 position)
@@ -237,13 +191,18 @@ public class Board : ScriptableObject
         return new Vector2(Mathf.Floor(result.x), Mathf.Floor(result.z));
     }
 
-    public void SetMarkerAt(Vector2 position, Color color)
+    public void SetMarker(Vector2 position, Color color)
     {
         position = new Vector2((int)position.x, (int)position.y);
         if (IsPositionValid(position) && gridRendered)
         {
-            tiles[(int)position.x, (int)position.y].SetMarker(color);
+            tiles[(int)position.x, (int)position.y].SetMarker(color, grid.transform);
         }
+    }
+
+    public void SetMarker(BoardTile tile, Color color)
+    {
+        tile.SetMarker(color, grid.transform);
     }
 
     public bool IsPositionValid(Vector2 position)

@@ -76,9 +76,10 @@ public class Battle : MonoBehaviour
         for (int i = 0; i < players.Length; i++)
         {
             players[i].gameObject.transform.parent = transform;
+            players[i].battle = this;
             if (isMainBattle)
             {
-                players[i].board.CamouflageBoard();
+                players[i].board.Set(BoardState.OVERHEAD);
             }
             else
             {
@@ -365,8 +366,7 @@ public class Battle : MonoBehaviour
         foreach (Player player in players)
         {
             player.SetMacroMarker(-1);
-            player.board.SetGridEnabled(true);
-            player.board.SetGridEnabled(false);
+            player.board.Set(BoardState.DISABLED);
         }
 
         foreach (Ship ship in ships)

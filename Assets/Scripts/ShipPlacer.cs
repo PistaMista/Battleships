@@ -66,7 +66,7 @@ public class ShipPlacer : MonoBehaviour
                         for (int i = 0; i < targetShip.length; i++)
                         {
                             player.board.tiles[(int)targetShip.tiles[i].x, (int)targetShip.tiles[i].y].containedShip = null;
-                            player.board.SetMarkerAt(targetShip.tiles[i], Color.clear);
+                            player.board.SetMarker(targetShip.tiles[i], Color.clear);
                         }
 
                         targetShip.tiles = new Vector2[targetShip.length];
@@ -104,7 +104,7 @@ public class ShipPlacer : MonoBehaviour
                             Interface.SwitchMenu("Placing Done"); //Switch the interface to show a button to go to the next player
                             foreach (Vector2 pos in validPositions) //Clear the tile colors of valid positions
                             {
-                                player.board.SetMarkerAt(pos, Color.clear);
+                                player.board.SetMarker(pos, Color.clear);
                             }
                             validPositions = new List<Vector2>(); //Clear the list of valid positions
                             PlacementPreview(null);
@@ -175,7 +175,7 @@ public class ShipPlacer : MonoBehaviour
         }
 
         validPositions.Remove(position);
-        player.board.SetMarkerAt(position, selectedTileColor);
+        player.board.SetMarker(position, selectedTileColor);
     }
 
     static void MarkAsValidPosition(Vector2 position) //Marks a position as valid
@@ -183,7 +183,7 @@ public class ShipPlacer : MonoBehaviour
         if (!validPositions.Contains(position))
         {
             validPositions.Add(position);
-            player.board.SetMarkerAt(position, validTileColor);
+            player.board.SetMarker(position, validTileColor);
         }
     }
 
@@ -193,7 +193,7 @@ public class ShipPlacer : MonoBehaviour
         {
             foreach (Vector2 pos in validPositions) //Clears the graphical representation of the valid tiles
             {
-                player.board.SetMarkerAt(pos, Color.clear);
+                player.board.SetMarker(pos, Color.clear);
             }
         }
 
@@ -302,7 +302,7 @@ public class ShipPlacer : MonoBehaviour
             {
                 if (battle.isMainBattle)
                 {
-                    player.board.CamouflageBoard();
+                    player.board.Set(BoardState.OVERHEAD);
                 }
             }
 
@@ -310,7 +310,7 @@ public class ShipPlacer : MonoBehaviour
             if (!player.AI) //Skip AI players
             {
                 Cameraman.TakePosition("Board " + (playerNumber + 1), 0.6f); //Camera takes up a position above the board
-                player.board.SetGridEnabled(true);
+                player.board.Set(BoardState.GRID_ONLY);
 
                 InitializeShipsForCurrentPlayer();
 
