@@ -14,7 +14,7 @@ public class Turret : MonoBehaviour
     public float defaultAngle;
     int currentlyFiring = 999;
     public float firingDelay;
-    bool doneFiring;
+    bool doneFiring = true;
     void Start()
     {
         defaultAngle = gameObject.transform.localRotation.eulerAngles.y;

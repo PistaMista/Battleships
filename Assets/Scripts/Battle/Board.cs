@@ -75,9 +75,20 @@ public class Board : ScriptableObject
         {
             float pos = -(float)dimensions / 2f + x;
             GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            tmp.GetComponent<Renderer>().material = gridMaterial;
+            Material material = gridMaterial;
+            if (x == 1 || x == dimensions - 1)
+            {
+                material = new Material(gridMaterial);
+                material.SetColor("_Color", Color.clear);
+                material.SetColor("_EmissionColor", shipOwner.color);
+                tmp.transform.localPosition = new Vector3(pos, 0.01f, 0f);
+            }
+            else
+            {
+                tmp.transform.localPosition = new Vector3(pos, 0f, 0f);
+            }
+            tmp.GetComponent<Renderer>().material = material;
             tmp.transform.localScale = new Vector3(0.1f, 0.1f, (float)dimensions);
-            tmp.transform.localPosition = new Vector3(pos, 0f, 0f);
             tmp.transform.parent = grid.transform;
         }
 
@@ -85,9 +96,20 @@ public class Board : ScriptableObject
         {
             float pos = -(float)dimensions / 2f + y;
             GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            tmp.GetComponent<Renderer>().material = gridMaterial;
+            Material material = gridMaterial;
+            if (y == 1 || y == dimensions - 1)
+            {
+                material = new Material(gridMaterial);
+                material.SetColor("_Color", Color.clear);
+                material.SetColor("_EmissionColor", shipOwner.color);
+                tmp.transform.localPosition = new Vector3(0f, 0.01f, pos);
+            }
+            else
+            {
+                tmp.transform.localPosition = new Vector3(0f, 0f, pos);
+            }
+            tmp.GetComponent<Renderer>().material = material;
             tmp.transform.localScale = new Vector3((float)dimensions, 0.1f, 0.1f);
-            tmp.transform.localPosition = new Vector3(0f, 0f, pos);
             tmp.transform.parent = grid.transform;
         }
 

@@ -26,7 +26,7 @@ public class Cannon : MonoBehaviour
         if (firing)
         {
             float position = barrel.transform.localPosition.z;
-            position = Mathf.SmoothDamp(position, defaultBarrelPosition, ref recoverySpeed, 1f, 2f);
+            position = Mathf.SmoothDamp(position, defaultBarrelPosition, ref recoverySpeed, 0.35f, 2f);
 
             barrel.transform.localPosition = new Vector3(0, 0, position);
             if (barrel.transform.localScale.z - position < 0.05f)
