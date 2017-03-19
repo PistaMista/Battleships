@@ -12,6 +12,9 @@ public class Turret : MonoBehaviour
     public int rightTraverseLimit;
     public float shellVelocity;
     public float defaultAngle;
+    int currentlyFiring = 999;
+    public float firingDelay;
+    bool doneFiring;
     void Start()
     {
         defaultAngle = gameObject.transform.localRotation.eulerAngles.y;
@@ -20,19 +23,38 @@ public class Turret : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (firingDelay <= 0)
+        {
+            if (currentlyFiring < cannons.Length)
+            {
+                cannons[currentlyFiring].Fire();
 
+                currentlyFiring++;
+                firingDelay = 0.5f;
+            }
+            else if (!doneFiring)
+            {
+                currentlyFiring = 0;
+                firingDelay = 0.1f;
+                doneFiring = true;
+            }
+        }
+
+        firingDelay -= Time.deltaTime;
     }
 
-    public float FireAt(Vector3 worldPosition)
+    public float FireAt(Vector3 worldPosition, float firingDelay)
     {
-        if (!RotateTo(worldPosition))
+        if (RotateTo(worldPosition))
+        {
+            this.firingDelay = firingDelay;
+            doneFiring = false;
+            return 1f;
+        }
+        else
         {
             return 0f;
         }
-
-
-
-        return 1f;
     }
 
     bool RotateTo(Vector3 targetPosition)

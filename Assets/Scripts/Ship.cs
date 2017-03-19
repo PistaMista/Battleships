@@ -18,7 +18,7 @@ public class Ship : MonoBehaviour
     public Turret[] turrets;
     //Are the turrets placed in reverse?
     public bool reverseTurrets;
-
+    public float turretFiringDelay;
     void Awake()
     {
         tiles = new Vector2[length];
@@ -45,14 +45,18 @@ public class Ship : MonoBehaviour
     public float FireAt(Vector3 worldPosition)
     {
         float highestTravelTime = 0f;
+        float currentDelay = 0f;
+
         foreach (Turret turret in turrets)
         {
-            float travelTime = turret.FireAt(worldPosition);
+            float travelTime = turret.FireAt(worldPosition, currentDelay);
 
             if (travelTime > highestTravelTime)
             {
                 highestTravelTime = travelTime;
             }
+
+            currentDelay += turretFiringDelay;
         }
 
         return highestTravelTime;
