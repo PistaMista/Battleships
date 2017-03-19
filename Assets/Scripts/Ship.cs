@@ -14,6 +14,11 @@ public class Ship : MonoBehaviour
     public bool sunk = false;
     //The amount of ship segments still intact
     public int lengthRemaining;
+    //The artillery turrets mounted on this ship
+    public Turret[] turrets;
+    //Are the turrets placed in reverse?
+    public bool reverseTurrets;
+
     void Awake()
     {
         tiles = new Vector2[length];
@@ -35,5 +40,21 @@ public class Ship : MonoBehaviour
             sunk = true;
             owner.ShipSunk(this);
         }
+    }
+
+    public float FireAt(Vector3 worldPosition)
+    {
+        float highestTravelTime = 0f;
+        foreach (Turret turret in turrets)
+        {
+            float travelTime = turret.FireAt(worldPosition);
+
+            if (travelTime > highestTravelTime)
+            {
+                highestTravelTime = travelTime;
+            }
+        }
+
+        return highestTravelTime;
     }
 }

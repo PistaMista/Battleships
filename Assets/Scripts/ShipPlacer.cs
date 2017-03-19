@@ -145,7 +145,7 @@ public class ShipPlacer : MonoBehaviour
         processedShip.transform.position = player.board.tiles[(int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].x, (int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].y].worldPosition - Vector3.up * (GameController.playerBoardElevation - 0.4f); //Sets up the position of the ship
         if ((selectedPositions[0] - selectedPositions[1]).x != 0) //Rotates the ship correctly
         {
-            processedShip.transform.rotation = Quaternion.Euler(Vector3.up * 90f);
+            processedShip.transform.rotation = Quaternion.Euler(Vector3.up * (90f - 180f * Random.Range(0, 1)));
         }
         else
         {

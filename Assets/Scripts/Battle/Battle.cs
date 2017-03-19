@@ -66,8 +66,46 @@ public class Battle : MonoBehaviour
             }
 
             switchTime -= Time.deltaTime;
+
+            if (!isMainBattle)
+            {
+                AIPlayerActions();
+            }
         }
     }
+
+    void AIPlayerActions()
+    {
+        if (switchTime <= -0.1f)
+        {
+            switch (state)
+            {
+                case BattleState.CHOOSING_TARGET:
+                    int randomTargetID = Random.Range(0, players.Length);
+                    while (randomTargetID == attackingPlayerID)
+                    {
+                        randomTargetID = Random.Range(0, players.Length);
+                    }
+
+                    if (SelectTarget(players[randomTargetID]))
+                    {
+                        ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1.8f);
+                    }
+                    break;
+                case BattleState.CHOOSING_TILE_TO_SHOOT:
+                    Vector2 positionToShoot = ChooseTileToAttackForAIPlayer();
+
+                    while (!ShootAtTile(positionToShoot))
+                    {
+                        positionToShoot = ChooseTileToAttackForAIPlayer();
+                    }
+
+                    ChangeState(BattleState.TURN_FINISHED, 1f);
+                    break;
+            }
+        }
+    }
+
     public void Initialize(Player[] competitors)
     {
         players = competitors;
@@ -197,6 +235,13 @@ public class Battle : MonoBehaviour
                         playersAlive--;
                     }
 
+                    if (!isMainBattle)
+                    {
+                        foreach (Ship ship in attackingPlayer.ships)
+                        {
+                            ship.FireAt(defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition);
+                        }
+                    }
 
                     ChangeState(BattleState.FIRING);
                     return true;
@@ -216,6 +261,10 @@ public class Battle : MonoBehaviour
         switch (state)
         {
             case BattleState.TURN_FINISHED:
+                if (!isMainBattle)
+                {
+                    ChangeState(BattleState.CHOOSING_TARGET, 1f);
+                }
                 NextPlayer();
                 break;
         }
