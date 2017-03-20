@@ -142,7 +142,11 @@ public class ShipPlacer : MonoBehaviour
         battle.ships.Add(processedShip);
 
         //processedShip.gameObject.SetActive(showShip); //Shows the ship
-        processedShip.transform.position = player.board.tiles[(int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].x, (int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].y].worldPosition - Vector3.up * (GameController.playerBoardElevation - 0.4f); //Sets up the position of the ship
+        //processedShip.transform.position = player.board.tiles[(int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].x, (int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].y].worldPosition - Vector3.up * (GameController.playerBoardElevation - 0.4f); //Sets up the position of the ship
+        Vector3 position1 = player.board.tiles[(int)selectedPositions[0].x, (int)selectedPositions[0].y].worldPosition;
+        Vector3 position2 = player.board.tiles[(int)selectedPositions[selectedPositions.Count - 1].x, (int)selectedPositions[selectedPositions.Count - 1].y].worldPosition;
+
+        processedShip.transform.position = position1 + (position2 - position1) / 2f - Vector3.up * (GameController.playerBoardElevation - 0.4f);
         if ((selectedPositions[0] - selectedPositions[1]).x != 0) //Rotates the ship correctly
         {
             processedShip.transform.rotation = Quaternion.Euler(Vector3.up * (90f - 180f * Random.Range(0, 1)));
