@@ -51,6 +51,10 @@ public class GameController : MonoBehaviour
     public GameObject[] defaultPlayerOverheadStatusMarkers;
     //Sets all switch times in battles to zero - TESTING FEATURE
     public bool nullifyBattleSwitchTimes;
+    //The default acceleration due to gravity
+    public float defaultGravity;
+    //The prefab for cannon shells
+    public GameObject defaultCannonShell;
 
     //Values accessed by code
     public static int playerBoardDimensions;
@@ -68,6 +72,8 @@ public class GameController : MonoBehaviour
     //How many human players there are?
     public static int humanPlayers;
     public static bool switchTimesNill = false;
+    public static float gravity;
+    public static GameObject cannonShell;
 
     void Awake()
     {
@@ -77,6 +83,9 @@ public class GameController : MonoBehaviour
         playerBoardGridMaterial = defaultPlayerBoardGridMaterial;
         playerBoardMarkerMaterial = defaultPlayerBoardMarkerMaterial;
         playerOverheadStatusMarkers = defaultPlayerOverheadStatusMarkers;
+        gravity = defaultGravity;
+        cannonShell = defaultCannonShell;
+
         switchTimesNill = nullifyBattleSwitchTimes;
         secondaryBattles = new List<Battle>();
     }

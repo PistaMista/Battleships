@@ -89,7 +89,7 @@ public class Battle : MonoBehaviour
 
                     if (SelectTarget(players[randomTargetID]))
                     {
-                        ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1.8f);
+                        ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 0.2f);
                     }
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
@@ -100,7 +100,7 @@ public class Battle : MonoBehaviour
                         positionToShoot = ChooseTileToAttackForAIPlayer();
                     }
 
-                    ChangeState(BattleState.TURN_FINISHED, 1f);
+                    ChangeState(BattleState.TURN_FINISHED, 0.2f);
                     break;
             }
         }
@@ -239,7 +239,10 @@ public class Battle : MonoBehaviour
                     {
                         foreach (Ship ship in attackingPlayer.ships)
                         {
-                            ship.FireAt(defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition);
+                            Vector3 targetPosition = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition;
+                            targetPosition.y = 0f;
+                            ship.FireAt(targetPosition);
+                            //ship.FireAt(defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition + Vector3.down * (GameController.playerBoardElevation - 0.4f));
                         }
                     }
 

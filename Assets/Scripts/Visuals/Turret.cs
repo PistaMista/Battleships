@@ -6,7 +6,7 @@ public class Turret : MonoBehaviour
 {
 
     // Use this for initialization
-    public Cannon[] cannons;
+    public Weapon[] weapons;
     public Ship ship;
     public int leftTraverseLimit;
     public int rightTraverseLimit;
@@ -15,6 +15,10 @@ public class Turret : MonoBehaviour
     int currentlyFiring = 999;
     public float firingDelay;
     bool doneFiring = true;
+
+    //The info about the trajectory
+    public float projectileTravelTime;
+    public float distanceToTarget;
     void Start()
     {
         defaultAngle = gameObject.transform.localRotation.eulerAngles.y;
@@ -25,12 +29,12 @@ public class Turret : MonoBehaviour
     {
         if (firingDelay <= 0)
         {
-            if (currentlyFiring < cannons.Length)
+            if (currentlyFiring < weapons.Length)
             {
-                cannons[currentlyFiring].Fire();
+                weapons[currentlyFiring].Fire();
 
                 currentlyFiring++;
-                firingDelay = 0.5f;
+                firingDelay = 0.2f;
             }
             else if (!doneFiring)
             {
@@ -45,11 +49,21 @@ public class Turret : MonoBehaviour
 
     public float FireAt(Vector3 worldPosition, float firingDelay)
     {
+        distanceToTarget = Vector3.Distance(ship.transform.position, worldPosition);
         if (RotateTo(worldPosition))
         {
             this.firingDelay = firingDelay;
             doneFiring = false;
-            return 1f;
+
+
+            foreach (Weapon weapon in weapons)
+            {
+                weapon.PrepareForFiring();
+            }
+
+            projectileTravelTime = weapons[0].GetTimeToTarget(distanceToTarget);
+
+            return projectileTravelTime;
         }
         else
         {
