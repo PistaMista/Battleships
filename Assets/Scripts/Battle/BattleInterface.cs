@@ -184,7 +184,7 @@ public class BattleInterface : MonoBehaviour
 
         foreach (Ship ship in switchingFrom.ships)
         {
-            battle.DestroySunkShip(ship);
+            battle.DisableSunkShip(ship);
         }
 
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);

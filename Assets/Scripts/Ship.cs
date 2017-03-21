@@ -55,7 +55,7 @@ public class Ship : MonoBehaviour
             sinkTimeLeft -= Time.deltaTime;
             if (sinkTimeLeft < 0)
             {
-                owner.battle.DestroySunkShip(this);
+                owner.battle.DisableSunkShip(this);
             }
         }
     }
