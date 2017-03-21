@@ -68,9 +68,12 @@ public class PlayerSelector : MonoBehaviour
                 }
                 else
                 {
-                    topAnchors.Add(currentlyDragged);
-                    centerAnchors.Remove(currentlyDragged);
-                    selectedPlayers.Remove(currentlyDragged.color);
+                    if (!topAnchors.Contains(currentlyDragged))
+                    {
+                        topAnchors.Add(currentlyDragged);
+                        centerAnchors.Remove(currentlyDragged);
+                        selectedPlayers.Remove(currentlyDragged.color);
+                    }
                 }
             }
 

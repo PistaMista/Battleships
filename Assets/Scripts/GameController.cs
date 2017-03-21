@@ -175,7 +175,7 @@ public class GameController : MonoBehaviour
 
                 }
 
-                Cameraman.TakePosition("Overhead View");
+                Cameraman.TakePosition("Overhead Title View");
                 Interface.SwitchMenu("Title Screen");
 
                 NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true) }, false);

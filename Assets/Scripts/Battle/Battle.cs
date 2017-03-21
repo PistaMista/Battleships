@@ -428,4 +428,15 @@ public class Battle : MonoBehaviour
 
         Destroy(this.gameObject);
     }
+
+    public bool DestroySunkShip(Ship ship)
+    {
+        if (ship.sunk)
+        {
+            ships.Remove(ship);
+            Destroy(ship.gameObject);
+        }
+
+        return ship.sunk;
+    }
 }

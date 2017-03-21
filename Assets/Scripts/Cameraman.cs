@@ -37,6 +37,7 @@ public class Cameraman : MonoBehaviour
 
     public static void SetUpBasicPositions()
     {
+        possiblePositions.Add("Overhead Title View", new CameraPosition(1f, new Vector3(0, 25f, -10f), new Vector3(60, 0, 0)));
         possiblePositions.Add("Overhead View", new CameraPosition(1f, new Vector3(0, 40f, 0), new Vector3(90, 0, 0)));
     }
     public static void AddPosition(float transitionTime, Vector3 targetPosition, Vector3 targetRotation, string name)

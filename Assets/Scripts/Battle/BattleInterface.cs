@@ -185,6 +185,11 @@ public class BattleInterface : MonoBehaviour
         switchingFrom.SetMacroMarker(-1);
         switchingTo.SetMacroMarker(0);
 
+        foreach (Ship ship in switchingFrom.ships)
+        {
+            battle.DestroySunkShip(ship);
+        }
+
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
     }
 
