@@ -63,7 +63,7 @@ public class Turret : MonoBehaviour
 
             projectileTravelTime = weapons[0].GetTimeToTarget(distanceToTarget);
 
-            return projectileTravelTime;
+            return projectileTravelTime + firingDelay;
         }
         else
         {

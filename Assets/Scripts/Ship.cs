@@ -10,8 +10,10 @@ public class Ship : MonoBehaviour
     public int length = 3;
     //The positions on the board that this ship occupies
     public Vector2[] tiles;
-    //Has this ship been sunk?
-    public bool sunk = false;
+    //Has this ship been eliminated?
+    public bool eliminated = false;
+    //Is this ship sinking?
+    bool sinking = false;
     //The amount of ship segments still intact
     public int lengthRemaining;
     //The artillery turrets mounted on this ship
@@ -37,10 +39,16 @@ public class Ship : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (sunk)
+        if (eliminated)
         {
             if (sinkTimeLeft < sinkTime)
             {
+                if (!sinking)
+                {
+
+                }
+
+                sinking = true;
                 rotationVelocity += rotationAcceleration * Time.deltaTime;
                 transform.Rotate(new Vector3(rotationVelocity * Time.deltaTime, rotationVelocity * Time.deltaTime, rotationVelocity * Time.deltaTime));
             }
@@ -58,8 +66,8 @@ public class Ship : MonoBehaviour
 
         if (lengthRemaining == 0)
         {
-            sunk = true;
-            sinkTimeLeft = sinkTime;
+            eliminated = true;
+            sinkTimeLeft = Mathf.Infinity;
             owner.ShipSunk(this);
         }
     }
@@ -82,5 +90,13 @@ public class Ship : MonoBehaviour
         }
 
         return highestTravelTime;
+    }
+
+    public void InformAboutShellTravelTime(float travelTime)
+    {
+        if (eliminated)
+        {
+            sinkTimeLeft = sinkTime + travelTime;
+        }
     }
 }

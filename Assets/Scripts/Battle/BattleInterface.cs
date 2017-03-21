@@ -11,8 +11,6 @@ public class BattleInterface : MonoBehaviour
     static Battle battle;
     //The indicator used to show tiles currently being fired at
     static GameObject recentlyShotTileIndicator;
-    //The tile which was most recently shot
-    static Vector2 recentlyShot;
 
     void Awake()
     {
@@ -57,7 +55,7 @@ public class BattleInterface : MonoBehaviour
                         break;
                     case BattleState.CHOOSING_TILE_TO_SHOOT:
                         Vector2 candidateTargetPosition = battle.defendingPlayer.board.WorldToTilePosition(InputController.currentInputPosition);
-                        recentlyShot = candidateTargetPosition;
+
 
                         battle.ShootAtTile(candidateTargetPosition);
 
@@ -100,11 +98,10 @@ public class BattleInterface : MonoBehaviour
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     Vector2 positionToShoot = battle.ChooseTileToAttackForAIPlayer();
-                    recentlyShot = positionToShoot;
+
                     while (!battle.ShootAtTile(positionToShoot))
                     {
                         positionToShoot = battle.ChooseTileToAttackForAIPlayer();
-                        recentlyShot = positionToShoot;
                     }
                     break;
             }
@@ -222,7 +219,7 @@ public class BattleInterface : MonoBehaviour
                 break;
             case BattleState.SHOWING_HIT_TILE:
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
-                recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)recentlyShot.x, (int)recentlyShot.y].worldPosition + Vector3.up * 3f;
+                recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].worldPosition + Vector3.up * 3f;
                 battle.ChangeState(BattleState.TURN_FINISHED, 1f);
                 if (GameController.humanPlayers <= 1 && !battle.defendingPlayer.AI || GameController.humanPlayers == 0)
                 {

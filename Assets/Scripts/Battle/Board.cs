@@ -152,7 +152,7 @@ public class Board : ScriptableObject
                         BoardTile tile = tiles[x, y];
                         if (tile.containedShip)
                         {
-                            if (tile.containedShip.sunk)
+                            if (tile.containedShip.eliminated)
                             {
                                 SetMarker(tile, new Color(180f / 255f, 0f, 0f));
                             }

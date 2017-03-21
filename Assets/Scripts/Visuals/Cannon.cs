@@ -45,8 +45,8 @@ public class Cannon : Weapon
 
     public override float GetTimeToTarget(float distanceToTarget)
     {
-        float time = (2f * turret.shellVelocity * Mathf.Sin(currentElevationAngle)) / GameController.gravity;
-        return 1f;
+        float time = (2f * turret.shellVelocity * Mathf.Sin(currentElevationAngle * Mathf.Deg2Rad)) / GameController.gravity;
+        return time;
     }
 
     public override void PrepareForFiring()

@@ -40,6 +40,9 @@ public class Battle : MonoBehaviour
     public delegate void OnFire();
     public OnFire onFire;
 
+    //The tile which was shot in this frame
+    public Vector2 recentlyShot;
+
 
     void Start()
     {
@@ -203,6 +206,8 @@ public class Battle : MonoBehaviour
             {
                 if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
                 {
+                    recentlyShot = tile;
+
                     targetState = BattleState.TURN_FINISHED;
                     switchTime = 0.5f;
 
@@ -210,7 +215,7 @@ public class Battle : MonoBehaviour
                     defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit = true;
                     if (defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip)
                     {
-                        if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.sunk)
+                        if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.eliminated)
                         {
                             attackingPlayer.hits[defendingPlayer.ID].Add(tile);
                             defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.Hit();
@@ -237,13 +242,7 @@ public class Battle : MonoBehaviour
 
                     if (!isMainBattle)
                     {
-                        foreach (Ship ship in attackingPlayer.ships)
-                        {
-                            Vector3 targetPosition = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition;
-                            targetPosition.y = 0f;
-                            ship.FireAt(targetPosition);
-                            //ship.FireAt(defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition + Vector3.down * (GameController.playerBoardElevation - 0.4f));
-                        }
+                        FireGunsAtTargetTile(tile);
                     }
 
                     ChangeState(BattleState.FIRING);
@@ -431,12 +430,36 @@ public class Battle : MonoBehaviour
 
     public bool DestroySunkShip(Ship ship)
     {
-        if (ship.sunk)
+        if (ship.eliminated)
         {
             ships.Remove(ship);
             Destroy(ship.gameObject);
         }
 
-        return ship.sunk;
+        return ship.eliminated;
+    }
+
+    public float FireGunsAtTargetTile(Vector2 targetTile)
+    {
+        float highestTravelTime = 0f;
+        foreach (Ship ship in attackingPlayer.ships)
+        {
+            Vector3 targetPosition = defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].worldPosition;
+            targetPosition.y = 0f;
+            float travelTime = ship.FireAt(targetPosition);
+            if (travelTime > highestTravelTime)
+            {
+                highestTravelTime = travelTime;
+            }
+
+            //ship.FireAt(defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition + Vector3.down * (GameController.playerBoardElevation - 0.4f));
+        }
+
+        if (defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip)
+        {
+            defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip.InformAboutShellTravelTime(highestTravelTime);
+        }
+
+        return highestTravelTime;
     }
 }
