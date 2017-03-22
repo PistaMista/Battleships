@@ -12,8 +12,6 @@ public class Ship : MonoBehaviour
     public Vector2[] tiles;
     //Has this ship been eliminated?
     public bool eliminated = false;
-    //Is this ship sinking?
-    bool sinking = false;
     //The amount of ship segments still intact
     public int lengthRemaining;
     //The artillery turrets mounted on this ship
@@ -27,6 +25,10 @@ public class Ship : MonoBehaviour
     //How much time it will take this ship to sink
     public float sinkTime;
     float sinkTimeLeft;
+
+    //The time it will take for an incoming shell to get here
+    float incomingShellTravelTime = -1f;
+
     void Awake()
     {
         tiles = new Vector2[length];
@@ -42,14 +44,10 @@ public class Ship : MonoBehaviour
         {
             if (sinkTimeLeft < sinkTime)
             {
-                if (!sinking)
-                {
-                    Explode();
-                }
+
 
 
                 FixFireRotation();
-                sinking = true;
             }
             sinkTimeLeft -= Time.deltaTime;
             if (sinkTimeLeft < 0)
@@ -57,6 +55,16 @@ public class Ship : MonoBehaviour
                 owner.battle.DisableSunkShip(this);
             }
         }
+
+        if (incomingShellTravelTime >= 0)
+        {
+            incomingShellTravelTime -= Time.deltaTime;
+            if (incomingShellTravelTime < 0)
+            {
+                OnShellHit();
+            }
+        }
+
     }
 
     public void Hit()
@@ -93,10 +101,7 @@ public class Ship : MonoBehaviour
 
     public void InformAboutShellTravelTime(float travelTime)
     {
-        if (eliminated)
-        {
-            sinkTimeLeft = sinkTime + travelTime;
-        }
+        incomingShellTravelTime = travelTime;
     }
 
     void Explode()
@@ -108,12 +113,7 @@ public class Ship : MonoBehaviour
 
         for (int i = 0; i <= length; i++)
         {
-            Vector3 localPosition = new Vector3(0f, 0f, Random.Range(-length / 2f, length / 2f));
-            effect = Instantiate(GameController.shipFire);
-            effect.transform.parent = this.transform;
-            effect.transform.localPosition = localPosition;
-
-            fires.Add(effect);
+            AddFire();
         }
     }
 
@@ -123,5 +123,27 @@ public class Ship : MonoBehaviour
         {
             fire.transform.rotation = Quaternion.Euler(Vector3.zero);
         }
+    }
+
+    void AddFire()
+    {
+        Vector3 localPosition = new Vector3(0f, 0f, Random.Range(-length / 2f, length / 2f));
+        GameObject effect = Instantiate(GameController.shipFire);
+        effect.transform.parent = this.transform;
+        effect.transform.localPosition = localPosition;
+
+        fires.Add(effect);
+    }
+
+    void OnShellHit()
+    {
+        if (eliminated)
+        {
+            sinkTimeLeft = sinkTime;
+            Explode();
+        }
+
+
+        AddFire();
     }
 }
