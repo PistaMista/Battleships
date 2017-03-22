@@ -59,6 +59,11 @@ public class Cannon : Weapon
     {
         Shell shell = Instantiate(GameController.cannonShell).GetComponent<Shell>();
         Vector3 direction = -(barrel.transform.position - transform.position).normalized;
+
+        float dispersionValue = turret.ship.gunDispersion;
+
+        Vector3 dispersion = new Vector3(Random.Range(0f, dispersionValue), Random.Range(0f, dispersionValue), Random.Range(0f, dispersionValue));
+        direction = (direction + dispersion).normalized;
         shell.Launch(direction * turret.shellVelocity);
         shell.transform.parent = turret.ship.owner.battle.transform;
         shell.transform.position = transform.position + direction * barrel.transform.localScale.z;

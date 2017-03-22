@@ -21,6 +21,8 @@ public class Ship : MonoBehaviour
     public float turretFiringDelay;
     //The effects on this ship
     List<GameObject> effects;
+    //The gun dispersion of this ship
+    public float gunDispersion;
 
     //How much time it will take this ship to sink
     public float sinkTime;
