@@ -21,6 +21,8 @@ public class Ship : MonoBehaviour
     //Are the turrets placed in reverse?
     public bool reverseTurrets;
     public float turretFiringDelay;
+    //The fire effects on this ship
+    List<GameObject> fires;
 
     //How much time it will take this ship to sink
     public float sinkTime;
@@ -28,6 +30,7 @@ public class Ship : MonoBehaviour
     void Awake()
     {
         tiles = new Vector2[length];
+        fires = new List<GameObject>();
         lengthRemaining = length;
     }
 
@@ -44,9 +47,9 @@ public class Ship : MonoBehaviour
                     Explode();
                 }
 
+
+                FixFireRotation();
                 sinking = true;
-
-
             }
             sinkTimeLeft -= Time.deltaTime;
             if (sinkTimeLeft < 0)
@@ -101,6 +104,24 @@ public class Ship : MonoBehaviour
         GameObject effect = Instantiate(GameController.shipExplosion);
         effect.transform.parent = this.transform;
         effect.transform.localPosition = Vector3.zero;
+        fires.Add(effect);
 
+        for (int i = 0; i <= length; i++)
+        {
+            Vector3 localPosition = new Vector3(0f, 0f, Random.Range(-length / 2f, length / 2f));
+            effect = Instantiate(GameController.shipFire);
+            effect.transform.parent = this.transform;
+            effect.transform.localPosition = localPosition;
+
+            fires.Add(effect);
+        }
+    }
+
+    void FixFireRotation()
+    {
+        foreach (GameObject fire in fires)
+        {
+            fire.transform.rotation = Quaternion.Euler(Vector3.zero);
+        }
     }
 }

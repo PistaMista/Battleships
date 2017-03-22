@@ -57,6 +57,8 @@ public class GameController : MonoBehaviour
     public GameObject defaultCannonShell;
     //The effect used for ship explosions
     public GameObject defaultShipExplosion;
+    //The effect used for ship fires
+    public GameObject defaultShipFire;
 
     //Values accessed by code
     public static int playerBoardDimensions;
@@ -77,6 +79,7 @@ public class GameController : MonoBehaviour
     public static float gravity;
     public static GameObject cannonShell;
     public static GameObject shipExplosion;
+    public static GameObject shipFire;
 
     void Awake()
     {
@@ -89,6 +92,7 @@ public class GameController : MonoBehaviour
         gravity = defaultGravity;
         cannonShell = defaultCannonShell;
         shipExplosion = defaultShipExplosion;
+        shipFire = defaultShipFire;
 
         switchTimesNill = nullifyBattleSwitchTimes;
         secondaryBattles = new List<Battle>();
