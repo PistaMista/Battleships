@@ -22,8 +22,10 @@ public class Player : MonoBehaviour
     public bool AI = false;
     //The macro marker of this player (markers shown in the overhead view such as if the player is on the turn/dead)
     public GameObject macroMarker;
-    //The ships owned by this player
-    public List<Ship> ships;
+    //All ships owned by this player
+    public List<Ship> allShips;
+    //Ships owned by this player which are still alive
+    public List<Ship> livingShips;
     //The battle this player is taking part in
     public Battle battle;
 
@@ -31,7 +33,8 @@ public class Player : MonoBehaviour
     {
         hits = new Dictionary<int, List<Vector2>>();
         misses = new Dictionary<int, List<Vector2>>();
-        ships = new List<Ship>();
+        allShips = new List<Ship>();
+        livingShips = new List<Ship>();
     }
 
     // Update is called once per frame
@@ -53,7 +56,7 @@ public class Player : MonoBehaviour
 
     public void ShipsShown(bool enabled)
     {
-        foreach (Ship ship in ships)
+        foreach (Ship ship in allShips)
         {
             ship.gameObject.SetActive(enabled);
         }
@@ -87,9 +90,9 @@ public class Player : MonoBehaviour
 
     public void ShipSunk(Ship ship)
     {
-        ships.Remove(ship);
+        livingShips.Remove(ship);
 
-        if (ships.Count == 0)
+        if (livingShips.Count == 0)
         {
             alive = false;
             if (!AI)
@@ -97,5 +100,12 @@ public class Player : MonoBehaviour
                 GameController.humanPlayers--;
             }
         }
+    }
+
+    public void AssignShip(Ship ship)
+    {
+        allShips.Add(ship);
+        livingShips.Add(ship);
+        ship.owner = this;
     }
 }

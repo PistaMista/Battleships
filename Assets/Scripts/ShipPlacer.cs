@@ -71,8 +71,8 @@ public class ShipPlacer : MonoBehaviour
 
                         targetShip.tiles = new Vector2[targetShip.length];
                         targetShip.gameObject.SetActive(false);
-                        player.ships.Remove(targetShip);
-                        battle.ships.Remove(targetShip);
+                        //player.allShips.Remove(targetShip);
+                        //battle.ships.Remove(targetShip);
 
                         PlacementPreview(targetShip);
 
@@ -138,8 +138,8 @@ public class ShipPlacer : MonoBehaviour
             processedShip.tiles[i] = pos; //Lets the ship know which tiles it is located in
         }
 
-        player.ships.Add(processedShip); //Adds the ship to the players ship list
-        battle.ships.Add(processedShip);
+        //player.allShips.Add(processedShip); //Adds the ship to the players ship list
+        //battle.ships.Add(processedShip);
 
         //processedShip.gameObject.SetActive(showShip); //Shows the ship
         //processedShip.transform.position = player.board.tiles[(int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].x, (int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].y].worldPosition - Vector3.up * (GameController.playerBoardElevation - 0.4f); //Sets up the position of the ship
@@ -338,6 +338,9 @@ public class ShipPlacer : MonoBehaviour
         {
             Ship ship = CreateShip(i);
             ship.owner = player;
+            ship.transform.parent = player.transform;
+
+            player.AssignShip(ship);
             shipsToPlace.Add(ship);
         }
 

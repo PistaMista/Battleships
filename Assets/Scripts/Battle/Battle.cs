@@ -221,7 +221,7 @@ public class Battle : MonoBehaviour
 
                             if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit)
                             {
-                                defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.Hit();
+                                defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.RegisterHit();
                             }
                         }
                         else
@@ -426,11 +426,6 @@ public class Battle : MonoBehaviour
             player.board.Set(BoardState.DISABLED);
         }
 
-        foreach (Ship ship in ships)
-        {
-            Destroy(ship.gameObject);
-        }
-
         Destroy(this.gameObject);
     }
 
@@ -447,7 +442,7 @@ public class Battle : MonoBehaviour
     public float FireGunsAtTargetTile(Vector2 targetTile)
     {
         float highestTravelTime = 0f;
-        foreach (Ship ship in attackingPlayer.ships)
+        foreach (Ship ship in attackingPlayer.livingShips)
         {
             Vector3 targetPosition = defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].worldPosition;
             targetPosition.y = 0f;

@@ -19,8 +19,8 @@ public class Ship : MonoBehaviour
     //Are the turrets placed in reverse?
     public bool reverseTurrets;
     public float turretFiringDelay;
-    //The fire effects on this ship
-    List<GameObject> fires;
+    //The effects on this ship
+    List<GameObject> effects;
 
     //How much time it will take this ship to sink
     public float sinkTime;
@@ -32,7 +32,7 @@ public class Ship : MonoBehaviour
     void Awake()
     {
         tiles = new Vector2[length];
-        fires = new List<GameObject>();
+        effects = new List<GameObject>();
         lengthRemaining = length;
     }
 
@@ -67,7 +67,7 @@ public class Ship : MonoBehaviour
 
     }
 
-    public void Hit()
+    public void RegisterHit()
     {
         lengthRemaining--;
 
@@ -104,22 +104,18 @@ public class Ship : MonoBehaviour
         incomingShellTravelTime = travelTime;
     }
 
-    void Explode()
+    public void BeginSinking()
     {
         GameObject effect = Instantiate(GameController.shipExplosion);
         effect.transform.parent = this.transform;
         effect.transform.localPosition = Vector3.zero;
-        fires.Add(effect);
-
-        for (int i = 0; i <= length; i++)
-        {
-            AddFire();
-        }
+        sinkTimeLeft = sinkTime;
+        effects.Add(effect);
     }
 
     void FixFireRotation()
     {
-        foreach (GameObject fire in fires)
+        foreach (GameObject fire in effects)
         {
             fire.transform.rotation = Quaternion.Euler(Vector3.zero);
         }
@@ -132,17 +128,15 @@ public class Ship : MonoBehaviour
         effect.transform.parent = this.transform;
         effect.transform.localPosition = localPosition;
 
-        fires.Add(effect);
+        effects.Add(effect);
     }
 
     void OnShellHit()
     {
         if (eliminated)
         {
-            sinkTimeLeft = sinkTime;
-            Explode();
+            BeginSinking();
         }
-
 
         AddFire();
     }

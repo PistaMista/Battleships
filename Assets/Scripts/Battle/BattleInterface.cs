@@ -182,7 +182,7 @@ public class BattleInterface : MonoBehaviour
         switchingFrom.SetMacroMarker(-1);
         switchingTo.SetMacroMarker(0);
 
-        foreach (Ship ship in switchingFrom.ships)
+        foreach (Ship ship in switchingFrom.allShips)
         {
             battle.DisableSunkShip(ship);
         }
