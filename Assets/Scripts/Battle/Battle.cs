@@ -212,13 +212,17 @@ public class Battle : MonoBehaviour
                     switchTime = 0.5f;
 
 
-                    defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit = true;
+
                     if (defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip)
                     {
                         if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.eliminated)
                         {
                             attackingPlayer.hits[defendingPlayer.ID].Add(tile);
-                            defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.Hit();
+
+                            if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit)
+                            {
+                                defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.Hit();
+                            }
                         }
                         else
                         {
@@ -229,6 +233,8 @@ public class Battle : MonoBehaviour
                     {
                         attackingPlayer.misses[defendingPlayer.ID].Add(tile);
                     }
+
+                    defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit = true;
 
                     if (onFire != null)
                     {

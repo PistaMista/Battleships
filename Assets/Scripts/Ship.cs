@@ -31,10 +31,6 @@ public class Ship : MonoBehaviour
         lengthRemaining = length;
     }
 
-    //Testing just 4fun
-    float rotationVelocity = 0f;
-    float rotationAcceleration = 30f;
-
 
     // Update is called once per frame
     void Update()
@@ -45,12 +41,12 @@ public class Ship : MonoBehaviour
             {
                 if (!sinking)
                 {
-
+                    Explode();
                 }
 
                 sinking = true;
-                rotationVelocity += rotationAcceleration * Time.deltaTime;
-                transform.Rotate(new Vector3(rotationVelocity * Time.deltaTime, rotationVelocity * Time.deltaTime, rotationVelocity * Time.deltaTime));
+
+
             }
             sinkTimeLeft -= Time.deltaTime;
             if (sinkTimeLeft < 0)
@@ -98,5 +94,13 @@ public class Ship : MonoBehaviour
         {
             sinkTimeLeft = sinkTime + travelTime;
         }
+    }
+
+    void Explode()
+    {
+        GameObject effect = Instantiate(GameController.shipExplosion);
+        effect.transform.parent = this.transform;
+        effect.transform.localPosition = Vector3.zero;
+
     }
 }
