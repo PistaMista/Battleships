@@ -98,7 +98,7 @@ public class Battle : MonoBehaviour
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     Vector2 positionToShoot = ChooseTileToAttackForAIPlayer();
 
-                    while (!ShootAtTile(positionToShoot))
+                    while (!HitTile(positionToShoot))
                     {
                         positionToShoot = ChooseTileToAttackForAIPlayer();
                     }
@@ -198,7 +198,7 @@ public class Battle : MonoBehaviour
         }
     }
 
-    public bool ShootAtTile(Vector2 tile)
+    public bool HitTile(Vector2 tile)
     {
         if (defendingPlayer)
         {

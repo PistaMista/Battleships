@@ -57,7 +57,7 @@ public class BattleInterface : MonoBehaviour
                         Vector2 candidateTargetPosition = battle.defendingPlayer.board.WorldToTilePosition(InputController.currentInputPosition);
 
 
-                        battle.ShootAtTile(candidateTargetPosition);
+                        battle.HitTile(candidateTargetPosition);
 
                         break;
                 }
@@ -99,7 +99,7 @@ public class BattleInterface : MonoBehaviour
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     Vector2 positionToShoot = battle.ChooseTileToAttackForAIPlayer();
 
-                    while (!battle.ShootAtTile(positionToShoot))
+                    while (!battle.HitTile(positionToShoot))
                     {
                         positionToShoot = battle.ChooseTileToAttackForAIPlayer();
                     }
@@ -234,10 +234,8 @@ public class BattleInterface : MonoBehaviour
                 SetUpOverhead();
                 Cameraman.TakePosition("Overhead View");
                 Interface.SwitchMenu("Overhead");
-                Sea.updateDelay = 1.75f;
                 break;
             case BattleState.CHOOSING_TILE_TO_SHOOT:
-                Sea.updateDelay = 0.45f;
                 break;
         }
     }
@@ -253,6 +251,5 @@ public class BattleInterface : MonoBehaviour
         Cameraman.TakePosition("Overhead View");
         Interface.SwitchMenu("Overhead");
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
-        Sea.updateDelay = 1.75f;
     }
 }

@@ -345,7 +345,6 @@ public class ShipPlacer : MonoBehaviour
         }
 
         selectedPositions = new List<Vector2>(); //Reset the list of selected positions for the current ship
-        Sea.updateDelay = 0.5f;
         RecalculateValidPositions(); //Recalculate valid positions for ship placement
     }
 
