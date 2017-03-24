@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class Sea : MonoBehaviour
@@ -21,18 +22,21 @@ public class Sea : MonoBehaviour
     public MeshRenderer meshRenderer;
     public MeshFilter meshFilter;
     public float elevationCap;
-    public static float updateDelay;
+    public float updateDelay;
+    public bool polyMode = false;
 
     void Start()
     {
         PlacePoints();
         meshFilter.mesh.MarkDynamic();
-        RecalculateVertices();
-        RecalculateTriangles();
-        StartCoroutine(Cycle());
+        //RecalculateVertices();
+        //RecalculateTriangles();
+        RecalculateMeshComposition();
+
         //Place the sea in the middle of the map
         transform.position = new Vector3(-(float)dimensions * spacing / 2f - spacing / 4f, 0, -(float)dimensions * spacing / 2f - spacing / 4f);
-        updateDelay = 1.5f;
+
+        StartCoroutine(Cycle());
     }
 
     void PlacePoints()
@@ -50,18 +54,21 @@ public class Sea : MonoBehaviour
             }
         }
     }
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 
     IEnumerator Cycle()
     {
-        UpdatePointElevation();
         meshFilter.mesh.Clear();
-        RecalculateVertices();
-        RecalculateTriangles();
+        UpdatePointElevation();
+        if (!polyMode)
+        {
+            RecalculateVertices();
+            RecalculateTriangles();
+        }
+        else
+        {
+            RecalculateMeshComposition();
+        }
+        meshFilter.mesh.RecalculateNormals();
         yield return new WaitForSeconds(updateDelay);
         StartCoroutine(Cycle());
     }
@@ -141,6 +148,72 @@ public class Sea : MonoBehaviour
         }
 
 
+        meshFilter.mesh.triangles = triangles.ToArray();
+        triangles = null;
+    }
+
+    void RecalculateMeshComposition()
+    {
+        List<int> triangles = new List<int>();
+        List<Vector3> vertices = new List<Vector3>();
+
+        //Calculate the triangles
+        //Calculate triangles for the first half
+        for (int i = 0; i < points.Length / 2; i++)
+        {
+            int[] quad = new int[] { i, i + 1, i + (int)Mathf.Pow(dimensions, 2f), i + (int)Mathf.Pow(dimensions, 2f) - dimensions };
+            if (CheckForCorrectQuadAssembly(quad))
+            {
+                vertices.Add(points[quad[0]].worldPosition);
+                vertices.Add(points[quad[1]].worldPosition);
+                vertices.Add(points[quad[2]].worldPosition);
+
+                triangles.Add(vertices.Count - 1);
+                triangles.Add(vertices.Count - 2);
+                triangles.Add(vertices.Count - 3);
+
+                vertices.Add(points[quad[3]].worldPosition);
+                vertices.Add(points[quad[1]].worldPosition);
+                vertices.Add(points[quad[0]].worldPosition);
+
+                triangles.Add(vertices.Count - 1);
+                triangles.Add(vertices.Count - 2);
+                triangles.Add(vertices.Count - 3);
+            }
+            quad = null;
+        }
+
+        triangles.Reverse();
+
+        //Calculate triangles for the second half
+        for (int i = points.Length / 2; i < points.Length; i++)
+        {
+            int[] quad = new int[] { i, i + 1, i - (int)Mathf.Pow(dimensions, 2f) + 1, i - (int)Mathf.Pow(dimensions, 2f) + dimensions + 1 };
+            if (CheckForCorrectQuadAssembly(quad))
+            {
+                vertices.Add(points[quad[0]].worldPosition);
+                vertices.Add(points[quad[1]].worldPosition);
+                vertices.Add(points[quad[2]].worldPosition);
+
+                triangles.Add(vertices.Count - 1);
+                triangles.Add(vertices.Count - 2);
+                triangles.Add(vertices.Count - 3);
+
+                vertices.Add(points[quad[3]].worldPosition);
+                vertices.Add(points[quad[1]].worldPosition);
+                vertices.Add(points[quad[0]].worldPosition);
+
+                triangles.Add(vertices.Count - 1);
+                triangles.Add(vertices.Count - 2);
+                triangles.Add(vertices.Count - 3);
+            }
+            quad = null;
+        }
+
+        meshFilter.mesh.vertices = vertices.ToArray();
+        vertices = null;
+
+        triangles.Reverse();
         meshFilter.mesh.triangles = triangles.ToArray();
         triangles = null;
     }
