@@ -61,24 +61,58 @@ public class GameController : MonoBehaviour
     public GameObject defaultShipFire;
 
     //Values accessed by code
+    /// <summary>
+    /// The dimensions of playing boards.
+    /// </summary>
     public static int playerBoardDimensions;
+    /// <summary>
+    /// The y position of each playing board.
+    /// </summary>
     public static float playerBoardElevation;
+    /// <summary>
+    /// The distance of each playing board from the center of the map.
+    /// </summary>
     public static float playerBoardDistanceFromCenter;
+    /// <summary>
+    /// The material used for rendering playing board grids.
+    /// </summary>
     public static Material playerBoardGridMaterial;
+    /// <summary>
+    /// The material used for marking tiles on playing boards.
+    /// </summary>
     public static Material playerBoardMarkerMaterial;
+    /// <summary>
+    /// A set of prefabs used to display player status in overhead view.
+    /// </summary>
     public static GameObject[] playerOverheadStatusMarkers;
-    //The battle the game will focus on
+    /// <summary>
+    /// The main battle of the game.
+    /// </summary>
     public static Battle mainBattle;
-    //The secondary battles
+    /// <summary>
+    /// The secondary battles currently going on.
+    /// </summary>
     public static List<Battle> secondaryBattles;
-    //Is there only one human player?
-    public static bool singleplayer = false;
-    //How many human players there are?
+    /// <summary>
+    /// The number of human players participating in the game.
+    /// </summary>
     public static int humanPlayers;
     public static bool switchTimesNill = false;
+    /// <summary>
+    /// The acceleration due to gravity.
+    /// </summary>
     public static float gravity;
+    /// <summary>
+    /// The prefab for cannon shells.
+    /// </summary>
     public static GameObject cannonShell;
+    /// <summary>
+    /// The prefab for ship explosions.
+    /// </summary>
     public static GameObject shipExplosion;
+    /// <summary>
+    /// The prefab for ship fires.
+    /// </summary>
     public static GameObject shipFire;
 
     void Awake()
@@ -107,6 +141,11 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Begins a new battle.
+    /// </summary>
+    /// <param name="playersToAdd">The player initializers of players to participate in the battle.</param>
+    /// <param name="focus">Whether this battle is the main battle of the game.</param>
     public static void NewBattle(PlayerInitializer[] playersToAdd, bool focus)
     {
         Player[] players = new Player[playersToAdd.Length];
@@ -163,6 +202,10 @@ public class GameController : MonoBehaviour
         battle.Initialize(players);
     }
 
+    /// <summary>
+    /// Changes the state of the game.
+    /// </summary>
+    /// <param name="state">The game state to change to.</param>
     public static void ChangeState(GameState state)
     {
         switch (GameController.state)
