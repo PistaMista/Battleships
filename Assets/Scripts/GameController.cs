@@ -29,6 +29,21 @@ public enum GameState
     BATTLING
 }
 
+/// <summary>
+/// All the possible damage types.
+/// </summary>
+public enum DamageType
+{
+    /// <summary>
+    /// Artillery shell damage.
+    /// </summary>
+    SHELL,
+    /// <summary>
+    /// Torpedo damage.
+    /// </summary>
+    TORPEDO
+}
+
 public class GameController : MonoBehaviour
 {
 

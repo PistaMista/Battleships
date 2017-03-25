@@ -544,7 +544,7 @@ public class Battle : MonoBehaviour
 
         if (defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip)
         {
-            defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip.InformAboutShellTravelTime(highestTravelTime);
+            defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip.InformAboutIncomingProjectile(highestTravelTime, DamageType.SHELL);
         }
 
         return highestTravelTime;

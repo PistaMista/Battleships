@@ -55,9 +55,13 @@ public class Ship : MonoBehaviour
     float sinkTimeLeft;
 
     /// <summary>
-    /// The time it will take for incoming artillery shells to arrive.
+    /// The time it will take for incoming projectiles to arrive.
     /// </summary>
-    float incomingShellTravelTime = -1f;
+    float incomingProjectileTravelTime = -1f;
+    /// <summary>
+    /// The type of incoming projectile.
+    /// </summary>
+    DamageType incomingProjectileDamageType;
     /// <summary>
     /// The awake function.
     /// </summary>
@@ -89,12 +93,12 @@ public class Ship : MonoBehaviour
             }
         }
 
-        if (incomingShellTravelTime >= 0)
+        if (incomingProjectileTravelTime >= 0)
         {
-            incomingShellTravelTime -= Time.deltaTime;
-            if (incomingShellTravelTime < 0)
+            incomingProjectileTravelTime -= Time.deltaTime;
+            if (incomingProjectileTravelTime < 0)
             {
-                OnShellHit();
+                OnProjectileHit(incomingProjectileDamageType);
             }
         }
 
@@ -138,12 +142,14 @@ public class Ship : MonoBehaviour
         return highestTravelTime;
     }
     /// <summary>
-    /// Informs this ship about incoming artillery shells.
+    /// Informs this ship about incoming projectiles.
     /// </summary>
-    /// <param name="travelTime"></param>
-    public void InformAboutShellTravelTime(float travelTime)
+    /// <param name="travelTime">The time it will take for them to get here.</param> 
+    /// <param name="type">The type of projectile coming in.</param>
+    public void InformAboutIncomingProjectile(float travelTime, DamageType type)
     {
-        incomingShellTravelTime = travelTime;
+        incomingProjectileTravelTime = travelTime;
+        incomingProjectileDamageType = type;
     }
     /// <summary>
     /// Begins the sinking effect.
@@ -181,13 +187,18 @@ public class Ship : MonoBehaviour
     /// <summary>
     /// Executed when a shell hits the ship.
     /// </summary>
-    void OnShellHit()
+    void OnProjectileHit(DamageType type)
     {
-        if (eliminated)
+        switch (type)
         {
-            BeginSinking();
-        }
+            case DamageType.SHELL:
+                if (eliminated)
+                {
+                    BeginSinking();
+                }
 
-        AddFire();
+                AddFire();
+                break;
+        }
     }
 }
