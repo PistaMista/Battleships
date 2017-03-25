@@ -1,12 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// All the possible game states.
+/// </summary>
 public enum GameState
 {
+    /// <summary>
+    /// The starting state.
+    /// </summary>
     NONE,
+    /// <summary>
+    /// The title screen state.
+    /// </summary>
     TITLE,
+    /// <summary>
+    /// Ships are being placed.
+    /// </summary>
     PLACING_SHIPS,
+    /// <summary>
+    /// Main battle competitors are being selected.
+    /// </summary>
     PLAYER_SELECTION,
+    /// <summary>
+    /// The battle is in progress.
+    /// </summary>
     BATTLING
 }
 
@@ -115,6 +134,9 @@ public class GameController : MonoBehaviour
     /// </summary>
     public static GameObject shipFire;
 
+    /// <summary>
+    /// Awake function.
+    /// </summary>
     void Awake()
     {
         playerBoardDimensions = defaultPlayerBoardDimensions;
@@ -133,6 +155,9 @@ public class GameController : MonoBehaviour
     }
 
     // Update is called once per frame
+    /// <summary>
+    /// Update function.
+    /// </summary>
     void Update()
     {
         if (state == GameState.TITLE && InputController.beginPress)
@@ -243,6 +268,9 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Accessed by gui elements to return back to the title screen.
+    /// </summary>    
     public void BackToTitle()
     {
         GameController.ChangeState(GameState.TITLE);

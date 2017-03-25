@@ -4,19 +4,38 @@ using UnityEngine;
 
 public class BattleInterface : MonoBehaviour
 {
+    /// <summary>
+    /// The marker to show what tile is being shot.
+    /// </summary>
     public GameObject defaultRecentlyShotTileMarker;
+    /// <summary>
+    /// The marker to show what tile is being shot.
+    /// </summary>
     static GameObject recentlyShotTileMarker;
+    /// <summary>
+    /// The speed at which the marker lands on tile being shot.
+    /// </summary>
     static float markerDescentSpeed;
-    //The battle currently managed by the interface 
+    /// <summary>
+    /// The battle the interface is attached to.
+    /// </summary>
     static Battle battle;
-    //The indicator used to show tiles currently being fired at
+    /// <summary>
+    /// The instance of the marker to show the tile being shot.
+    /// </summary>
     static GameObject recentlyShotTileIndicator;
 
+    /// <summary>
+    /// The awake function.
+    /// </summary>
     void Awake()
     {
         recentlyShotTileMarker = defaultRecentlyShotTileMarker;
     }
 
+    /// <summary>
+    /// The update function.
+    /// </summary>    
     void Update()
     {
         if (battle)
@@ -76,6 +95,9 @@ public class BattleInterface : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Manages the actions for AI players.
+    /// </summary>    
     static void AIPlayerActions()
     {
         if (battle.switchTime <= -0.1f)
@@ -108,6 +130,10 @@ public class BattleInterface : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Attaches a battle to the interface.
+    /// </summary>
+    /// <param name="battle">The battle to attach.</param>
     public static void Attach(Battle battle)
     {
         BattleInterface.battle = battle;
@@ -117,17 +143,19 @@ public class BattleInterface : MonoBehaviour
         SetUpOverhead();
     }
 
+    /// <summary>
+    /// Dettaches the current battle from the interface.
+    /// </summary>
     public static void Dettach()
     {
         battle = null;
         Destroy(recentlyShotTileIndicator);
     }
 
-    public static void Disable()
-    {
-        battle = null;
-    }
-
+    /// <summary>
+    /// Gets the player, who should be selected considering input position.
+    /// </summary>
+    /// <returns>The player, who should be selected.</returns>
     static Player PlayerBeingSelected()
     {
         foreach (Player player in battle.players)
@@ -145,6 +173,9 @@ public class BattleInterface : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Sets up the overhead view.
+    /// </summary>
     static void SetUpOverhead()
     {
         foreach (Player player in battle.players)
@@ -162,6 +193,11 @@ public class BattleInterface : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Shows a player's board.
+    /// </summary>
+    /// <param name="player">The player, who's board to show.</param>
     static void ViewPlayer(Player player)
     {
         player.SetMacroMarker(-1);
@@ -177,6 +213,11 @@ public class BattleInterface : MonoBehaviour
         Cameraman.TakePosition("Board " + (player.ID + 1), 0.6f);
     }
 
+    /// <summary>
+    /// On player switch.
+    /// </summary>
+    /// <param name="switchingFrom">...</param>
+    /// <param name="switchingTo">...</param>
     static void OnPlayerSwitch(Player switchingFrom, Player switchingTo)
     {
         switchingFrom.SetMacroMarker(-1);
@@ -190,6 +231,11 @@ public class BattleInterface : MonoBehaviour
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
     }
 
+    /// <summary>
+    /// On battle state change.
+    /// </summary>
+    /// <param name="switchingFrom">...</param>
+    /// <param name="switchingTo">...</param>
     static void OnBattleStateChange(BattleState switchingFrom, BattleState switchingTo)
     {
         switch (switchingFrom)
@@ -240,11 +286,17 @@ public class BattleInterface : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// On guns firing.
+    /// </summary>
     static void OnFire()
     {
 
     }
 
+    /// <summary>
+    /// Used by UI elements to return back to overhead view.
+    /// </summary>
     public void BackToOverhead()
     {
         SetUpOverhead();

@@ -5,32 +5,63 @@ using UnityEngine;
 public class ShipPlacer : MonoBehaviour
 {
     //Values accessed through the editor
+    /// <summary>
+    /// The default ship loadout for each player.
+    /// </summary>
     public GameObject[] defaultShipLoadout;
-    //Color of valid tiles
+    /// <summary>
+    /// The color of valid placement tiles.
+    /// </summary>
     public Color defaultValidTileColor;
-    //Color of selected tiles
+    /// <summary>
+    /// The color of selected tiles.
+    /// </summary>
     public Color defaultSelectedTileColor;
-    //An array of the vectors of the four cardinal directions
+    /// <summary>
+    /// The four cardinal directions.
+    /// </summary>
     static Vector2[] cardinalDirections;
     //Static values accessed by anything else
+    /// <summary>
+    /// The color of valid placement tiles.
+    /// </summary>
     static Color validTileColor;
+    /// <summary>
+    /// The color of selected tiles.
+    /// </summary>
     static Color selectedTileColor;
-    //The ship template
+    /// <summary>
+    /// The ship loadout for each player.
+    /// </summary>
     static GameObject[] shipLoadout;
-    //The id of the player currently having his ships placed
+    /// <summary>
+    /// The ID of the player currently having his ships placed.
+    /// </summary>
     static int playerNumber;
-    //The player currently having his ships placed
+    /// <summary>
+    /// The player currently having his ships placed.
+    /// </summary>
     static Player player;
-    //All the players having their board readied
+    /// <summary>
+    /// All the players having their ships placed.
+    /// </summary>
     static Player[] customers;
-    //The ships to place
+    /// <summary>
+    /// The ships to place for the current player.
+    /// </summary>
     static List<Ship> shipsToPlace;
-    //Makes the player unable to place more ships when finished placing one ship until screen is released
+    /// <summary>
+    /// Locks the screen after placing a ship. (To prevent accidental placement)
+    /// </summary>
     static bool placementLock = false;
-    //The battle which these players will participate in
+    /// <summary>
+    /// The battle these players will compete in.
+    /// </summary>
     static Battle battle;
 
-
+    /// <summary>
+    /// The awake function.
+    /// </summary>
     void Awake()
     {
         cardinalDirections = new Vector2[] { Vector2.up, Vector2.left, Vector2.right, Vector2.down };
@@ -40,16 +71,18 @@ public class ShipPlacer : MonoBehaviour
         validPositions = new List<Vector2>();
     }
 
-    void Start()
-    {
-
-    }
-
-    //The positions selected by the player for the ship to sit in
+    /// <summary>
+    /// The positions selected by the player for the ship to sit in.
+    /// </summary>
     static List<Vector2> selectedPositions;
-    //The positions which are valid
+    /// <summary>
+    /// The positions which are valid.
+    /// </summary>
     static List<Vector2> validPositions;
 
+    /// <summary>
+    /// The update function.
+    /// </summary>
     void Update()
     {
         if (customers != null)
@@ -126,8 +159,10 @@ public class ShipPlacer : MonoBehaviour
             }
         }
     }
-
-    static void FinishPlacingShip() //Finalizes placing a ship
+    /// <summary>
+    /// Finalizes placing a ship.
+    /// </summary>    
+    static void FinishPlacingShip()
     {
         Ship processedShip = shipsToPlace[0];
 
@@ -159,8 +194,11 @@ public class ShipPlacer : MonoBehaviour
         shipsToPlace.RemoveAt(0); //Specifies that the ship is now placed and removes it from the list of ships that still have to be placed
         selectedPositions = new List<Vector2>(); //Resets the list of selected positions
     }
-
-    static void SelectPosition(Vector2 position) //Selects a position for ship placement
+    /// <summary>
+    /// Selects a position for ship placement.
+    /// </summary>
+    /// <param name="position">Position to select.</param>
+    static void SelectPosition(Vector2 position)
     {
         if (selectedPositions.Count <= 1)
         {
@@ -181,8 +219,11 @@ public class ShipPlacer : MonoBehaviour
         validPositions.Remove(position);
         player.board.SetMarker(position, selectedTileColor);
     }
-
-    static void MarkAsValidPosition(Vector2 position) //Marks a position as valid
+    /// <summary>
+    /// Marks a position as valid.
+    /// </summary>
+    /// <param name="position">Position to mark.</param>
+    static void MarkAsValidPosition(Vector2 position)
     {
         if (!validPositions.Contains(position))
         {
@@ -190,8 +231,10 @@ public class ShipPlacer : MonoBehaviour
             player.board.SetMarker(position, validTileColor);
         }
     }
-
-    static void RecalculateValidPositions() //Recalculates valid positions for ship placement
+    /// <summary>
+    /// Recalculates valid positions for ship placement.
+    /// </summary>
+    static void RecalculateValidPositions()
     {
         if (validPositions != null)
         {
@@ -254,7 +297,13 @@ public class ShipPlacer : MonoBehaviour
             }
         }
     }
-
+    /// <summary>
+    /// Checks if the tile can contain the currently placed ship.
+    /// </summary>
+    /// <param name="position">The position of the tile to check.</param>
+    /// <param name="direction">The direction in which to check.</param>
+    /// <param name="initValidate">Automatically validate checked positions.</param>
+    /// <returns>Tile validity for current ship containment.</returns>
     static bool ShipPlaceable(Vector2 position, Vector2 direction, bool initValidate) //Checks if the tile can contain a ship of a specified size
     {
         List<Vector2> confirmedPositions = new List<Vector2>(); //A list of the positions confirmed to be suitable for ship placement
@@ -291,7 +340,10 @@ public class ShipPlacer : MonoBehaviour
 
         return confirmedPositions.Count >= shipsToPlace[0].length && rootPositionConfirmed; //If the amount of confirmed positions is more than or equal to the ship's length the tile is suitable to have a ship in it
     }
-
+    /// <summary>
+    /// Switches to the next player.
+    /// </summary>
+    /// <returns>Switching successful.</returns>
     static bool NextPlayer()
     {
         playerNumber++; //Increment the id of currently handled player
@@ -329,7 +381,9 @@ public class ShipPlacer : MonoBehaviour
             }
         }
     }
-
+    /// <summary>
+    /// Initializes ships for the current player.
+    /// </summary>
     private static void InitializeShipsForCurrentPlayer()
     {
         shipsToPlace = new List<Ship>(); //Readies a list of ships for the player to place (blank)
@@ -347,7 +401,11 @@ public class ShipPlacer : MonoBehaviour
         selectedPositions = new List<Vector2>(); //Reset the list of selected positions for the current ship
         RecalculateValidPositions(); //Recalculate valid positions for ship placement
     }
-
+    /// <summary>
+    /// Creates a new ship.
+    /// </summary>
+    /// <param name="shipLoadoutID">The ID of the ship in the loadout array.</param>
+    /// <returns>New ship.</returns>
     static Ship CreateShip(int shipLoadoutID) //Creates a new ship
     {
         GameObject ship = Instantiate(shipLoadout[shipLoadoutID]);
@@ -355,6 +413,10 @@ public class ShipPlacer : MonoBehaviour
 
         return ship.GetComponent<Ship>();
     }
+    /// <summary>
+    /// Handles placing the ships for a battle.
+    /// </summary>
+    /// <param name="battle">The battle to handle.</param>
     public static void HandleShipsForBattle(Battle battle)
     {
         Reset();
@@ -371,7 +433,9 @@ public class ShipPlacer : MonoBehaviour
             Interface.SwitchMenu("Placing"); //Switches the interface to the placement menu
         }
     }
-
+    /// <summary>
+    /// Places ships for all AI players.
+    /// </summary>
     static void PlaceShipsForAIPlayers()
     {
         for (int i = 0; i < customers.Length; i++)
@@ -411,10 +475,18 @@ public class ShipPlacer : MonoBehaviour
     }
 
 
-    //The parent of all objects used to preview the currently placed ship
+    /// <summary>
+    /// The parent of all objects used to preview the currently placed ship.
+    /// </summary>
     static GameObject previewParent;
-    //The ship currently being previewed
+    /// <summary>
+    /// The ship currently being previewed.
+    /// </summary>
     static Ship currentlyPreviewed;
+    /// <summary>
+    /// Previews a ship on the left.
+    /// </summary>
+    /// <param name="ship">The ship to preview.</param>
     static void PlacementPreview(Ship ship)
     {
         if (currentlyPreviewed != null)
@@ -458,7 +530,9 @@ public class ShipPlacer : MonoBehaviour
             }
         }
     }
-
+    /// <summary>
+    /// Used by UI elements to switch to the next player.
+    /// </summary>
     public void PlayerFinished()
     {
         if (!NextPlayer())
@@ -466,13 +540,17 @@ public class ShipPlacer : MonoBehaviour
             PlacementFinished();
         }
     }
-
+    /// <summary>
+    /// Finishes ship placement.
+    /// </summary>
     public static void PlacementFinished()
     {
         Reset();
         battle.StartBattle();
     }
-
+    /// <summary>
+    /// Resets the ship placer.
+    /// </summary>
     public static void Reset()
     {
         if (shipsToPlace != null)

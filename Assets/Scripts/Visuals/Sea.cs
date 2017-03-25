@@ -6,25 +6,61 @@ using UnityEngine;
 public class Sea : MonoBehaviour
 {
 
-
+    /// <summary>
+    /// The point on the sea's mesh.
+    /// </summary>
     public struct SeaPoint
     {
+        /// <summary>
+        /// The world position of this point.
+        /// </summary>
         public Vector3 worldPosition;
+        /// <summary>
+        /// The target elevation of this point.
+        /// </summary>
         public float targetElevation;
+        /// <summary>
+        /// The current elevation of this point.
+        /// </summary>
         public float currentElevation;
+        /// <summary>
+        /// The current elevation change of this point.
+        /// </summary>
         public float currentElevationChange;
     }
 
+    /// <summary>
+    /// The dimensions of the sea. Bigger numbers reduce performance.
+    /// </summary>
     public int dimensions;
+    /// <summary>
+    /// All the points of the sea's mesh.
+    /// </summary>
     public SeaPoint[] points;
+    /// <summary>
+    /// The spacing between the points.
+    /// </summary>
     public float spacing;
-    public Material seaMaterial;
-    public MeshRenderer meshRenderer;
+    /// <summary>
+    /// The mesh filter of this sea's mesh.
+    /// </summary>
     public MeshFilter meshFilter;
+    /// <summary>
+    /// The maximum elevation of each sea point.
+    /// </summary>
     public float elevationCap;
+    /// <summary>
+    /// How often the sea updates.
+    /// </summary>
     public float updateDelay;
+    /// <summary>
+    /// Whether the sea is rendered in poly graphics.
+    /// </summary>
     public bool polyMode = false;
 
+    /// <summary>
+    /// The start function.
+    /// </summary>
     void Start()
     {
         PlacePoints();
@@ -39,6 +75,9 @@ public class Sea : MonoBehaviour
         StartCoroutine(Cycle());
     }
 
+    /// <summary>
+    /// Places the sea points.
+    /// </summary>
     void PlacePoints()
     {
         points = new SeaPoint[(int)Mathf.Pow(dimensions, 2f) * 2];
@@ -55,6 +94,10 @@ public class Sea : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Executes a cycle of the sea update.
+    /// </summary>
+    /// <returns></returns>
     IEnumerator Cycle()
     {
         meshFilter.mesh.Clear();
@@ -73,6 +116,9 @@ public class Sea : MonoBehaviour
         StartCoroutine(Cycle());
     }
 
+    /// <summary>
+    /// Updates the elevation of all sea points.
+    /// </summary>
     void UpdatePointElevation()
     {
         for (int i = 0; i < points.Length; i++)
@@ -92,6 +138,9 @@ public class Sea : MonoBehaviour
             points[i] = point;
         }
     }
+    /// <summary>
+    /// Recalculates the vertices of the sea's mesh.
+    /// </summary>
     void RecalculateVertices()
     {
         Vector3[] vertices = new Vector3[points.Length];
@@ -105,7 +154,9 @@ public class Sea : MonoBehaviour
         meshFilter.mesh.vertices = vertices;
         vertices = null;
     }
-
+    /// <summary>
+    /// Recalculates the triangles of the sea's mesh.
+    /// </summary>
     void RecalculateTriangles()
     {
         List<int> triangles = new List<int>();
@@ -151,7 +202,9 @@ public class Sea : MonoBehaviour
         meshFilter.mesh.triangles = triangles.ToArray();
         triangles = null;
     }
-
+    /// <summary>
+    /// Recalculates the entire mesh composition. Doubles up vertices.
+    /// </summary>
     void RecalculateMeshComposition()
     {
         List<int> triangles = new List<int>();
@@ -217,7 +270,11 @@ public class Sea : MonoBehaviour
         meshFilter.mesh.triangles = triangles.ToArray();
         triangles = null;
     }
-
+    /// <summary>
+    /// Checks if the given array of vertices is valid to create a quad.
+    /// </summary>
+    /// <param name="vertices">The vertices of the quad to check</param>
+    /// <returns>Validity of the quad.</returns>
     bool CheckForCorrectQuadAssembly(int[] vertices)
     {
         if (vertices[0] < dimensions || vertices[0] > points.Length - dimensions - 1)

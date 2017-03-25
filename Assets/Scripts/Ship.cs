@@ -4,33 +4,63 @@ using UnityEngine;
 
 public class Ship : MonoBehaviour
 {
-    //The owner of this Ship
+    /// <summary>
+    /// The owner of this ship.
+    /// </summary>
     public Player owner;
-    //The length of this Ship
+    /// <summary>
+    /// The length of this ship.
+    /// </summary>
     public int length = 3;
-    //The positions on the board that this ship occupies
+    /// <summary>
+    /// The positions on the board that this ship occupies.
+    /// </summary>
     public Vector2[] tiles;
-    //Has this ship been eliminated?
+    /// <summary>
+    /// Whether this ship has been eliminated.
+    /// </summary>
     public bool eliminated = false;
-    //The amount of ship segments still intact
+    /// <summary>
+    /// The number of ship segments still intact.
+    /// </summary>
     public int lengthRemaining;
-    //The artillery turrets mounted on this ship
+    /// <summary>
+    /// The weapon turrets mounted on this ship.
+    /// </summary>
     public Turret[] turrets;
-    //Are the turrets placed in reverse?
+    /// <summary>
+    /// Whether the turrets are placed in reverse.
+    /// </summary>
     public bool reverseTurrets;
+    /// <summary>
+    /// Delay between each of the turrets firing.
+    /// </summary>
     public float turretFiringDelay;
-    //The effects on this ship
+    /// <summary>
+    /// The effects on this ship.
+    /// </summary>
     List<GameObject> effects;
-    //The gun dispersion of this ship
+    /// <summary>
+    /// The dispersion of this ship's guns.
+    /// </summary>
     public float gunDispersion;
 
-    //How much time it will take this ship to sink
+    /// <summary>
+    /// The time it will take for this ship to sink.
+    /// </summary>
     public float sinkTime;
+    /// <summary>
+    /// The sinking time left.
+    /// </summary>
     float sinkTimeLeft;
 
-    //The time it will take for an incoming shell to get here
+    /// <summary>
+    /// The time it will take for incoming artillery shells to arrive.
+    /// </summary>
     float incomingShellTravelTime = -1f;
-
+    /// <summary>
+    /// The awake function.
+    /// </summary>
     void Awake()
     {
         tiles = new Vector2[length];
@@ -38,8 +68,9 @@ public class Ship : MonoBehaviour
         lengthRemaining = length;
     }
 
-
-    // Update is called once per frame
+    /// <summary>
+    /// The update function.
+    /// </summary>
     void Update()
     {
         if (eliminated)
@@ -68,7 +99,9 @@ public class Ship : MonoBehaviour
         }
 
     }
-
+    /// <summary>
+    /// Registers a hit on this ship.
+    /// </summary>
     public void RegisterHit()
     {
         lengthRemaining--;
@@ -80,7 +113,11 @@ public class Ship : MonoBehaviour
             owner.ShipSunk(this);
         }
     }
-
+    /// <summary>
+    /// Fires the ship's guns at the target world position.
+    /// </summary>
+    /// <param name="worldPosition">The world position to target.</param>
+    /// <returns>The time it will take for the shells to arrive at the target position.</returns>
     public float FireAt(Vector3 worldPosition)
     {
         float highestTravelTime = 0f;
@@ -100,12 +137,17 @@ public class Ship : MonoBehaviour
 
         return highestTravelTime;
     }
-
+    /// <summary>
+    /// Informs this ship about incoming artillery shells.
+    /// </summary>
+    /// <param name="travelTime"></param>
     public void InformAboutShellTravelTime(float travelTime)
     {
         incomingShellTravelTime = travelTime;
     }
-
+    /// <summary>
+    /// Begins the sinking effect.
+    /// </summary>
     public void BeginSinking()
     {
         GameObject effect = Instantiate(GameController.shipExplosion);
@@ -114,7 +156,9 @@ public class Ship : MonoBehaviour
         sinkTimeLeft = sinkTime;
         effects.Add(effect);
     }
-
+    /// <summary>
+    /// Fixes the rotation of fires during sinking.
+    /// </summary>
     void FixFireRotation()
     {
         foreach (GameObject fire in effects)
@@ -122,7 +166,9 @@ public class Ship : MonoBehaviour
             fire.transform.rotation = Quaternion.Euler(Vector3.zero);
         }
     }
-
+    /// <summary>
+    /// Randomly starts a fire on the ship.
+    /// </summary>
     void AddFire()
     {
         Vector3 localPosition = new Vector3(0f, 0f, Random.Range(-length / 2f, length / 2f));
@@ -132,7 +178,9 @@ public class Ship : MonoBehaviour
 
         effects.Add(effect);
     }
-
+    /// <summary>
+    /// Executed when a shell hits the ship.
+    /// </summary>
     void OnShellHit()
     {
         if (eliminated)

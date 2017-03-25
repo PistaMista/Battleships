@@ -7,10 +7,22 @@ public class Cameraman : MonoBehaviour
 {
 
     // Use this for initialization
+    /// <summary>
+    /// A position for the camera to use.
+    /// </summary>
     public struct CameraPosition
     {
+        /// <summary>
+        /// The default transition time.
+        /// </summary>
         public float transitionTime;
+        /// <summary>
+        /// The world position.
+        /// </summary>
         public Vector3 position;
+        /// <summary>
+        /// The world rotation.
+        /// </summary>
         public Vector3 rotation;
         public CameraPosition(float transitionSpeed, Vector3 targetPosition, Vector3 targetRotation)
         {
@@ -20,26 +32,58 @@ public class Cameraman : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// The current position of the camera.
+    /// </summary>
     public static CameraPosition currentPosition;
+    /// <summary>
+    /// The target position of the camera.
+    /// </summary>
     public static CameraPosition currentTargetPosition;
+    /// <summary>
+    /// The transition progress.
+    /// </summary>
     public static float transitionProgress;
+    /// <summary>
+    /// The list of possible camera positions.
+    /// </summary>
     static Dictionary<string, CameraPosition> possiblePositions;
+    /// <summary>
+    /// The rate of change in position.
+    /// </summary>
     static Vector3 positionChange = Vector3.zero;
+    /// <summary>
+    /// The rate of change in rotation.
+    /// </summary>
     static Vector3 rotationChange = Vector3.zero;
+    /// <summary>
+    /// The rate of change in transition progress.
+    /// </summary>
     static float progressChange = 0f;
-
+    /// <summary>
+    /// The start function.
+    /// </summary>
     void Start()
     {
         possiblePositions = new Dictionary<string, CameraPosition>();
         SetUpBasicPositions();
         TakePosition("Overhead View");
     }
-
+    /// <summary>
+    /// Sets up basic positions for use by the camera.
+    /// </summary>
     public static void SetUpBasicPositions()
     {
         possiblePositions.Add("Overhead Title View", new CameraPosition(1f, new Vector3(0, 25f, -10f), new Vector3(60, 0, 0)));
         possiblePositions.Add("Overhead View", new CameraPosition(1f, new Vector3(0, 40f, 0), new Vector3(90, 0, 0)));
     }
+    /// <summary>
+    /// Adds a new position to the list of possible positions.
+    /// </summary>
+    /// <param name="transitionTime">The default transition time.</param>
+    /// <param name="targetPosition">The world position.</param>
+    /// <param name="targetRotation">The world rotation.</param>
+    /// <param name="name">The name of this position.</param>
     public static void AddPosition(float transitionTime, Vector3 targetPosition, Vector3 targetRotation, string name)
     {
         if (possiblePositions.ContainsKey(name))
@@ -50,7 +94,9 @@ public class Cameraman : MonoBehaviour
 
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// The update function.
+    /// </summary>
     void Update()
     {
 
@@ -65,7 +111,10 @@ public class Cameraman : MonoBehaviour
             transform.rotation = Quaternion.Euler(currentPosition.rotation);
         }
     }
-
+    /// <summary>
+    /// Transfers the camera to a position of that name.
+    /// </summary>
+    /// <param name="name">The name of the position to use.</param>
     public static void TakePosition(string name)
     {
         currentPosition = new CameraPosition(0f, Camera.main.transform.position, Camera.main.transform.rotation.eulerAngles);
@@ -76,7 +125,11 @@ public class Cameraman : MonoBehaviour
         currentTargetPosition = position;
         transitionProgress = 0f;
     }
-
+    /// <summary>
+    /// Transfers the camera to a position of that name. Overrides transition time.
+    /// </summary>
+    /// <param name="name">The name of the position to use.</param>
+    /// <param name="transitionTimeOverride">New transition time.</param>
     public static void TakePosition(string name, float transitionTimeOverride)
     {
         currentPosition = new CameraPosition(0f, Camera.main.transform.position, Camera.main.transform.rotation.eulerAngles);
@@ -88,7 +141,12 @@ public class Cameraman : MonoBehaviour
         currentTargetPosition = position;
         transitionProgress = 0f;
     }
-
+    /// <summary>
+    /// Determines which way to rotate in order to achieve the shortest rotation.
+    /// </summary>
+    /// <param name="currentRotation">The current rotation.</param>
+    /// <param name="targetRotation">The target rotation.</param>
+    /// <returns>New target rotation.</returns>
     static float GetTargetRotationComponentForShortestPath(float currentRotation, float targetRotation)
     {
         if (Mathf.Abs(currentRotation - targetRotation) > Mathf.Abs(currentRotation - targetRotation + 360))
@@ -100,7 +158,10 @@ public class Cameraman : MonoBehaviour
             return targetRotation;
         }
     }
-
+    /// <summary>
+    /// Sets the blur effect.
+    /// </summary>
+    /// <param name="enabled">Blur effect enabled.</param>
     public static void SetBlur(bool enabled)
     {
         Camera.main.GetComponent<Blur>().enabled = enabled;

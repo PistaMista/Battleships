@@ -6,49 +6,89 @@ public enum BattleState { CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_
 public class Battle : MonoBehaviour
 {
 
-    //Is the battle in progress?
+    /// <summary>
+    /// Whether the battle is in progress.
+    /// </summary>
     public bool battling = false;
-    //Is this the main battle of the game?
+    /// <summary>
+    /// Whether this battle is the main battle of the game.
+    /// </summary>
     public bool isMainBattle = false;
-    //The players competing in this battle
+    /// <summary>
+    /// The players competing in this battle.
+    /// </summary>
     public Player[] players;
-    //All the ships competing in this battle
+    /// <summary>
+    /// All the ships competing in this battle.
+    /// </summary>
     public List<Ship> ships;
-    //How many players are still alive
+    /// <summary>
+    /// The number of players, who are still alive.
+    /// </summary>
     public int playersAlive;
-    //The ID of the player on the turn
+    /// <summary>
+    /// The ID of the player on the turn.
+    /// </summary>
     public int attackingPlayerID;
-    //The player on the turn
+    /// <summary>
+    /// The player on the turn.
+    /// </summary>
     public Player attackingPlayer;
-    //The player targeted by the attackingPlayer
+    /// <summary>
+    /// The player targeted by the attacking player.
+    /// </summary>
     public Player defendingPlayer;
-    //The state of the battle
+    /// <summary>
+    /// The current state of the battle.
+    /// </summary>
     public BattleState state;
-    //The delay before switching to the next state
+    /// <summary>
+    /// The delay before switching to the next state.
+    /// </summary>
     public float switchTime;
-    //The state to switch to after switchTime is over
+    /// <summary>
+    /// The state to switch to after switch time is over.
+    /// </summary>
     public BattleState targetState;
 
     //Delegates for external modules to tap into
-    //On next player
+    /// <summary>
+    /// On next player switch.
+    /// </summary>
+    /// <param name="switchingFrom">The player, who was on turn before.</param>
+    /// <param name="switchingTo">The player, who is on turn now.</param>
     public delegate void OnPlayerSwitch(Player switchingFrom, Player switchingTo);
+    /// <summary>
+    /// On next player switch.
+    /// </summary>
     public OnPlayerSwitch onPlayerSwitch;
-    //On battle state switch
+    /// <summary>
+    /// On battle state change.
+    /// </summary>
+    /// <param name="switchingFrom">The last battle state.</param>
+    /// <param name="switchingTo">The current battle state.</param>
     public delegate void OnBattleStateChange(BattleState switchingFrom, BattleState switchingTo);
+    /// <summary>
+    /// On battle state change.
+    /// </summary>
     public OnBattleStateChange onBattleStateChange;
-    //On gun fire
+    /// <summary>
+    /// On firing guns.
+    /// </summary>
     public delegate void OnFire();
+    /// <summary>
+    /// On firing guns.
+    /// </summary>
     public OnFire onFire;
-
-    //The tile which was shot in this frame
+    /// <summary>
+    /// The tile which was targeted in this frame.
+    /// </summary>
     public Vector2 recentlyShot;
 
 
-    void Start()
-    {
-
-    }
-
+    /// <summary>
+    /// The update function.
+    /// </summary>
     void Update()
     {
         if (battling)
@@ -77,6 +117,9 @@ public class Battle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes actions for AI players.
+    /// </summary>    
     void AIPlayerActions()
     {
         if (switchTime <= -0.1f)
@@ -109,6 +152,10 @@ public class Battle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Initializes the battle.
+    /// </summary>
+    /// <param name="competitors">Players to compete in this battle.</param>
     public void Initialize(Player[] competitors)
     {
         players = competitors;
@@ -132,6 +179,9 @@ public class Battle : MonoBehaviour
         ShipPlacer.HandleShipsForBattle(this);
     }
 
+    /// <summary>
+    /// Starts the battle.
+    /// </summary>
     public void StartBattle()
     {
         battling = true;
@@ -155,6 +205,9 @@ public class Battle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Passes the turn to the next player.
+    /// </summary>    
     void NextPlayer()
     {
         Player originalAttacker = attackingPlayer;
@@ -185,6 +238,11 @@ public class Battle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Selects a target for the attacking player.
+    /// </summary>
+    /// <param name="target">The player to target.</param>
+    /// <returns>Target validity.</returns>
     public bool SelectTarget(Player target)
     {
         if (target != attackingPlayer && target.alive)
@@ -198,6 +256,11 @@ public class Battle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Registers a hit on the targeted player's tile.
+    /// </summary>
+    /// <param name="tile">Position of the tile to hit.</param>
+    /// <returns>Hit successful.</returns>
     public bool HitTile(Vector2 tile)
     {
         if (defendingPlayer)
@@ -260,6 +323,10 @@ public class Battle : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Changes the state of the battle immediately.
+    /// </summary>
+    /// <param name="state">The state to change to.</param>
     public void ChangeState(BattleState state)
     {
         BattleState lastState = this.state;
@@ -283,14 +350,21 @@ public class Battle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Changes the state of the battle with a delay.
+    /// </summary>
+    /// <param name="state">The state to change to.</param>
+    /// <param name="switchTime">The delay before changing.</param>    
     public void ChangeState(BattleState state, float switchTime)
     {
         targetState = state;
         this.switchTime = switchTime;
     }
 
-
-
+    /// <summary>
+    /// Calculates the optimal position of tile to attack for AI players.
+    /// </summary>
+    /// <returns>Position of optimal tile to target.</returns>
     public Vector2 ChooseTileToAttackForAIPlayer()
     {
         List<Vector2> hits = attackingPlayer.hits[defendingPlayer.ID];
@@ -418,6 +492,9 @@ public class Battle : MonoBehaviour
         return result;
     }
 
+    /// <summary>
+    /// Ends the battle.
+    /// </summary>
     public void End()
     {
         foreach (Player player in players)
@@ -429,6 +506,11 @@ public class Battle : MonoBehaviour
         Destroy(this.gameObject);
     }
 
+    /// <summary>
+    /// Checks if a ship has been sunk and disables it, if it was.
+    /// </summary>
+    /// <param name="ship">The ship to check.</param>
+    /// <returns>Ship sunk.</returns>
     public bool DisableSunkShip(Ship ship)
     {
         if (ship.eliminated)
@@ -439,6 +521,11 @@ public class Battle : MonoBehaviour
         return ship.eliminated;
     }
 
+    /// <summary>
+    /// Fires the guns of all living ships of the attacking player at the target tile.
+    /// </summary>
+    /// <param name="targetTile">The position of the tile to target.</param>
+    /// <returns>The time it will take for the shells to arrive.</returns>
     public float FireGunsAtTargetTile(Vector2 targetTile)
     {
         float highestTravelTime = 0f;

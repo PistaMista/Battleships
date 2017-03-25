@@ -2,16 +2,65 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum BoardState { OVERHEAD, GRID_ONLY, ENEMY, FRIENDLY, SHIPS, DISABLED }
+/// <summary>
+/// All the possible board states.
+/// </summary>
+public enum BoardState
+{
+    /// <summary>
+    /// State to be used in overhead battle view.
+    /// </summary>
+    OVERHEAD,
+    /// <summary>
+    /// Shows only the board grid.
+    /// </summary>
+    GRID_ONLY,
+    /// <summary>
+    /// Shows, whatever should be shown to an enemy.
+    /// </summary>
+    ENEMY,
+    /// <summary>
+    /// Shows, whatever should be shown to a friendly.
+    /// </summary>
+    FRIENDLY,
+    /// <summary>
+    /// Shows only the ships.
+    /// </summary>
+    SHIPS,
+    /// <summary>
+    /// Disables all graphical features of the board.
+    /// </summary>
+    DISABLED
+}
 
 public class Board : ScriptableObject
 {
+    /// <summary>
+    /// The tiles the board is made up of.
+    /// </summary>
     public struct BoardTile
     {
+        /// <summary>
+        /// The ship which occupies this tile.
+        /// </summary>
         public Ship containedShip;
+        /// <summary>
+        /// Whether this tile was hit by a shell.
+        /// </summary>
         public bool hit;
+        /// <summary>
+        /// The position in the world of this tile.
+        /// </summary>
         public Vector3 worldPosition;
+        /// <summary>
+        /// The marker object of this tile.
+        /// </summary>
         GameObject marker;
+        /// <summary>
+        /// Sets the color of this tile's marker.
+        /// </summary>
+        /// <param name="color">The color to set.</param>
+        /// <param name="parent">Which transform to parent the marker object to.</param>
         public void SetMarker(Color color, Transform parent)
         {
             Destroy(marker);
@@ -30,22 +79,43 @@ public class Board : ScriptableObject
         }
     }
 
-    //The owner of this board's ships
-    public Player shipOwner;
-    //Where should this board be rendered
+    /// <summary>
+    /// The player who owns the board.
+    /// </summary>
+    public Player owner;
+    /// <summary>
+    /// The position of this board in the world.
+    /// </summary>
     public Vector3 position;
-    //The tiles of this board
+    /// <summary>
+    /// The tiles, that the board is made up of.
+    /// </summary>
     public BoardTile[,] tiles;
-    //The graphical grid
+    /// <summary>
+    /// The graphical grid.
+    /// </summary>
     public GameObject grid;
-    //Is the grid rendered
+    /// <summary>
+    /// Whether the grid is rendered.
+    /// </summary>
     bool gridRendered = false;
-    //The dimensions of the board - always a square
+    /// <summary>
+    /// The dimensions of the board. The length of a square side.
+    /// </summary>
     public int dimensions;
-    //The material used to render the grid
+    /// <summary>
+    /// The material used to render the grid.
+    /// </summary>
     Material gridMaterial;
 
-    public void Initialize(int dimensions, Vector3 position, Player shipOwner, Material gridMaterial)
+    /// <summary>
+    /// Initializes the board.
+    /// </summary>
+    /// <param name="dimensions">The dimensions of the board. The length of a square side.</param>
+    /// <param name="position">The position of this board in the world.</param>
+    /// <param name="owner">The owner of this board.</param>
+    /// <param name="gridMaterial">The material used to render the grid.</param>    
+    public void Initialize(int dimensions, Vector3 position, Player owner, Material gridMaterial)
     {
         tiles = new BoardTile[dimensions, dimensions];
 
@@ -58,7 +128,7 @@ public class Board : ScriptableObject
         }
 
         this.position = position;
-        this.shipOwner = shipOwner;
+        this.owner = owner;
 
         this.dimensions = dimensions;
         this.gridMaterial = gridMaterial;
@@ -66,7 +136,11 @@ public class Board : ScriptableObject
         //gridRendered = true;
         Set(BoardState.DISABLED);
     }
-
+    /// <summary>
+    /// Draws the grid lines.
+    /// </summary>
+    /// <param name="dimensions">The dimensions of the grid. The length of a square side.</param>
+    /// <param name="gridMaterial">The material used to render the grid.</param>
     void DrawGrid(int dimensions, Material gridMaterial)
     {
         grid = new GameObject("RenderGrid");
@@ -80,7 +154,7 @@ public class Board : ScriptableObject
             {
                 material = new Material(gridMaterial);
                 material.SetColor("_Color", Color.clear);
-                material.SetColor("_EmissionColor", shipOwner.color);
+                material.SetColor("_EmissionColor", owner.color);
                 tmp.transform.localPosition = new Vector3(pos, 0.01f, 0f);
             }
             else
@@ -101,7 +175,7 @@ public class Board : ScriptableObject
             {
                 material = new Material(gridMaterial);
                 material.SetColor("_Color", Color.clear);
-                material.SetColor("_EmissionColor", shipOwner.color);
+                material.SetColor("_EmissionColor", owner.color);
                 tmp.transform.localPosition = new Vector3(0f, 0.01f, pos);
             }
             else
@@ -116,6 +190,10 @@ public class Board : ScriptableObject
         grid.transform.position = position;
     }
 
+    /// <summary>
+    /// Sets the board to a different state.
+    /// </summary>
+    /// <param name="state">The board state to switch to.</param>
     public void Set(BoardState state)
     {
         Destroy(grid);
@@ -130,8 +208,8 @@ public class Board : ScriptableObject
                 break;
             case BoardState.ENEMY:
                 DrawGrid(dimensions, GameController.playerBoardGridMaterial);
-                Vector2[] hits = shipOwner.battle.attackingPlayer.hits[shipOwner.ID].ToArray();
-                Vector2[] misses = shipOwner.battle.attackingPlayer.misses[shipOwner.ID].ToArray();
+                Vector2[] hits = owner.battle.attackingPlayer.hits[owner.ID].ToArray();
+                Vector2[] misses = owner.battle.attackingPlayer.misses[owner.ID].ToArray();
 
                 foreach (Vector2 pos in hits)
                 {
@@ -180,7 +258,7 @@ public class Board : ScriptableObject
                     }
                 }
 
-                shipOwner.ShipsShown(true);
+                owner.ShipsShown(true);
                 break;
             case BoardState.OVERHEAD:
                 grid = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -189,19 +267,24 @@ public class Board : ScriptableObject
                 grid.name = "Player Icon";
                 Renderer tmp = grid.GetComponent<Renderer>();
                 tmp.material = gridMaterial;
-                tmp.material.SetColor("_Color", shipOwner.color);
+                tmp.material.SetColor("_Color", owner.color);
                 tmp.material.SetColor("_EmissionColor", Color.clear);
 
                 gridRendered = false;
-                shipOwner.ShipsShown(false);
+                owner.ShipsShown(false);
                 break;
             case BoardState.SHIPS:
                 gridRendered = false;
-                shipOwner.ShipsShown(true);
+                owner.ShipsShown(true);
                 break;
         }
     }
 
+    /// <summary>
+    /// Converts a position in the world to a position of the tile on this board.
+    /// </summary>
+    /// <param name="position">The world position to convert.</param>
+    /// <returns>The converted board position.</returns>
     public Vector2 WorldToTilePosition(Vector3 position)
     {
         Vector3 result = position - this.position + Vector3.one * ((float)dimensions / 2f);
@@ -213,6 +296,11 @@ public class Board : ScriptableObject
         return new Vector2(Mathf.Floor(result.x), Mathf.Floor(result.z));
     }
 
+    /// <summary>
+    /// Sets the color of the marker at position.
+    /// </summary>
+    /// <param name="position">The position of the tile on the board.</param>
+    /// <param name="color">The color to set that tile's marker to.</param>
     public void SetMarker(Vector2 position, Color color)
     {
         position = new Vector2((int)position.x, (int)position.y);
@@ -221,12 +309,20 @@ public class Board : ScriptableObject
             tiles[(int)position.x, (int)position.y].SetMarker(color, grid.transform);
         }
     }
-
+    /// <summary>
+    /// Sets the color of the marker of a tile.
+    /// </summary>
+    /// <param name="tile">The tile of which to set the marker color.</param>
+    /// <param name="color">The color to set that tile's marker to.</param>    
     public void SetMarker(BoardTile tile, Color color)
     {
         tile.SetMarker(color, grid.transform);
     }
-
+    /// <summary>
+    /// Determines whether a position is a valid position on the board.
+    /// </summary>
+    /// <param name="position">The position to check.</param>
+    /// <returns>Validity of this board position.</returns>
     public bool IsPositionValid(Vector2 position)
     {
         return (position.x >= 0 && position.y >= 0 && position.x < dimensions && position.y < dimensions);

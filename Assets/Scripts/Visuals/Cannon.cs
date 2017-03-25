@@ -6,20 +6,35 @@ public class Cannon : Weapon
 {
 
     // Use this for initialization
+    /// <summary>
+    /// The barrel of the cannon.
+    /// </summary>
     public GameObject barrel;
 
-
+    /// <summary>
+    /// The recoil distance of this cannon, that is how far the barrel goes back, when firing.
+    /// </summary>
     float recoilDistance;
+    /// <summary>
+    /// The starting position of the barrel.
+    /// </summary>
     float defaultBarrelPosition;
+    /// <summary>
+    /// The speed at which the recoil recovers.
+    /// </summary>
     float recoverySpeed = 0.3f;
 
+    /// <summary>
+    /// The start function.
+    /// </summary>    
     protected override void Start()
     {
         recoilDistance = barrel.transform.localScale.z * 0.45f;
         defaultBarrelPosition = barrel.transform.localPosition.z;
     }
-
-    // Update is called once per frame
+    /// <summary>
+    /// The update function.
+    /// </summary>
     protected override void Update()
     {
         base.Update();
@@ -35,26 +50,36 @@ public class Cannon : Weapon
             }
         }
     }
-
+    /// <summary>
+    /// Fires the cannon.
+    /// </summary>
     public override void Fire()
     {
         base.Fire();
         barrel.transform.localPosition = new Vector3(0f, 0f, defaultBarrelPosition - recoilDistance * Mathf.Sign(barrel.transform.localPosition.z));
         LaunchShell();
     }
-
+    /// <summary>
+    /// Gets the time needed for the shell to reach the target.
+    /// </summary>
+    /// <param name="distanceToTarget">The distance of the target.</param>
+    /// <returns>Time needed for the shell to cross the distance to target.</returns>
     public override float GetTimeToTarget(float distanceToTarget)
     {
-        float time = (2f * turret.shellVelocity * Mathf.Sin(currentElevationAngle * Mathf.Deg2Rad)) / GameController.gravity;
+        float time = (2f * turret.projectileVelocity * Mathf.Sin(currentElevationAngle * Mathf.Deg2Rad)) / GameController.gravity;
         return time;
     }
-
+    /// <summary>
+    /// Prepares the cannon for firing.
+    /// </summary>
     public override void PrepareForFiring()
     {
-        float angle = (Mathf.Asin((turret.distanceToTarget * GameController.gravity) / (turret.shellVelocity * turret.shellVelocity))) * Mathf.Rad2Deg / 2f;
+        float angle = (Mathf.Asin((turret.distanceToTarget * GameController.gravity) / (turret.projectileVelocity * turret.projectileVelocity))) * Mathf.Rad2Deg / 2f;
         SetElevation(angle);
     }
-
+    /// <summary>
+    /// Launches a shell from the tip of the barrel.
+    /// </summary>
     void LaunchShell()
     {
         Shell shell = Instantiate(GameController.cannonShell).GetComponent<Shell>();
@@ -64,7 +89,7 @@ public class Cannon : Weapon
 
         Vector3 dispersion = new Vector3(Random.Range(0f, dispersionValue), Random.Range(0f, dispersionValue), Random.Range(0f, dispersionValue));
         direction = (direction + dispersion).normalized;
-        shell.Launch(direction * turret.shellVelocity);
+        shell.Launch(direction * turret.projectileVelocity);
         shell.transform.parent = turret.ship.owner.battle.transform;
         shell.transform.position = transform.position + direction * barrel.transform.localScale.z;
     }
