@@ -32,7 +32,7 @@ public enum GameState
 /// <summary>
 /// All the possible damage types.
 /// </summary>
-public enum DamageType
+public enum ProjectileType
 {
     /// <summary>
     /// Artillery shell damage.

@@ -17,6 +17,15 @@ public class Weapon : MonoBehaviour
     /// The current elevation angle of this weapon - some weapons may not use this property.
     /// </summary>
     protected float currentElevationAngle;
+
+    /// <summary>
+    /// On weapon fire.
+    /// </summary>
+    public delegate void OnFire();
+    /// <summary>
+    /// On weapon fire.
+    /// </summary>
+    public OnFire onFire;
     /// <summary>
     /// The start function.
     /// </summary>
@@ -32,13 +41,21 @@ public class Weapon : MonoBehaviour
     {
 
     }
+
     /// <summary>
-    /// Fires this weapon.
+    /// Fires the weapon.
     /// </summary>
-    public virtual void Fire()
+    /// <returns>Projectile that was fired.</returns>
+    public virtual Projectile Fire()
     {
         firing = true;
+        if (onFire != null)
+        {
+            onFire();
+            onFire = null;
+        }
 
+        return null;
     }
     /// <summary>
     /// Sets the elevation angle of this weapon.

@@ -53,11 +53,17 @@ public class Cannon : Weapon
     /// <summary>
     /// Fires the cannon.
     /// </summary>
-    public override void Fire()
+    /// <returns>The shell that was fired.</returns>
+    public override Projectile Fire()
     {
         base.Fire();
         barrel.transform.localPosition = new Vector3(0f, 0f, defaultBarrelPosition - recoilDistance * Mathf.Sign(barrel.transform.localPosition.z));
-        LaunchShell();
+        Shell shell = LaunchShell();
+        if (turret.ship.targetedShip != null)
+        {
+            turret.ship.targetedShip.InformAboutIncomingProjectile(shell);
+        }
+        return shell;
     }
     /// <summary>
     /// Gets the time needed for the shell to reach the target.
@@ -80,7 +86,7 @@ public class Cannon : Weapon
     /// <summary>
     /// Launches a shell from the tip of the barrel.
     /// </summary>
-    void LaunchShell()
+    Shell LaunchShell()
     {
         Shell shell = Instantiate(GameController.cannonShell).GetComponent<Shell>();
         Vector3 direction = -(barrel.transform.position - transform.position).normalized;
@@ -92,5 +98,9 @@ public class Cannon : Weapon
         shell.Launch(direction * turret.projectileVelocity);
         shell.transform.parent = turret.ship.owner.battle.transform;
         shell.transform.position = transform.position + direction * barrel.transform.localScale.z;
+        shell.travelTime = GetTimeToTarget(turret.distanceToTarget);
+        shell.type = ProjectileType.SHELL;
+
+        return shell;
     }
 }

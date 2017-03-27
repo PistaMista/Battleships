@@ -53,6 +53,11 @@ public class Turret : MonoBehaviour
     public float distanceToTarget;
 
     /// <summary>
+    /// Whether this turret can fire at the currently targeted location.
+    /// </summary>
+    public bool canFire;
+
+    /// <summary>
     /// The start function.
     /// </summary>
     void Start()
@@ -107,11 +112,12 @@ public class Turret : MonoBehaviour
             }
 
             projectileTravelTime = weapons[0].GetTimeToTarget(distanceToTarget);
-
+            canFire = true;
             return projectileTravelTime + firingDelay;
         }
         else
         {
+            canFire = false;
             return 0f;
         }
     }

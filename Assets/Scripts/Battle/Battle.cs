@@ -533,7 +533,7 @@ public class Battle : MonoBehaviour
         {
             Vector3 targetPosition = defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].worldPosition;
             targetPosition.y = 0f;
-            float travelTime = ship.FireAt(targetPosition);
+            float travelTime = ship.FireAt(targetPosition, defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip);
             if (travelTime > highestTravelTime)
             {
                 highestTravelTime = travelTime;
@@ -542,10 +542,10 @@ public class Battle : MonoBehaviour
             //ship.FireAt(defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition + Vector3.down * (GameController.playerBoardElevation - 0.4f));
         }
 
-        if (defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip)
-        {
-            defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip.InformAboutIncomingProjectile(highestTravelTime, DamageType.SHELL);
-        }
+        // if (defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip)
+        // {
+        //     defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip.InformAboutIncomingProjectile(highestTravelTime, ProjectileType.SHELL);
+        // }
 
         return highestTravelTime;
     }

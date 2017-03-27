@@ -287,12 +287,14 @@ public class BattleInterface : MonoBehaviour
     }
 
     /// <summary>
-    /// On guns firing.
+    /// On guns firing. Sets up the action camera and attack fleet.
     /// </summary>
     static void OnFire()
     {
 
     }
+
+
 
     /// <summary>
     /// Used by UI elements to return back to overhead view.

@@ -55,16 +55,34 @@ public class Ship : MonoBehaviour
     float sinkTimeLeft;
 
     /// <summary>
-    /// The time it will take for incoming projectiles to arrive.
+    /// The time it will take for incoming projectiles to arrive. Deprecated.
     /// </summary>
     float incomingProjectileTravelTime = -1f;
     /// <summary>
-    /// The type of incoming projectile.
+    /// The type of incoming projectile. Deprecated.
     /// </summary>
-    DamageType incomingProjectileDamageType;
+    ProjectileType incomingProjectileDamageType;
+
+    /// <summary>
+    /// The first projectile which is going to hit the ship.
+    /// </summary>
+    Projectile incomingProjectile;
+
+    /// <summary>
+    /// The world position of this ship's place on the playing board.
+    /// </summary>
+    public Vector3 boardPosition;
+    /// <summary>
+    /// The world rotation of this ship's place on the playing board.
+    /// </summary>
+    public Vector3 boardRotation;
+    /// <summary>
+    /// The ship, that is currently getting shot at by this ship.
+    /// </summary>
+    public Ship targetedShip;
     /// <summary>
     /// The awake function.
-    /// </summary>
+    /// </summary> 
     void Awake()
     {
         tiles = new Vector2[length];
@@ -92,16 +110,6 @@ public class Ship : MonoBehaviour
                 owner.battle.DisableSunkShip(this);
             }
         }
-
-        if (incomingProjectileTravelTime >= 0)
-        {
-            incomingProjectileTravelTime -= Time.deltaTime;
-            if (incomingProjectileTravelTime < 0)
-            {
-                OnProjectileHit(incomingProjectileDamageType);
-            }
-        }
-
     }
     /// <summary>
     /// Registers a hit on this ship.
@@ -122,7 +130,7 @@ public class Ship : MonoBehaviour
     /// </summary>
     /// <param name="worldPosition">The world position to target.</param>
     /// <returns>The time it will take for the shells to arrive at the target position.</returns>
-    public float FireAt(Vector3 worldPosition)
+    public float FireAt(Vector3 worldPosition, Ship targetedShip)
     {
         float highestTravelTime = 0f;
         float currentDelay = 0f;
@@ -139,6 +147,7 @@ public class Ship : MonoBehaviour
             currentDelay += turretFiringDelay;
         }
 
+        this.targetedShip = targetedShip;
         return highestTravelTime;
     }
     /// <summary>
@@ -146,11 +155,15 @@ public class Ship : MonoBehaviour
     /// </summary>
     /// <param name="travelTime">The time it will take for them to get here.</param> 
     /// <param name="type">The type of projectile coming in.</param>
-    public void InformAboutIncomingProjectile(float travelTime, DamageType type)
+    public void InformAboutIncomingProjectile(Projectile projectile)
     {
-        incomingProjectileTravelTime = travelTime;
-        incomingProjectileDamageType = type;
+        if (incomingProjectile == null)
+        {
+            incomingProjectile = projectile;
+            projectile.onHit += OnProjectileHit;
+        }
     }
+
     /// <summary>
     /// Begins the sinking effect.
     /// </summary>
@@ -187,11 +200,11 @@ public class Ship : MonoBehaviour
     /// <summary>
     /// Executed when a shell hits the ship.
     /// </summary>
-    void OnProjectileHit(DamageType type)
+    void OnProjectileHit(Projectile projectile)
     {
-        switch (type)
+        switch (projectile.type)
         {
-            case DamageType.SHELL:
+            case ProjectileType.SHELL:
                 if (eliminated)
                 {
                     BeginSinking();
@@ -200,5 +213,14 @@ public class Ship : MonoBehaviour
                 AddFire();
                 break;
         }
+    }
+
+    /// <summary>
+    /// Positions the ship on the playing board.
+    /// </summary>
+    public void PositionOnPlayingBoard()
+    {
+        transform.position = boardPosition;
+        transform.rotation = Quaternion.Euler(boardRotation);
     }
 }

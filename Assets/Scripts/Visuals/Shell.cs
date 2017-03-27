@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Shell : MonoBehaviour
+public class Shell : Projectile
 {
 
     // Use this for initialization
@@ -15,8 +15,9 @@ public class Shell : MonoBehaviour
     /// <summary>
     /// The update function.
     /// </summary>
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         velocity += Vector3.down * GameController.gravity * Time.deltaTime;
         transform.position += velocity * Time.deltaTime;
         if (transform.position.y < -2f)
