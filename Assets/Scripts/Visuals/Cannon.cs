@@ -61,7 +61,7 @@ public class Cannon : Weapon
         Shell shell = LaunchShell();
         if (turret.ship.targetedShip != null)
         {
-            turret.ship.targetedShip.InformAboutIncomingProjectile(shell);
+            turret.ship.targetedShip.IncomingProjectile(shell);
         }
         return shell;
     }
@@ -83,9 +83,11 @@ public class Cannon : Weapon
         float angle = (Mathf.Asin((turret.distanceToTarget * GameController.gravity) / (turret.projectileVelocity * turret.projectileVelocity))) * Mathf.Rad2Deg / 2f;
         SetElevation(angle);
     }
+
     /// <summary>
     /// Launches a shell from the tip of the barrel.
     /// </summary>
+    /// <returns>The shell that was launched.</returns>
     Shell LaunchShell()
     {
         Shell shell = Instantiate(GameController.cannonShell).GetComponent<Shell>();

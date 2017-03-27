@@ -153,9 +153,8 @@ public class Ship : MonoBehaviour
     /// <summary>
     /// Informs this ship about incoming projectiles.
     /// </summary>
-    /// <param name="travelTime">The time it will take for them to get here.</param> 
-    /// <param name="type">The type of projectile coming in.</param>
-    public void InformAboutIncomingProjectile(Projectile projectile)
+    /// <param name="projectile">The incoming projectile.</param> 
+    public void IncomingProjectile(Projectile projectile)
     {
         if (incomingProjectile == null)
         {
