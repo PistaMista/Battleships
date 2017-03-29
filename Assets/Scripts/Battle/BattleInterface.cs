@@ -78,6 +78,7 @@ public class BattleInterface : MonoBehaviour
 
                         battle.HitTile(candidateTargetPosition);
 
+
                         break;
                 }
             }
@@ -206,9 +207,13 @@ public class BattleInterface : MonoBehaviour
         {
             player.board.Set(BoardState.FRIENDLY);
         }
-        else
+        else if (!battle.attackingPlayer.AI || GameController.humanPlayers == 0)
         {
             player.board.Set(BoardState.ENEMY);
+        }
+        else
+        {
+            player.board.Set(BoardState.OVERHEAD);
         }
         Cameraman.TakePosition("Board " + (player.ID + 1), 0.6f);
     }
@@ -249,7 +254,6 @@ public class BattleInterface : MonoBehaviour
         {
             case BattleState.FIRING:
                 Interface.SwitchMenu("Firing Screen");
-                battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
 
                 foreach (Player player in battle.players)
                 {
@@ -262,19 +266,24 @@ public class BattleInterface : MonoBehaviour
                     battle.defendingPlayer.board.Set(BoardState.SHIPS);
                 }
 
-                break;
-            case BattleState.SHOWING_HIT_TILE:
-                recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
-                recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].worldPosition + Vector3.up * 3f;
-                battle.ChangeState(BattleState.TURN_FINISHED, 1f);
-                if (GameController.humanPlayers <= 1 && !battle.defendingPlayer.AI || GameController.humanPlayers == 0)
+                if (!battle.attackingPlayer.AI || GameController.humanPlayers < 2)
                 {
-                    battle.defendingPlayer.board.Set(BoardState.FRIENDLY);
+                    battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
                 }
                 else
                 {
-                    battle.defendingPlayer.board.Set(BoardState.ENEMY);
+                    battle.ChangeState(BattleState.TURN_FINISHED, 1f);
+
                 }
+
+                break;
+            case BattleState.SHOWING_HIT_TILE:
+                battle.ChangeState(BattleState.TURN_FINISHED, 1f);
+                ViewPlayer(battle.defendingPlayer);
+                recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
+                recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].worldPosition + Vector3.up * 3f;
+
+
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();
@@ -291,7 +300,7 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     static void OnFire()
     {
-
+        battle.ChangeState(BattleState.FIRING);
     }
 
 

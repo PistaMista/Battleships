@@ -312,9 +312,9 @@ public class Battle : MonoBehaviour
                     if (!isMainBattle)
                     {
                         FireGunsAtTargetTile(tile);
+                        ChangeState(BattleState.FIRING);
                     }
 
-                    ChangeState(BattleState.FIRING);
                     return true;
                 }
             }

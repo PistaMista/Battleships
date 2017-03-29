@@ -64,11 +64,6 @@ public class Ship : MonoBehaviour
     ProjectileType incomingProjectileDamageType;
 
     /// <summary>
-    /// The first projectile which is going to hit the ship.
-    /// </summary>
-    Projectile incomingProjectile;
-
-    /// <summary>
     /// The world position of this ship's place on the playing board.
     /// </summary>
     public Vector3 boardPosition;
@@ -107,7 +102,7 @@ public class Ship : MonoBehaviour
                 }
                 else if (sinkProgress < 1f)
                 {
-                    transform.position = new Vector3(transform.position.x, Mathf.SmoothStep(GameController.seaLevel, -2f, (sinkProgress - 0.5f) / 0.5f), transform.position.z);
+                    transform.position = new Vector3(transform.position.x, Mathf.SmoothStep(GameController.seaLevel, -length / 2f, (sinkProgress - 0.5f) / 0.5f), transform.position.z);
                 }
 
 
@@ -165,11 +160,7 @@ public class Ship : MonoBehaviour
     /// <param name="projectile">The incoming projectile.</param> 
     public void IncomingProjectile(Projectile projectile)
     {
-        if (incomingProjectile == null)
-        {
-            incomingProjectile = projectile;
-            projectile.onHit += OnProjectileHit;
-        }
+        projectile.onHit += OnProjectileHit;
     }
 
     /// <summary>
@@ -208,7 +199,7 @@ public class Ship : MonoBehaviour
     /// </summary>
     void AddFire()
     {
-        Vector3 localPosition = new Vector3(0f, 0f, Random.Range(-length / 2f, length / 2f));
+        Vector3 localPosition = new Vector3(0f, 0.5f, Random.Range(-length / 2f, length / 2f));
         GameObject effect = Instantiate(GameController.shipFire);
         effect.transform.parent = this.transform;
         effect.transform.localPosition = localPosition;
@@ -228,7 +219,10 @@ public class Ship : MonoBehaviour
                     BeginSinking();
                 }
 
-                AddFire();
+                if (Random.Range(0, 20) == 0)
+                {
+                    AddFire();
+                }
                 break;
         }
     }
