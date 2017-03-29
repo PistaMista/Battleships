@@ -93,6 +93,8 @@ public class GameController : MonoBehaviour
     public GameObject defaultShipExplosion;
     //The effect used for ship fires
     public GameObject defaultShipFire;
+    //The sea level
+    public float defaultSeaLevel;
 
     //Values accessed by code
     /// <summary>
@@ -148,6 +150,10 @@ public class GameController : MonoBehaviour
     /// The prefab for ship fires.
     /// </summary>
     public static GameObject shipFire;
+    /// <summary>
+    /// The sea level height.
+    /// </summary>
+    public static float seaLevel;
 
     /// <summary>
     /// Awake function.
@@ -164,6 +170,7 @@ public class GameController : MonoBehaviour
         cannonShell = defaultCannonShell;
         shipExplosion = defaultShipExplosion;
         shipFire = defaultShipFire;
+        seaLevel = defaultSeaLevel;
 
         switchTimesNill = nullifyBattleSwitchTimes;
         secondaryBattles = new List<Battle>();

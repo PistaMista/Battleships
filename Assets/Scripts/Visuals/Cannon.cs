@@ -80,7 +80,9 @@ public class Cannon : Weapon
     /// </summary>
     public override void PrepareForFiring()
     {
-        float angle = (Mathf.Asin((turret.distanceToTarget * GameController.gravity) / (turret.projectileVelocity * turret.projectileVelocity))) * Mathf.Rad2Deg / 2f;
+        float altitudeDifference = (transform.position.y - 1.5f);
+        //float angle = (Mathf.Asin((turret.distanceToTarget * GameController.gravity) / (turret.projectileVelocity * turret.projectileVelocity))) * Mathf.Rad2Deg / 2f;
+        float angle = Mathf.Atan((Mathf.Pow(turret.projectileVelocity, 2f) - Mathf.Sqrt(Mathf.Pow(turret.projectileVelocity, 4f) - GameController.gravity * (GameController.gravity * Mathf.Pow(turret.distanceToTarget, 2f) + 2 * altitudeDifference * Mathf.Pow(turret.projectileVelocity, 2f)))) / (GameController.gravity * turret.distanceToTarget)) * Mathf.Rad2Deg;
         SetElevation(angle);
     }
 

@@ -99,7 +99,16 @@ public class Ship : MonoBehaviour
         {
             if (sinkTimeLeft < sinkTime)
             {
+                float sinkProgress = 1f - sinkTimeLeft / sinkTime;
 
+                if (sinkProgress < 0.5f)
+                {
+                    transform.rotation = Quaternion.Euler(Mathf.SmoothStep(0f, 85f, sinkProgress / 0.5f), transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+                }
+                else if (sinkProgress < 1f)
+                {
+                    transform.position = new Vector3(transform.position.x, Mathf.SmoothStep(GameController.seaLevel, -2f, (sinkProgress - 0.5f) / 0.5f), transform.position.z);
+                }
 
 
                 FixFireRotation();
@@ -179,9 +188,19 @@ public class Ship : MonoBehaviour
     /// </summary>
     void FixFireRotation()
     {
-        foreach (GameObject fire in effects)
+        for (int i = 0; i < effects.Count; i++)
         {
+            GameObject fire = effects[i];
+
             fire.transform.rotation = Quaternion.Euler(Vector3.zero);
+            if (fire.transform.position.y < GameController.seaLevel)
+            {
+                effects.Remove(fire);
+                ParticleSystem particles = fire.GetComponent<ParticleSystem>();
+
+                particles.Stop();
+                i--;
+            }
         }
     }
     /// <summary>
@@ -204,7 +223,7 @@ public class Ship : MonoBehaviour
         switch (projectile.type)
         {
             case ProjectileType.SHELL:
-                if (eliminated)
+                if (eliminated && sinkTimeLeft > sinkTime)
                 {
                     BeginSinking();
                 }

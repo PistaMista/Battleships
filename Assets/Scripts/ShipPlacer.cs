@@ -181,7 +181,7 @@ public class ShipPlacer : MonoBehaviour
         Vector3 position1 = player.board.tiles[(int)selectedPositions[0].x, (int)selectedPositions[0].y].worldPosition;
         Vector3 position2 = player.board.tiles[(int)selectedPositions[selectedPositions.Count - 1].x, (int)selectedPositions[selectedPositions.Count - 1].y].worldPosition;
 
-        processedShip.boardPosition = position1 + (position2 - position1) / 2f - Vector3.up * (GameController.playerBoardElevation - 0.4f);
+        processedShip.boardPosition = position1 + (position2 - position1) / 2f - Vector3.up * (GameController.playerBoardElevation - GameController.seaLevel);
         if ((selectedPositions[0] - selectedPositions[1]).x != 0) //Rotates the ship correctly
         {
             processedShip.boardRotation = Vector3.up * (90f - 180f * Random.Range(0, 1));
