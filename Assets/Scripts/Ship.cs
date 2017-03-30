@@ -109,7 +109,7 @@ public class Ship : MonoBehaviour
                 FixFireRotation();
             }
             sinkTimeLeft -= Time.deltaTime;
-            if (sinkTimeLeft < 0)
+            if (sinkTimeLeft < -sinkTime / 4f)
             {
                 owner.battle.DisableSunkShip(this);
             }
@@ -160,7 +160,10 @@ public class Ship : MonoBehaviour
     /// <param name="projectile">The incoming projectile.</param> 
     public void IncomingProjectile(Projectile projectile)
     {
-        projectile.onHit += OnProjectileHit;
+        if (gameObject.activeInHierarchy)
+        {
+            projectile.onHit += OnProjectileHit;
+        }
     }
 
     /// <summary>

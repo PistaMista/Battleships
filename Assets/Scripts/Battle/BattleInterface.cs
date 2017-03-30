@@ -215,7 +215,7 @@ public class BattleInterface : MonoBehaviour
         {
             player.board.Set(BoardState.OVERHEAD);
         }
-        Cameraman.TakePosition("Board " + (player.ID + 1), 0.6f);
+        Cameraman.TakePosition("Board " + (player.ID + 1), 0.3f);
     }
 
     /// <summary>
@@ -253,28 +253,8 @@ public class BattleInterface : MonoBehaviour
         switch (switchingTo)
         {
             case BattleState.FIRING:
-                Interface.SwitchMenu("Firing Screen");
+                PrepareActionView();
 
-                foreach (Player player in battle.players)
-                {
-                    player.board.Set(BoardState.DISABLED);
-                    player.SetMacroMarker(-1);
-                }
-
-                if ((GameController.humanPlayers == 1 && !battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
-                {
-                    battle.defendingPlayer.board.Set(BoardState.SHIPS);
-                }
-
-                if (!battle.attackingPlayer.AI || GameController.humanPlayers < 2)
-                {
-                    battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
-                }
-                else
-                {
-                    battle.ChangeState(BattleState.TURN_FINISHED, 1f);
-
-                }
 
                 break;
             case BattleState.SHOWING_HIT_TILE:
@@ -287,7 +267,7 @@ public class BattleInterface : MonoBehaviour
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();
-                Cameraman.TakePosition("Overhead View");
+                Cameraman.TakePosition("Overhead View", 0.45f);
                 Interface.SwitchMenu("Overhead");
                 break;
             case BattleState.CHOOSING_TILE_TO_SHOOT:
@@ -311,8 +291,90 @@ public class BattleInterface : MonoBehaviour
     public void BackToOverhead()
     {
         SetUpOverhead();
-        Cameraman.TakePosition("Overhead View");
+        Cameraman.TakePosition("Overhead View", 0.45f);
         Interface.SwitchMenu("Overhead");
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
+    }
+
+
+    /// <summary>
+    /// Prepares the game for an action shot of weapons firing.
+    /// </summary>
+    static void PrepareActionView()
+    {
+        //Prepares the interface
+        Interface.SwitchMenu("Firing Screen");
+
+        foreach (Player player in battle.players)
+        {
+            player.board.Set(BoardState.DISABLED);
+            player.SetMacroMarker(-1);
+        }
+
+        if ((GameController.humanPlayers == 1 && !battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
+        {
+            battle.defendingPlayer.board.Set(BoardState.SHIPS);
+        }
+
+        if (!battle.attackingPlayer.AI || (GameController.humanPlayers < 2 && !battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
+        {
+            battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
+        }
+        else
+        {
+            battle.ChangeState(BattleState.TURN_FINISHED, 1f);
+        }
+
+        //Prepares the attack fleet
+        Vector3 fleetPosition = Vector3.zero;
+        float fleetRotation = 0f;
+
+        if (Mathf.Abs(battle.defendingPlayer.board.position.z) < Mathf.Abs(battle.defendingPlayer.board.position.x))
+        {
+            fleetPosition = battle.defendingPlayer.board.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(battle.defendingPlayer.board.position.x);
+            fleetRotation = 90f * Mathf.Sign(battle.defendingPlayer.board.position.x);
+        }
+        else
+        {
+            fleetPosition = battle.defendingPlayer.board.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(battle.defendingPlayer.board.position.z);
+            fleetRotation = 90f - 90f * Mathf.Sign(battle.defendingPlayer.board.position.z);
+        }
+
+
+
+        GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        tmp.transform.position = fleetPosition;
+        tmp.transform.localScale = new Vector3(0.1f, 0.1f, 2f);
+        tmp.transform.localRotation = Quaternion.Euler(new Vector3(0f, fleetRotation, 0f));
+
+        List<Ship> destroyers = new List<Ship>();
+        List<Ship> cruisers = new List<Ship>();
+        List<Ship> battleships = new List<Ship>();
+        foreach (Ship ship in battle.attackingPlayer.livingShips)
+        {
+            switch (ship.length)
+            {
+                case 3:
+                    destroyers.Add(ship);
+                    break;
+                case 4:
+                    cruisers.Add(ship);
+                    break;
+                case 5:
+                    battleships.Add(ship);
+                    break;
+            }
+        }
+
+
+
+    }
+
+    /// <summary>
+    /// Cycles the action shot.
+    /// </summary>
+    static void RefreshActionView()
+    {
+
     }
 }
