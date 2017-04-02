@@ -95,6 +95,8 @@ public class GameController : MonoBehaviour
     public GameObject defaultShipFire;
     //The sea level
     public float defaultSeaLevel;
+    //Skips showing action shots of AI vs AI attacks in main battles
+    public bool defaultSkipAIvsAIActionShots;
 
     //Values accessed by code
     /// <summary>
@@ -154,6 +156,10 @@ public class GameController : MonoBehaviour
     /// The sea level height.
     /// </summary>
     public static float seaLevel;
+    /// <summary>
+    /// Skips action shots of AI vs AI attacks in main battles.
+    /// </summary>
+    public static bool skipAIvsAIActionShots;
 
     /// <summary>
     /// Awake function.
@@ -171,6 +177,7 @@ public class GameController : MonoBehaviour
         shipExplosion = defaultShipExplosion;
         shipFire = defaultShipFire;
         seaLevel = defaultSeaLevel;
+        skipAIvsAIActionShots = defaultSkipAIvsAIActionShots;
 
         switchTimesNill = nullifyBattleSwitchTimes;
         secondaryBattles = new List<Battle>();

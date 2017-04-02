@@ -141,10 +141,7 @@ public class Battle : MonoBehaviour
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     Vector2 positionToShoot = ChooseTileToAttackForAIPlayer();
 
-                    while (!HitTile(positionToShoot))
-                    {
-                        positionToShoot = ChooseTileToAttackForAIPlayer();
-                    }
+                    Debug.Log(HitTile(positionToShoot));
 
                     ChangeState(BattleState.TURN_FINISHED, 0.2f);
                     break;
@@ -320,6 +317,7 @@ public class Battle : MonoBehaviour
             }
         }
 
+        Debug.LogWarning("There was an attempt to shoot an invalid tile: " + tile + ". Things may break.");
         return false;
     }
 
@@ -382,6 +380,12 @@ public class Battle : MonoBehaviour
 
         Vector2[] cardinalDirections = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
 
+        //Eliminate the misses
+        foreach (Vector2 miss in misses)
+        {
+            processedTiles.Add(miss);
+        }
+
         //Analyze hits
         foreach (Vector2 hit in hits)
         {
@@ -443,7 +447,7 @@ public class Battle : MonoBehaviour
                     foreach (Vector2 direction in cardinalDirections)
                     {
                         Vector2 checkedPosition = hit + direction;
-                        if (defendingPlayer.board.IsPositionValid(checkedPosition))
+                        if (defendingPlayer.board.IsPositionValid(checkedPosition) && !processedTiles.Contains(checkedPosition))
                         {
                             processedTiles.Add(checkedPosition);
                             rankedTiles[10].Add(checkedPosition);
@@ -456,6 +460,8 @@ public class Battle : MonoBehaviour
                 }
             }
         }
+
+
 
         //Add the other tiles
         for (int x = 0; x < defendingPlayer.board.dimensions; x++)
@@ -489,6 +495,7 @@ public class Battle : MonoBehaviour
 
         result = rankedTiles[targetRank][Random.Range(0, rankedTiles[targetRank].Count - 1)];
 
+        //Debug.Log(result);
         return result;
     }
 
@@ -533,7 +540,9 @@ public class Battle : MonoBehaviour
         {
             Vector3 targetPosition = defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].worldPosition;
             targetPosition.y = 0f;
-            float travelTime = ship.FireAt(targetPosition, defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip);
+            float travelTime = ship.PrepareToFireAt(targetPosition, defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip);
+            ship.Fire();
+
             if (travelTime > highestTravelTime)
             {
                 highestTravelTime = travelTime;

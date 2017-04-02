@@ -166,4 +166,9 @@ public class Cameraman : MonoBehaviour
     {
         Camera.main.GetComponent<Blur>().enabled = enabled;
     }
+
+    public static void SetOrthographic(bool enabled)
+    {
+        Camera.main.orthographic = enabled;
+    }
 }

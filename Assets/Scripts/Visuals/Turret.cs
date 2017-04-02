@@ -92,20 +92,15 @@ public class Turret : MonoBehaviour
     }
 
     /// <summary>
-    /// Fires all weapons at worldPosition.
+    /// Prepares all weapons to fire at worldPosition.
     /// </summary>
-    /// <param name="worldPosition">The position to fire at.</param>
-    /// <param name="firingDelay">The delay before starting to fire.</param>
+    /// <param name="worldPosition">The position to prepare to fire at.</param>
     /// <returns>The time it will take for projectiles to arrive at the target position.</returns>
-    public float FireAt(Vector3 worldPosition, float firingDelay)
+    public float PrepareToFireAt(Vector3 worldPosition)
     {
         distanceToTarget = Vector3.Distance(ship.transform.position, worldPosition);
         if (RotateTo(worldPosition))
         {
-            this.firingDelay = firingDelay;
-            doneFiring = false;
-
-
             foreach (Weapon weapon in weapons)
             {
                 weapon.PrepareForFiring();
@@ -121,6 +116,16 @@ public class Turret : MonoBehaviour
             return 0f;
         }
     }
+
+    /// <summary>
+    /// Fires all weapons with a delay of firing delay.
+    /// </summary>
+    /// <param name="firingDelay">The delay before firing.</param>
+    public void Fire(float firingDelay)
+    {
+        this.firingDelay = firingDelay;
+        doneFiring = false;
+    }
     /// <summary>
     /// Rotates the turret to point at the target world position.
     /// </summary>
@@ -128,21 +133,27 @@ public class Turret : MonoBehaviour
     /// <returns>Whether the turret is able to point at the target position.</returns>    
     bool RotateTo(Vector3 targetPosition)
     {
-        Vector3 relativeTargetPosition = targetPosition - transform.position;
-        float relativeTargetAngle = Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg + ship.transform.rotation.eulerAngles.y - defaultRotation + 90f;
+        Vector3 relativeTargetPosition = -(targetPosition - transform.position);
+        relativeTargetPosition = (ship.reverseTurrets) ? -relativeTargetPosition : relativeTargetPosition;
+        float shipAngle = ship.transform.rotation.eulerAngles.y;
+        float relativeTargetAngle = Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg - (-shipAngle - defaultRotation) - 90f;
 
-        if (ship.reverseTurrets)
-        {
-            relativeTargetAngle += 180f;
-        }
+
+        Debug.Log(Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg + " " + relativeTargetAngle);
+
+        relativeTargetAngle %= 360f;
+
+        Debug.Log(Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg + " " + relativeTargetAngle);
 
         if (Mathf.Abs(relativeTargetAngle) > 180f)
         {
             relativeTargetAngle -= 360f * Mathf.Sign(relativeTargetAngle);
         }
+        Debug.Log(Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg + " " + relativeTargetAngle);
+        Debug.Log("------");
         if ((relativeTargetAngle <= 0 && Mathf.Abs(relativeTargetAngle) <= rightTraverseLimit) || (relativeTargetAngle >= 0 && Mathf.Abs(relativeTargetAngle) <= leftTraverseLimit))
         {
-            transform.rotation = Quaternion.Euler(0f, defaultRotation - relativeTargetAngle + ship.transform.eulerAngles.y, 0f);
+            transform.rotation = Quaternion.Euler(0f, defaultRotation - relativeTargetAngle + shipAngle, 0f);
             return true;
         }
         else

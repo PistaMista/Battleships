@@ -130,18 +130,18 @@ public class Ship : MonoBehaviour
         }
     }
     /// <summary>
-    /// Fires the ship's guns at the target world position.
+    /// Prepares to fire the ship's guns at the target world position.
     /// </summary>
-    /// <param name="worldPosition">The world position to target.</param>
+    /// <param name="worldPosition">The world position of the target.</param>
     /// <returns>The time it will take for the shells to arrive at the target position.</returns>
-    public float FireAt(Vector3 worldPosition, Ship targetedShip)
+    public float PrepareToFireAt(Vector3 worldPosition, Ship targetedShip)
     {
         float highestTravelTime = 0f;
         float currentDelay = 0f;
 
         foreach (Turret turret in turrets)
         {
-            float travelTime = turret.FireAt(worldPosition, currentDelay);
+            float travelTime = turret.PrepareToFireAt(worldPosition);
 
             if (travelTime > highestTravelTime)
             {
@@ -154,6 +154,22 @@ public class Ship : MonoBehaviour
         this.targetedShip = targetedShip;
         return highestTravelTime;
     }
+
+    public void Fire()
+    {
+        float currentDelay = 0f;
+
+        foreach (Turret turret in turrets)
+        {
+            if (turret.canFire)
+            {
+                turret.Fire(currentDelay);
+                currentDelay += turretFiringDelay;
+            }
+        }
+    }
+
+
     /// <summary>
     /// Informs this ship about incoming projectiles.
     /// </summary>
@@ -174,6 +190,7 @@ public class Ship : MonoBehaviour
         GameObject effect = Instantiate(GameController.shipExplosion);
         effect.transform.parent = this.transform;
         effect.transform.localPosition = Vector3.zero;
+        effect.GetComponent<ParticleSystem>().Play();
         sinkTimeLeft = sinkTime;
         effects.Add(effect);
     }

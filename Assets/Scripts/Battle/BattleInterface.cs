@@ -114,7 +114,14 @@ public class BattleInterface : MonoBehaviour
 
                     if (battle.SelectTarget(battle.players[randomTargetID]))
                     {
-                        battle.ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1.8f);
+                        if (GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI)
+                        {
+                            Debug.Log(battle.HitTile(battle.ChooseTileToAttackForAIPlayer()));
+                        }
+                        else
+                        {
+                            battle.ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1.8f);
+                        }
 
                         ViewPlayer(battle.defendingPlayer);
                     }
@@ -122,10 +129,7 @@ public class BattleInterface : MonoBehaviour
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     Vector2 positionToShoot = battle.ChooseTileToAttackForAIPlayer();
 
-                    while (!battle.HitTile(positionToShoot))
-                    {
-                        positionToShoot = battle.ChooseTileToAttackForAIPlayer();
-                    }
+                    battle.HitTile(positionToShoot);
                     break;
             }
         }
@@ -202,7 +206,6 @@ public class BattleInterface : MonoBehaviour
     static void ViewPlayer(Player player)
     {
         player.SetMacroMarker(-1);
-
         if (player == battle.attackingPlayer || (GameController.humanPlayers == 1 && !player.AI) || GameController.humanPlayers == 0)
         {
             player.board.Set(BoardState.FRIENDLY);
@@ -252,6 +255,7 @@ public class BattleInterface : MonoBehaviour
                 foreach (Ship ship in battle.attackingPlayer.livingShips)
                 {
                     ship.PositionOnPlayingBoard();
+                    ship.gameObject.SetActive(false);
                 }
                 break;
         }
@@ -286,7 +290,10 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     static void OnFire()
     {
-        battle.ChangeState(BattleState.FIRING);
+        if (!(GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI))
+        {
+            battle.ChangeState(BattleState.FIRING);
+        }
     }
 
 
@@ -330,6 +337,10 @@ public class BattleInterface : MonoBehaviour
         {
             battle.ChangeState(BattleState.TURN_FINISHED, 1f);
         }
+
+        //TEST
+        battle.switchTime = 2f;
+        //TEST
 
         //Prepares the attack fleet
         Vector3 fleetPosition = Vector3.zero;
@@ -385,7 +396,7 @@ public class BattleInterface : MonoBehaviour
         for (int i = 0; i < destroyers.Count; i++)
         {
             Ship ship = destroyers[i];
-            position = new Vector3(-(destroyers.Count / 2f - 0.5f) * 3f + (i) * 3f, ship.transform.position.y, 5.5f);
+            position = new Vector3(-(destroyers.Count / 2f - 0.5f) * 3f + (i) * 3f, ship.transform.position.y, -5.5f);
             ship.transform.position = position;
         }
 
@@ -393,7 +404,7 @@ public class BattleInterface : MonoBehaviour
         for (int i = 0; i < cruisers.Count; i++)
         {
             Ship ship = cruisers[i];
-            position = new Vector3(-(cruisers.Count / 2f - 0.5f) * 5.5f + (i) * 5.5f, ship.transform.position.y, -5.5f);
+            position = new Vector3(-(cruisers.Count / 2f - 0.5f) * 5.5f + (i) * 5.5f, ship.transform.position.y, 5.5f);
             ship.transform.position = position;
         }
 
@@ -409,6 +420,12 @@ public class BattleInterface : MonoBehaviour
             //Vector3 targetDirection = new Vector3(Mathf.Cos(fleetRotation * Mathf.Deg2Rad), 0f, Mathf.Sin(fleetRotation * Mathf.Deg2Rad)).normalized;
             Vector3 localPosition = new Vector3(ship.transform.position.x * Mathf.Cos(radianAngle) - ship.transform.position.z * Mathf.Sin(radianAngle), 0f, ship.transform.position.z * Mathf.Cos(radianAngle) + ship.transform.position.x * Mathf.Sin(radianAngle));
             ship.transform.position = localPosition + fleetPosition;
+        }
+
+        foreach (Ship ship in battle.attackingPlayer.livingShips)
+        {
+            ship.PrepareToFireAt(battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].worldPosition, battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].containedShip);
+            ship.Fire();
         }
 
     }
