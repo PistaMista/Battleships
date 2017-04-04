@@ -141,6 +141,21 @@ public class Cameraman : MonoBehaviour
         currentTargetPosition = position;
         transitionProgress = 0f;
     }
+
+    /// <summary>
+    /// Transfers the camera to the newly created position. The position will not be saved.
+    /// </summary>
+    /// <param name="position">The position which to take.</param>
+    public static void TakePosition(CameraPosition position)
+    {
+        currentPosition = new CameraPosition(0f, Camera.main.transform.position, Camera.main.transform.rotation.eulerAngles);
+        position.rotation.x = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.x, position.rotation.x);
+        position.rotation.y = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.y, position.rotation.y);
+        position.rotation.z = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.z, position.rotation.z);
+        currentTargetPosition = position;
+        transitionProgress = 0f;
+    }
+
     /// <summary>
     /// Determines which way to rotate in order to achieve the shortest rotation.
     /// </summary>
