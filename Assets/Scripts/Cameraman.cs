@@ -26,6 +26,22 @@ public class Cameraman : MonoBehaviour
         public Vector3 rotation;
         public CameraPosition(float transitionSpeed, Vector3 targetPosition, Vector3 targetRotation)
         {
+            if (Mathf.Abs(targetRotation.x) > 180f)
+            {
+                targetRotation.x = (targetRotation.x % 360f) - 360f * Mathf.Sign(targetRotation.x);
+            }
+
+            if (Mathf.Abs(targetRotation.y) > 180f)
+            {
+                targetRotation.y = (targetRotation.y % 360f) - 360f * Mathf.Sign(targetRotation.y);
+            }
+
+            if (Mathf.Abs(targetRotation.z) > 180f)
+            {
+                targetRotation.z = (targetRotation.z % 360f) - 360f * Mathf.Sign(targetRotation.z);
+            }
+
+
             this.transitionTime = transitionSpeed;
             this.position = targetPosition;
             this.rotation = targetRotation;
@@ -75,6 +91,8 @@ public class Cameraman : MonoBehaviour
     public static void SetUpBasicPositions()
     {
         possiblePositions.Add("Overhead Title View", new CameraPosition(1f, new Vector3(0, 15f, -20f), new Vector3(30f, 0, 0)));
+        //possiblePositions.Add("Overhead Title View", new CameraPosition(1f, new Vector3(0, 15f, -20f), new Vector3(, 0, 0)));
+
         possiblePositions.Add("Overhead View", new CameraPosition(1f, new Vector3(0, 40f, 0), new Vector3(90, 0, 0)));
     }
     /// <summary>

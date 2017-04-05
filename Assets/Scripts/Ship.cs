@@ -176,10 +176,7 @@ public class Ship : MonoBehaviour
     /// <param name="projectile">The incoming projectile.</param> 
     public void IncomingProjectile(Projectile projectile)
     {
-        if (gameObject.activeInHierarchy)
-        {
-            projectile.onHit += OnProjectileHit;
-        }
+        projectile.onHit += OnProjectileHit;
     }
 
     /// <summary>

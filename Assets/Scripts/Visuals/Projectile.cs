@@ -7,9 +7,17 @@ public class Projectile : MonoBehaviour
 
     // Use this for initialization
     /// <summary>
+    /// The weapon that fired this projectile.
+    /// </summary>
+    public Weapon weapon;
+    /// <summary>
     /// The time it will take for the projectile to reach the target.
     /// </summary>
     public float travelTime;
+    /// <summary>
+    /// The velocity of this projectile.
+    /// </summary>
+    public Vector3 velocity;
     /// <summary>
     /// The type of the projectile.
     /// </summary>

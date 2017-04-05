@@ -72,7 +72,10 @@ public class Cannon : Weapon
     /// <returns>Time needed for the shell to cross the distance to target.</returns>
     public override float GetTimeToTarget(float distanceToTarget)
     {
-        float time = (2f * turret.projectileVelocity * Mathf.Sin(currentElevationAngle * Mathf.Deg2Rad)) / GameController.gravity;
+        //float time = (2f * turret.projectileVelocity * Mathf.Sin(currentElevationAngle * Mathf.Deg2Rad)) / GameController.gravity;
+        float pAngle = currentElevationAngle * Mathf.Deg2Rad;
+        float velocitySin = turret.projectileVelocity * Mathf.Sin(pAngle);
+        float time = (velocitySin + Mathf.Sqrt(Mathf.Pow(velocitySin, 2f) + 2f * GameController.gravity * (0.55f))) / GameController.gravity;
         return time;
     }
     /// <summary>
@@ -104,7 +107,13 @@ public class Cannon : Weapon
         shell.transform.position = transform.position + direction * barrel.transform.localScale.z;
         shell.travelTime = GetTimeToTarget(turret.distanceToTarget);
         shell.type = ProjectileType.SHELL;
-
+        shell.weapon = this;
         return shell;
+    }
+
+    public override void SetElevation(float elevation)
+    {
+        base.SetElevation(elevation);
+        turret.gunDirection = -(transform.position - barrel.transform.position).normalized;
     }
 }

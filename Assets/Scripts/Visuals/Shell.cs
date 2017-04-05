@@ -6,10 +6,6 @@ public class Shell : Projectile
 {
 
     // Use this for initialization
-    /// <summary>
-    /// The velocity of the shell.
-    /// </summary>
-    Vector3 velocity;
 
     // Update is called once per frame
     /// <summary>
@@ -20,7 +16,7 @@ public class Shell : Projectile
         base.Update();
         velocity += Vector3.down * GameController.gravity * Time.deltaTime;
         transform.position += velocity * Time.deltaTime;
-        if (transform.position.y < -2f)
+        if (travelTime < 0f)
         {
             Destroy(gameObject);
         }

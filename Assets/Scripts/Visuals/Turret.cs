@@ -4,11 +4,18 @@ using UnityEngine;
 
 public class Turret : MonoBehaviour
 {
-
+    /// <summary>
+    /// The direction in which the guns are pointing.
+    /// </summary>
+    public Vector3 gunDirection;
     /// <summary>
     /// The weapons mounted in this turret.
     /// </summary>
     public Weapon[] weapons;
+    /// <summary>
+    /// An array of the most recently fired projectiles by the weapons mounted in this turret. May contain null references (or traces of nuts).
+    /// </summary>
+    public Projectile[] recentlyFiredProjectiles;
     /// <summary>
     /// The ship this turret is mounted on.
     /// </summary>
@@ -75,7 +82,7 @@ public class Turret : MonoBehaviour
         {
             if (currentlyFiring < weapons.Length)
             {
-                weapons[currentlyFiring].Fire();
+                recentlyFiredProjectiles[currentlyFiring] = weapons[currentlyFiring].Fire();
 
                 currentlyFiring++;
                 firingDelay = 0.2f;
@@ -98,7 +105,8 @@ public class Turret : MonoBehaviour
     /// <returns>The time it will take for projectiles to arrive at the target position.</returns>
     public float PrepareToFireAt(Vector3 worldPosition)
     {
-        distanceToTarget = Vector3.Distance(ship.transform.position, worldPosition);
+        recentlyFiredProjectiles = new Projectile[weapons.Length];
+        distanceToTarget = Vector3.Distance(transform.position, worldPosition);
         if (RotateTo(worldPosition))
         {
             foreach (Weapon weapon in weapons)
@@ -138,19 +146,13 @@ public class Turret : MonoBehaviour
         float shipAngle = ship.transform.rotation.eulerAngles.y;
         float relativeTargetAngle = Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg - (-shipAngle - defaultRotation) - 90f;
 
-
-        Debug.Log(Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg + " " + relativeTargetAngle);
-
         relativeTargetAngle %= 360f;
 
-        Debug.Log(Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg + " " + relativeTargetAngle);
 
         if (Mathf.Abs(relativeTargetAngle) > 180f)
         {
             relativeTargetAngle -= 360f * Mathf.Sign(relativeTargetAngle);
         }
-        Debug.Log(Mathf.Atan2(relativeTargetPosition.z, relativeTargetPosition.x) * Mathf.Rad2Deg + " " + relativeTargetAngle);
-        Debug.Log("------");
         if ((relativeTargetAngle <= 0 && Mathf.Abs(relativeTargetAngle) <= rightTraverseLimit) || (relativeTargetAngle >= 0 && Mathf.Abs(relativeTargetAngle) <= leftTraverseLimit))
         {
             transform.rotation = Quaternion.Euler(0f, defaultRotation - relativeTargetAngle + shipAngle, 0f);
