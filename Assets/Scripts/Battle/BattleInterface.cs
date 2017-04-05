@@ -19,7 +19,7 @@ public class BattleInterface : MonoBehaviour
     /// <summary>
     /// The battle the interface is attached to.
     /// </summary>
-    static Battle battle;
+    public static Battle battle;
     /// <summary>
     /// The instance of the marker to show the tile being shot.
     /// </summary>
@@ -91,9 +91,12 @@ public class BattleInterface : MonoBehaviour
             {
                 recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation + 0.1f, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
             }
+
+            if (currentViewType != ActionViewType.NONE)
+            {
+                RefreshActionView();
+            }
         }
-
-
     }
 
     /// <summary>
@@ -114,7 +117,7 @@ public class BattleInterface : MonoBehaviour
 
                     if (battle.SelectTarget(battle.players[randomTargetID]))
                     {
-                        if (GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI)
+                        if (GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI && GameController.humanPlayers > 0)
                         {
                             Debug.Log(battle.HitTile(battle.ChooseTileToAttackForAIPlayer()));
                         }
@@ -257,6 +260,8 @@ public class BattleInterface : MonoBehaviour
                     ship.PositionOnPlayingBoard();
                     ship.gameObject.SetActive(false);
                 }
+
+                currentViewType = ActionViewType.NONE;
                 break;
         }
 
@@ -290,7 +295,7 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     static void OnFire()
     {
-        if (!(GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI))
+        if (!(GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI && GameController.humanPlayers > 0))
         {
             battle.ChangeState(BattleState.FIRING);
         }
@@ -308,6 +313,8 @@ public class BattleInterface : MonoBehaviour
         Interface.SwitchMenu("Overhead");
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
     }
+
+
 
 
     /// <summary>
@@ -367,19 +374,24 @@ public class BattleInterface : MonoBehaviour
         List<Ship> destroyers = new List<Ship>();
         List<Ship> cruisers = new List<Ship>();
         List<Ship> battleships = new List<Ship>();
+        List<Ship> attackers = new List<Ship>();
         foreach (Ship ship in battle.attackingPlayer.livingShips)
         {
-            switch (ship.length)
+            if (ship.lengthRemaining == ship.length)
             {
-                case 3:
-                    destroyers.Add(ship);
-                    break;
-                case 4:
-                    cruisers.Add(ship);
-                    break;
-                case 5:
-                    battleships.Add(ship);
-                    break;
+                attackers.Add(ship);
+                switch (ship.length)
+                {
+                    case 3:
+                        destroyers.Add(ship);
+                        break;
+                    case 4:
+                        cruisers.Add(ship);
+                        break;
+                    case 5:
+                        battleships.Add(ship);
+                        break;
+                }
             }
         }
 
@@ -411,7 +423,7 @@ public class BattleInterface : MonoBehaviour
         //Rotate the ships
         //Vector3 directionModifier = new Vector3(Mathf.Cos(fleetRotation * Mathf.Deg2Rad), 0f, Mathf.Sin(fleetRotation * Mathf.Deg2Rad)).normalized;
 
-        foreach (Ship ship in battle.attackingPlayer.livingShips)
+        foreach (Ship ship in attackers)
         {
             ship.gameObject.SetActive(true);
             ship.transform.rotation = Quaternion.Euler(Vector3.up * fleetRotation);
@@ -422,19 +434,154 @@ public class BattleInterface : MonoBehaviour
             ship.transform.position = localPosition + fleetPosition;
         }
 
-        foreach (Ship ship in battle.attackingPlayer.livingShips)
-        {
-            ship.PrepareToFireAt(battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].worldPosition, battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].containedShip);
-            ship.Fire();
-        }
 
+
+        ActionViewType[] tmp = (ActionViewType[])ActionViewType.GetValues(typeof(ActionViewType));
+        //currentViewType = tmp[Random.Range(1, tmp.Length)];
+        currentViewType = ActionViewType.BARREL_LINEAR_FOLLOW;
+        actionViewTime = 0f;
+        //Setup the specified action view type
+        switch (currentViewType)
+        {
+            case ActionViewType.BARREL_LINEAR_FOLLOW:
+                float highestTravelTime = 0f;
+                List<Turret> availableTurrets = new List<Turret>();
+
+                foreach (Ship ship in attackers)
+                {
+                    float travelTime = ship.PrepareToFireAt(battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].worldPosition, battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].containedShip);
+                    highestTravelTime = (travelTime > highestTravelTime) ? travelTime : highestTravelTime;
+
+
+                    foreach (Turret turret in ship.turrets)
+                    {
+                        if (turret.canFire)
+                        {
+                            availableTurrets.Add(turret);
+                        }
+                    }
+
+                }
+
+                if (availableTurrets.Count > 0)
+                {
+                    selectedTurret = availableTurrets[Random.Range(0, availableTurrets.Count)];
+                    selectedShip = selectedTurret.ship;
+                    if (selectedShip != null)
+                    {
+                        Vector3 direction = selectedTurret.gunDirection;
+                        float xzDistance = Vector2.Distance(Vector2.zero, new Vector2(direction.x, direction.z));
+                        Vector3 angle = new Vector3(Mathf.Atan2(-direction.y, xzDistance) * Mathf.Rad2Deg, Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg, 0f);
+
+                        direction.y = 0f;
+                        Cameraman.TakePosition(new Cameraman.CameraPosition(0.25f, selectedTurret.transform.position + Vector3.up * 0.3f - direction, angle));
+                    }
+                }
+
+
+                highestTravelTime += 4f;
+                battle.switchTime = highestTravelTime;
+                break;
+            case ActionViewType.AERIAL_VIEW:
+                float longestTravelTime = 0f;
+                List<Turret> fireableTurrets = new List<Turret>();
+
+                foreach (Ship ship in attackers)
+                {
+                    float travelTime = ship.PrepareToFireAt(battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].worldPosition, battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].containedShip);
+                    longestTravelTime = (travelTime > longestTravelTime) ? travelTime : longestTravelTime;
+
+
+                    foreach (Turret turret in ship.turrets)
+                    {
+                        if (turret.canFire)
+                        {
+                            fireableTurrets.Add(turret);
+                        }
+                    }
+
+                }
+
+                if (fireableTurrets.Count > 0)
+                {
+                    selectedTurret = fireableTurrets[Random.Range(0, fireableTurrets.Count)];
+                    selectedShip = selectedTurret.ship;
+                    if (selectedShip != null)
+                    {
+                        Cameraman.TakePosition(new Cameraman.CameraPosition(0.25f, selectedShip.transform.position + Vector3.up * 20f, new Vector3(90f, 0f, 0f)));
+                    }
+                }
+
+
+                foreach (Ship ship in attackers)
+                {
+                    ship.Fire();
+                }
+
+
+                longestTravelTime += 2f;
+                battle.switchTime = longestTravelTime;
+                break;
+        }
     }
 
+    /// <summary>
+    /// Types of action views.
+    /// </summary>
+    enum ActionViewType
+    {
+        NONE,
+        BARREL_LINEAR_FOLLOW,
+        AERIAL_VIEW,
+    }
+
+    /// <summary>
+    /// The type of action view used for the current action shot.
+    /// </summary>
+    static ActionViewType currentViewType;
+
+    /// <summary>
+    /// The projectile tracked by the camera.
+    /// </summary>
+    static int trackedProjectileID = 0;
+    static Turret selectedTurret;
+    static Ship selectedShip;
+    static float actionViewTime;
     /// <summary>
     /// Refreshes the action shot.
     /// </summary>
     static void RefreshActionView()
     {
+        Debug.Log(currentViewType);
+        switch (currentViewType)
+        {
+            case ActionViewType.BARREL_LINEAR_FOLLOW:
+                Projectile projectile = selectedTurret.recentlyFiredProjectiles[trackedProjectileID];
+                if (projectile != null)
+                {
+                    Debug.Log(projectile.name);
+                    Vector3 direction = projectile.velocity.normalized;
+                    Debug.Log(Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg);
+                    float xzDistance = Vector2.Distance(Vector2.zero, new Vector2(direction.x, direction.z));
+                    Vector3 angle = new Vector3(Mathf.Atan2(-direction.y, xzDistance) * Mathf.Rad2Deg, Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg, 0f);
+                    //angle.x = -30f;
+                    //angle.y += 90f;
+                    Cameraman.TakePosition(new Cameraman.CameraPosition(0.22f, projectile.transform.position + Vector3.up, angle));
+                }
 
+                if (actionViewTime > 1f && actionViewTime < 1f + Time.deltaTime)
+                {
+                    foreach (Ship ship in battle.attackingPlayer.livingShips)
+                    {
+                        if (ship.length == ship.lengthRemaining)
+                        {
+                            ship.Fire();
+                        }
+                    }
+                }
+                break;
+        }
+
+        actionViewTime += Time.deltaTime;
     }
 }
