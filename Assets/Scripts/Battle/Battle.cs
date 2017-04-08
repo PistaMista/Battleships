@@ -197,7 +197,7 @@ public class Battle : MonoBehaviour
         {
             foreach (Player player in players)
             {
-                player.ShipsShown(true);
+                player.ShipsShown(true, false);
             }
         }
     }

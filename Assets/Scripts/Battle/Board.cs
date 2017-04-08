@@ -258,7 +258,7 @@ public class Board : ScriptableObject
                     }
                 }
 
-                owner.ShipsShown(true);
+                owner.ShipsShown(true, true);
                 break;
             case BoardState.OVERHEAD:
                 grid = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -275,7 +275,7 @@ public class Board : ScriptableObject
                 break;
             case BoardState.SHIPS:
                 gridRendered = false;
-                owner.ShipsShown(true);
+                owner.ShipsShown(true, true);
                 break;
         }
     }

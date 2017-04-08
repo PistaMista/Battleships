@@ -117,7 +117,7 @@ public class Cameraman : MonoBehaviour
     /// </summary>
     void Update()
     {
-
+        Debug.Log(transitionProgress);
         if (transitionProgress < 100f)
         {
             transitionProgress = Mathf.SmoothDamp(transitionProgress, 100f, ref progressChange, currentTargetPosition.transitionTime);
@@ -166,12 +166,15 @@ public class Cameraman : MonoBehaviour
     /// <param name="position">The position which to take.</param>
     public static void TakePosition(CameraPosition position)
     {
-        currentPosition = new CameraPosition(0f, Camera.main.transform.position, Camera.main.transform.rotation.eulerAngles);
-        position.rotation.x = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.x, position.rotation.x);
-        position.rotation.y = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.y, position.rotation.y);
-        position.rotation.z = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.z, position.rotation.z);
-        currentTargetPosition = position;
-        transitionProgress = 0f;
+        if (!PositionsEqual(position, currentTargetPosition))
+        {
+            currentPosition = new CameraPosition(0f, Camera.main.transform.position, Camera.main.transform.rotation.eulerAngles);
+            position.rotation.x = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.x, position.rotation.x);
+            position.rotation.y = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.y, position.rotation.y);
+            position.rotation.z = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.z, position.rotation.z);
+            currentTargetPosition = position;
+            transitionProgress = 0f;
+        }
     }
 
     /// <summary>
@@ -203,5 +206,13 @@ public class Cameraman : MonoBehaviour
     public static void SetOrthographic(bool enabled)
     {
         Camera.main.orthographic = enabled;
+    }
+
+    static bool PositionsEqual(CameraPosition position1, CameraPosition position2)
+    {
+        bool cond1 = position1.position == position2.position;
+        bool cond2 = position1.rotation == position2.rotation;
+        bool cond3 = position1.transitionTime == position2.transitionTime;
+        return cond1 && cond2 && cond3;
     }
 }

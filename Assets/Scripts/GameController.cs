@@ -97,6 +97,8 @@ public class GameController : MonoBehaviour
     public float defaultSeaLevel;
     //Skips showing action shots of AI vs AI attacks in main battles
     public bool defaultSkipAIvsAIActionShots;
+    //The total amount of board tiles in the game. Used to limit the length of each match.
+    public int defaultTotalBoardTileLimit;
 
     //Values accessed by code
     /// <summary>
@@ -160,12 +162,17 @@ public class GameController : MonoBehaviour
     /// Skips action shots of AI vs AI attacks in main battles.
     /// </summary>
     public static bool skipAIvsAIActionShots;
+    /// <summary>
+    /// The total amount of board tiles in the game. Used to limit the length of each match.
+    /// </summary>
+    public static int totalBoardTileLimit;
 
     /// <summary>
     /// Awake function.
     /// </summary>
     void Awake()
     {
+        totalBoardTileLimit = defaultTotalBoardTileLimit;
         playerBoardDimensions = defaultPlayerBoardDimensions;
         playerBoardElevation = defaultPlayerBoardElevation;
         playerBoardDistanceFromCenter = defaultPlayerBoardDistanceFromCenter;
@@ -205,6 +212,7 @@ public class GameController : MonoBehaviour
         Player[] players = new Player[playersToAdd.Length];
         //state = GameState.PLACING_SHIPS;
         humanPlayers = 0;
+        playerBoardDimensions = Mathf.FloorToInt(Mathf.Sqrt((float)totalBoardTileLimit / (float)players.Length));
         //For all players create their own board
         for (int i = 0; i < players.Length; i++)
         {

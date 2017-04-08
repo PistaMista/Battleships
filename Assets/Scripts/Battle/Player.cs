@@ -85,6 +85,20 @@ public class Player : MonoBehaviour
     /// Shows or hides this player's ships.
     /// </summary>
     /// <param name="enabled">Ships shown.</param>
+    public void ShipsShown(bool enabled, bool onlyLiving)
+    {
+        foreach (Ship ship in allShips)
+        {
+            if (onlyLiving && !ship.eliminated || !onlyLiving)
+            {
+                ship.gameObject.SetActive(enabled);
+            }
+        }
+    }
+    /// <summary>
+    /// Shows or hides this player's ships.
+    /// </summary>
+    /// <param name="enabled">Ships shown.</param>
     public void ShipsShown(bool enabled)
     {
         foreach (Ship ship in allShips)

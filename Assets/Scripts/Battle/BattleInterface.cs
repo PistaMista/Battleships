@@ -71,6 +71,7 @@ public class BattleInterface : MonoBehaviour
                         break;
                     case BattleState.FRIENDLY_SHIP_PREVIEW:
                         BackToOverhead();
+                        battle.switchTime = 0f;
                         break;
                     case BattleState.CHOOSING_TILE_TO_SHOOT:
                         Vector2 candidateTargetPosition = battle.defendingPlayer.board.WorldToTilePosition(InputController.currentInputPosition);
@@ -264,7 +265,7 @@ public class BattleInterface : MonoBehaviour
         {
             case BattleState.FIRING:
                 battle.ChangeState(BattleState.SHOWING_HIT_TILE, 1f);
-
+                Actionman.ActionView();
 
                 break;
             case BattleState.SHOWING_HIT_TILE:

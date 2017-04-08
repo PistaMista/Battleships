@@ -87,7 +87,7 @@ public class ShipPlacer : MonoBehaviour
     {
         if (customers != null)
         {
-            if (InputController.beginPress) //If the player presses the screen...
+            if (InputController.beginPress && selectedPositions.Count == 0) //If the player presses the screen...
             {
                 placementLock = false; //Disable placement lock
                 Vector2 pos = player.board.WorldToTilePosition(InputController.currentInputPosition);
@@ -131,6 +131,7 @@ public class ShipPlacer : MonoBehaviour
 
                     if (selectedPositions.Count == shipsToPlace[0].length) //If the amount of selected tiles is equal to the ships length...
                     {
+                        Ship lastShip = shipsToPlace[0];
                         FinishPlacingShip(); //Finish placing the ship
                         if (shipsToPlace.Count == 0) //If all ships are placed...
                         {
@@ -149,7 +150,8 @@ public class ShipPlacer : MonoBehaviour
                         }
 
                         placementLock = true; //Enable placement lock
-                        player.ShipsShown(true);
+                        //player.ShipsShown(true);
+                        lastShip.gameObject.SetActive(true);
                     }
                     else //If the amount of selected tiles is not equal to the ship's length...
                     {
@@ -250,9 +252,9 @@ public class ShipPlacer : MonoBehaviour
 
         if (selectedPositions.Count == 0) //If the player hasnt started selecting where his ship will be go through all the tiles and mark the valid ones
         {
-            for (int x = 0; x < GameController.playerBoardDimensions; x++)
+            for (int x = 0; x < player.board.dimensions; x++)
             {
-                for (int y = 0; y < GameController.playerBoardDimensions; y++)
+                for (int y = 0; y < player.board.dimensions; y++)
                 {
                     if (!validPositions.Contains(new Vector2(x, y)))
                     {
@@ -314,7 +316,7 @@ public class ShipPlacer : MonoBehaviour
         for (int i = -(shipsToPlace[0].length - 1); i <= (shipsToPlace[0].length - 1); i++) //Checks the tiles in direction for a distance of the ships length
         {
             Vector2 checkedPosition = position + direction * i; //The position currently being checked
-            if (!(checkedPosition.x < 0 || checkedPosition.y < 0 || checkedPosition.x >= GameController.playerBoardDimensions || checkedPosition.y >= GameController.playerBoardDimensions) && !player.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y].containedShip) //Checks if the tile is free
+            if (!(checkedPosition.x < 0 || checkedPosition.y < 0 || checkedPosition.x >= player.board.dimensions || checkedPosition.y >= player.board.dimensions) && !player.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y].containedShip) //Checks if the tile is free
             {
                 confirmedPositions.Add(checkedPosition); //Add the tile to the list of confirmed positions
                 if (i == 0)
