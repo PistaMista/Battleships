@@ -117,7 +117,6 @@ public class Cameraman : MonoBehaviour
     /// </summary>
     void Update()
     {
-        Debug.Log(transitionProgress);
         if (transitionProgress < 100f)
         {
             transitionProgress = Mathf.SmoothDamp(transitionProgress, 100f, ref progressChange, currentTargetPosition.transitionTime);
@@ -202,12 +201,20 @@ public class Cameraman : MonoBehaviour
     {
         Camera.main.GetComponent<Blur>().enabled = enabled;
     }
-
+    /// <summary>
+    /// Enables/Disables orthographic mode.
+    /// </summary>
+    /// <param name="enabled">Whether to enable or disable orthographic mode.</param>
     public static void SetOrthographic(bool enabled)
     {
         Camera.main.orthographic = enabled;
     }
-
+    /// <summary>
+    /// Compares two camera positions.
+    /// </summary>
+    /// <param name="position1"></param>
+    /// <param name="position2"></param>
+    /// <returns>Whether the camera positions match.</returns>
     static bool PositionsEqual(CameraPosition position1, CameraPosition position2)
     {
         bool cond1 = position1.position == position2.position;

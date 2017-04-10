@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class FleetAttackFormationBaseModule : ActionShotModule
 {
-
+    /// <summary>
+    /// Prepares the action shot.
+    /// </summary>
     public override void Prepare()
     {
         base.Prepare();
@@ -95,6 +97,9 @@ public class FleetAttackFormationBaseModule : ActionShotModule
         }
     }
 
+    /// <summary>
+    /// Refreshes the action shot.
+    /// </summary>
     public override void Refresh()
     {
         base.Refresh();

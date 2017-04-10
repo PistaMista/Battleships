@@ -4,11 +4,29 @@ using UnityEngine;
 
 public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
 {
+    /// <summary>
+    /// The ID of the gun which fired the projectile tracked by the action camera.
+    /// </summary>
     int trackedProjectileID;
+    /// <summary>
+    /// The turret the action camera will focus on.
+    /// </summary>
     Turret selectedTurret;
+    /// <summary>
+    /// The ship the action camera will focus on.
+    /// </summary>
     Ship selectedShip;
+    /// <summary>
+    /// Whether the focused turret has fired.
+    /// </summary>
     bool fired = false;
+    /// <summary>
+    /// Whether the shot will kill the targeted ship.
+    /// </summary>
     bool killingShot = false;
+    /// <summary>
+    /// Prepares the action shot.
+    /// </summary>
     public override void Prepare()
     {
         base.Prepare();
@@ -20,7 +38,7 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
             ship.PrepareToFireAt(BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition, BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].containedShip);
             foreach (Turret turret in ship.turrets)
             {
-                if (turret.canFire)
+                if (turret.canFire && !turret.ignoredByActionCamera)
                 {
                     availableTurrets.Add(turret);
                 }
@@ -52,7 +70,9 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
             }
         }
     }
-
+    /// <summary>
+    /// Refreshes the action shot.
+    /// </summary>
     public override void Refresh()
     {
         base.Refresh();
@@ -69,39 +89,62 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
         }
         else
         {
-            if (fired && stage == 1)
+            if (fired && (stage == 1 || stage == 2))
             {
-                stage = 2;
+                stage = 3;
                 Vector3 position = BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition;
                 position.y = 8f;
                 Cameraman.TakePosition(new Cameraman.CameraPosition(0.5f, position, new Vector3(90f, Camera.main.transform.eulerAngles.y, 0f)));
-
             }
         }
 
-
-        if (lifetime > 1f && stage == 0)
+        switch (stage)
         {
-            stage = 1;
-            if (!killingShot)
-            {
-                foreach (Ship ship in BattleInterface.battle.attackingPlayer.livingShips)
+            case 0:
+                if (lifetime > 1f)
                 {
-                    if (ship.length == ship.lengthRemaining)
+                    if (!killingShot)
                     {
-                        ship.Fire();
+                        stage = 1;
+                        foreach (Ship ship in attackers)
+                        {
+                            ship.Fire();
+                        }
+                    }
+                    else
+                    {
+                        stage = 2;
+                        selectedTurret.Fire(1f);
                     }
                 }
-            }
-            else
-            {
-                selectedShip.Fire();
-            }
+                break;
+            case 2:
+                if (lifetime > 2.2f && fired)
+                {
+                    foreach (Ship ship in attackers)
+                    {
+                        if (ship != selectedShip)
+                        {
+                            ship.Fire();
+                        }
+                    }
+                    stage = 1;
+                }
+                break;
+            case 3:
+                if (Cameraman.transitionProgress > 98f)
+                {
+                    Actionman.EndActionView();
+                }
+                break;
         }
 
-        if (stage == 2 && Cameraman.transitionProgress > 98f && (killingShot && lifetime > 10f || !killingShot))
-        {
-            Actionman.EndActionView();
-        }
+
+
+
+        // if (stage == 3 && Cameraman.transitionProgress > 98f && (killingShot && lifetime > 10f || !killingShot))
+        // {
+        //     Actionman.EndActionView();
+        // }
     }
 }

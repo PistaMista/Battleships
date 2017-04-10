@@ -65,6 +65,10 @@ public class Turret : MonoBehaviour
     public bool canFire;
 
     /// <summary>
+    /// Whether this turret will be ignored when choosing the turret to focus on for the action shot.
+    /// </summary>
+    public bool ignoredByActionCamera;
+    /// <summary>
     /// The start function.
     /// </summary>
     void Start()

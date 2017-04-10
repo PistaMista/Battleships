@@ -101,6 +101,7 @@ public class Sea : MonoBehaviour
     IEnumerator Cycle()
     {
         meshFilter.mesh.Clear();
+        meshFilter.mesh.MarkDynamic();
         UpdatePointElevation();
         if (!polyMode)
         {
