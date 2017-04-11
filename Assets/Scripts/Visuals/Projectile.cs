@@ -13,7 +13,16 @@ public class Projectile : MonoBehaviour
     /// <summary>
     /// The time it will take for the projectile to reach the target.
     /// </summary>
-    public float travelTime;
+    float travelTime;
+    public float TravelTime
+    {
+        get { return travelTime; }
+        set { travelTime = value; travelTimeLeft = value; }
+    }
+    /// <summary>
+    /// The time left until reaching the target.
+    /// </summary>
+    public float travelTimeLeft;
     /// <summary>
     /// The velocity of this projectile.
     /// </summary>
@@ -44,10 +53,10 @@ public class Projectile : MonoBehaviour
     /// </summary>
     protected virtual void Update()
     {
-        if (travelTime >= 0)
+        if (travelTimeLeft >= 0)
         {
-            travelTime -= Time.deltaTime;
-            if (travelTime < 0)
+            travelTimeLeft -= Time.deltaTime;
+            if (travelTimeLeft < 0)
             {
                 if (onHit != null)
                 {

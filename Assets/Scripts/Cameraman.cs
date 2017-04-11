@@ -127,6 +127,8 @@ public class Cameraman : MonoBehaviour
             transform.position = currentPosition.position;
             transform.rotation = Quaternion.Euler(currentPosition.rotation);
         }
+        Debug.Log(transitionProgress);
+        Debug.Log(currentTargetPosition.position);
     }
     /// <summary>
     /// Transfers the camera to a position of that name.
@@ -141,6 +143,9 @@ public class Cameraman : MonoBehaviour
         position.rotation.z = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.z, position.rotation.z);
         currentTargetPosition = position;
         transitionProgress = 0f;
+        progressChange = 0f;
+        //positionChange = Vector3.zero;
+        //rotationChange = Vector3.zero;
     }
     /// <summary>
     /// Transfers the camera to a position of that name. Overrides transition time.
@@ -157,6 +162,9 @@ public class Cameraman : MonoBehaviour
         position.transitionTime = transitionTimeOverride;
         currentTargetPosition = position;
         transitionProgress = 0f;
+        progressChange = 0f;
+        //positionChange = Vector3.zero;
+        //rotationChange = Vector3.zero;
     }
 
     /// <summary>
@@ -165,15 +173,16 @@ public class Cameraman : MonoBehaviour
     /// <param name="position">The position which to take.</param>
     public static void TakePosition(CameraPosition position)
     {
-        if (!PositionsEqual(position, currentTargetPosition))
-        {
-            currentPosition = new CameraPosition(0f, Camera.main.transform.position, Camera.main.transform.rotation.eulerAngles);
-            position.rotation.x = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.x, position.rotation.x);
-            position.rotation.y = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.y, position.rotation.y);
-            position.rotation.z = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.z, position.rotation.z);
-            currentTargetPosition = position;
-            transitionProgress = 0f;
-        }
+
+        currentPosition = new CameraPosition(0f, Camera.main.transform.position, Camera.main.transform.rotation.eulerAngles);
+        position.rotation.x = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.x, position.rotation.x);
+        position.rotation.y = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.y, position.rotation.y);
+        position.rotation.z = GetTargetRotationComponentForShortestPath(Camera.main.transform.rotation.z, position.rotation.z);
+        currentTargetPosition = position;
+        transitionProgress = 0f;
+        progressChange = 0f;
+        //positionChange = Vector3.zero;
+        //rotationChange = Vector3.zero;
     }
 
     /// <summary>

@@ -16,7 +16,7 @@ public class Shell : Projectile
         base.Update();
         velocity += Vector3.down * GameController.gravity * Time.deltaTime;
         transform.position += velocity * Time.deltaTime;
-        if (travelTime < 0f)
+        if (travelTimeLeft < 0f)
         {
             Destroy(gameObject);
         }
