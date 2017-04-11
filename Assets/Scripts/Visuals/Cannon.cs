@@ -106,7 +106,7 @@ public class Cannon : Weapon
         shell.transform.parent = turret.ship.owner.battle.transform;
         shell.transform.position = transform.position + direction * barrel.transform.localScale.z;
         shell.travelTime = GetTimeToTarget(turret.distanceToTarget);
-        shell.type = ProjectileType.SHELL;
+        shell.type = AttackType.SHELL;
         shell.weapon = this;
         return shell;
     }

@@ -5,7 +5,32 @@ public enum BattleState { CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_
 
 public class Battle : MonoBehaviour
 {
-
+    /// <summary>
+    /// Holds the information about the most recent attack.
+    /// </summary>
+    public struct RecentAttackInformation
+    {
+        /// <summary>
+        /// The position which was attacked.
+        /// </summary>
+        public Vector2 tilePosition;
+        /// <summary>
+        /// The weapon used for the attack.
+        /// </summary>
+        public AttackType type;
+        /// <summary>
+        /// Whether the hit ship was sunk by this attack.
+        /// </summary>
+        public bool shipSunk;
+        /// <summary>
+        /// The ship which was hit.
+        /// </summary>
+        public Ship hitShip;
+        /// <summary>
+        /// The world position of the attacked tile.
+        /// </summary>
+        public Vector3 attackedTileWorldPosition;
+    }
     /// <summary>
     /// Whether the battle is in progress.
     /// </summary>
@@ -81,9 +106,9 @@ public class Battle : MonoBehaviour
     /// </summary>
     public OnFire onFire;
     /// <summary>
-    /// The tile which was targeted in this frame.
+    /// Stores information about the most recent attack.
     /// </summary>
-    public Vector2 recentlyShot;
+    public RecentAttackInformation recentAttackInfo;
 
 
     /// <summary>
@@ -266,7 +291,9 @@ public class Battle : MonoBehaviour
             {
                 if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
                 {
-                    recentlyShot = tile;
+                    recentAttackInfo.tilePosition = tile;
+                    recentAttackInfo.attackedTileWorldPosition = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition;
+                    recentAttackInfo.type = AttackType.SHELL;
 
                     targetState = BattleState.TURN_FINISHED;
                     switchTime = 0.5f;
@@ -278,20 +305,23 @@ public class Battle : MonoBehaviour
                         if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.eliminated)
                         {
                             attackingPlayer.hits[defendingPlayer.ID].Add(tile);
-
+                            recentAttackInfo.hitShip = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip;
                             if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit)
                             {
                                 defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.RegisterHit();
+                                //recentAttackInfo.shipSunk = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.eliminated;
                             }
                         }
                         else
                         {
                             attackingPlayer.misses[defendingPlayer.ID].Add(tile);
+                            recentAttackInfo.hitShip = null;
                         }
                     }
                     else
                     {
                         attackingPlayer.misses[defendingPlayer.ID].Add(tile);
+                        recentAttackInfo.hitShip = null;
                     }
 
                     defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit = true;

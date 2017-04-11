@@ -272,7 +272,7 @@ public class BattleInterface : MonoBehaviour
                 battle.ChangeState(BattleState.TURN_FINISHED, 1f);
                 ViewPlayer(battle.defendingPlayer);
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
-                recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)battle.recentlyShot.x, (int)battle.recentlyShot.y].worldPosition + Vector3.up * 3f;
+                recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.attackedTileWorldPosition + Vector3.up * 3f;
 
 
                 break;

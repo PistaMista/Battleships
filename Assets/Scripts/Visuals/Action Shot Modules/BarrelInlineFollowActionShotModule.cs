@@ -35,7 +35,8 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
 
         foreach (Ship ship in attackers)
         {
-            ship.PrepareToFireAt(BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition, BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].containedShip);
+            //ship.PrepareToFireAt(BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition, BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].containedShip);
+            ship.PrepareToFireAt(BattleInterface.battle.recentAttackInfo.attackedTileWorldPosition, BattleInterface.battle.recentAttackInfo.hitShip);
             foreach (Turret turret in ship.turrets)
             {
                 if (turret.canFire && !turret.ignoredByActionCamera)
@@ -61,12 +62,12 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
             }
         }
 
-        if (selectedShip.targetedShip != null)
+        if (BattleInterface.battle.recentAttackInfo.hitShip != null)
         {
-            if (selectedShip.targetedShip.eliminated)
+            if (BattleInterface.battle.recentAttackInfo.hitShip.eliminated)
             {
                 killingShot = true;
-                selectedShip.targetedShip.gameObject.SetActive(true);
+                BattleInterface.battle.recentAttackInfo.hitShip.gameObject.SetActive(true);
             }
         }
     }
@@ -92,7 +93,8 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
             if (fired && (stage == 1 || stage == 2))
             {
                 stage = 3;
-                Vector3 position = BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition;
+                //Vector3 position = BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition;
+                Vector3 position = BattleInterface.battle.recentAttackInfo.attackedTileWorldPosition;
                 position.y = 8f;
                 Cameraman.TakePosition(new Cameraman.CameraPosition(0.5f, position, new Vector3(90f, Camera.main.transform.eulerAngles.y, 0f)));
             }

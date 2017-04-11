@@ -21,7 +21,7 @@ public class Projectile : MonoBehaviour
     /// <summary>
     /// The type of the projectile.
     /// </summary>
-    public ProjectileType type;
+    public AttackType type;
     /// <summary>
     /// Executed when the projectile hits the target.
     /// </summary>

@@ -61,7 +61,7 @@ public class Ship : MonoBehaviour
     /// <summary>
     /// The type of incoming projectile. Deprecated.
     /// </summary>
-    ProjectileType incomingProjectileDamageType;
+    AttackType incomingProjectileDamageType;
 
     /// <summary>
     /// The world position of this ship's place on the playing board.
@@ -230,7 +230,7 @@ public class Ship : MonoBehaviour
     {
         switch (projectile.type)
         {
-            case ProjectileType.SHELL:
+            case AttackType.SHELL:
                 if (eliminated && sinkTimeLeft > sinkTime)
                 {
                     BeginSinking();
