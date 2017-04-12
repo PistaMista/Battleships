@@ -127,8 +127,8 @@ public class Cameraman : MonoBehaviour
             transform.position = currentPosition.position;
             transform.rotation = Quaternion.Euler(currentPosition.rotation);
         }
-        Debug.Log(transitionProgress);
-        Debug.Log(currentTargetPosition.position);
+        //Debug.Log(transitionProgress);
+        //Debug.Log(currentTargetPosition.position);
     }
     /// <summary>
     /// Transfers the camera to a position of that name.
