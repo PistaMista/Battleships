@@ -23,6 +23,10 @@ public class Cannon : Weapon
     /// The speed at which the recoil recovers.
     /// </summary>
     float recoverySpeed = 0.3f;
+    /// <summary>
+    /// The effect used to show the muzzle flash of the cannon.
+    /// </summary>
+    public GameObject muzzleFlashEffect;
 
     /// <summary>
     /// The start function.
@@ -63,6 +67,12 @@ public class Cannon : Weapon
         {
             turret.ship.targetedShip.IncomingProjectile(shell);
         }
+
+        if (muzzleFlashEffect != null)
+        {
+            muzzleFlashEffect.GetComponent<ParticleSystem>().Play();
+        }
+
         return shell;
     }
     /// <summary>

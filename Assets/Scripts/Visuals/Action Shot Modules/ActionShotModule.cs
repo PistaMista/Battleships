@@ -46,11 +46,6 @@ public class ActionShotModule : ScriptableObject
             player.SetMacroMarker(-1);
         }
 
-        if ((GameController.humanPlayers == 1 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
-        {
-            BattleInterface.battle.defendingPlayer.board.Set(BoardState.SHIPS);
-        }
-
         if (!BattleInterface.battle.attackingPlayer.AI || (GameController.humanPlayers < 2 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
         {
             BattleInterface.battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);

@@ -164,7 +164,7 @@ public class Ship : MonoBehaviour
             if (turret.canFire)
             {
                 turret.Fire(currentDelay);
-                currentDelay += turretFiringDelay;
+                currentDelay += turretFiringDelay * Random.Range(0.75f, 1.25f);
             }
         }
     }

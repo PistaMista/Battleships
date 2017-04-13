@@ -202,6 +202,7 @@ public class Board : ScriptableObject
         {
             case BoardState.DISABLED:
                 gridRendered = false;
+                owner.ShipsShown(false);
                 break;
             case BoardState.GRID_ONLY:
                 DrawGrid(dimensions, GameController.playerBoardGridMaterial);
