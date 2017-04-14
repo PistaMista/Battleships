@@ -26,6 +26,19 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
 
         List<Turret> availableTurrets = new List<Turret>();
 
+        if (BattleInterface.battle.recentAttackInfo.hitShip != null)
+        {
+            if (BattleInterface.battle.recentAttackInfo.hitShip.eliminated)
+            {
+                killingShot = true;
+            }
+
+            if ((GameController.humanPlayers == 1 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0 || killingShot)
+            {
+                BattleInterface.battle.recentAttackInfo.hitShip.gameObject.SetActive(true);
+            }
+        }
+
         foreach (Ship ship in attackers)
         {
             //ship.PrepareToFireAt(BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition, BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].containedShip);
@@ -44,7 +57,7 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
         {
             selectedTurret = availableTurrets[Random.Range(0, availableTurrets.Count)];
             selectedShip = selectedTurret.ship;
-            if (selectedShip != null)
+            if (selectedShip != null && !killingShot)
             {
                 Vector3 direction = selectedTurret.gunDirection;
                 float xzDistance = Vector2.Distance(Vector2.zero, new Vector2(direction.x, direction.z));
@@ -57,18 +70,7 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
 
 
 
-        if (BattleInterface.battle.recentAttackInfo.hitShip != null)
-        {
-            if (BattleInterface.battle.recentAttackInfo.hitShip.eliminated)
-            {
-                killingShot = true;
-            }
 
-            if ((GameController.humanPlayers == 1 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0 || killingShot)
-            {
-                BattleInterface.battle.recentAttackInfo.hitShip.gameObject.SetActive(true);
-            }
-        }
 
         if (attackers.Count == 0)
         {

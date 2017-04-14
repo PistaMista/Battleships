@@ -70,7 +70,7 @@ public class Board : ScriptableObject
                 marker.transform.position = worldPosition;
                 marker.transform.parent = parent;
                 marker.transform.localScale = new Vector3(0.9f, 0.1f, 0.9f);
-
+                marker.layer = 5;
                 color.a = 0.6f;
                 Renderer renderer = marker.GetComponent<Renderer>();
                 renderer.material = GameController.playerBoardMarkerMaterial;
@@ -144,6 +144,7 @@ public class Board : ScriptableObject
     void DrawGrid(int dimensions, Material gridMaterial)
     {
         grid = new GameObject("RenderGrid");
+        grid.layer = 5;
 
         for (int x = 1; x < dimensions; x++)
         {
@@ -164,6 +165,7 @@ public class Board : ScriptableObject
             tmp.GetComponent<Renderer>().material = material;
             tmp.transform.localScale = new Vector3(0.1f, 0.1f, (float)dimensions);
             tmp.transform.parent = grid.transform;
+            tmp.layer = 5;
         }
 
         for (int y = 1; y < dimensions; y++)
@@ -185,6 +187,7 @@ public class Board : ScriptableObject
             tmp.GetComponent<Renderer>().material = material;
             tmp.transform.localScale = new Vector3((float)dimensions, 0.1f, 0.1f);
             tmp.transform.parent = grid.transform;
+            tmp.layer = 5;
         }
 
         grid.transform.position = position;

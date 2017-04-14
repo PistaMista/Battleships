@@ -24,11 +24,14 @@ public class Actionman : MonoBehaviour
     /// </summary>
     public static void ActionView()
     {
-        int randomModuleID = Random.Range(1, 2);
+        int randomModuleID = Random.Range(1, 3);
         switch (randomModuleID)
         {
             case 1:
                 currentActionShot = (BarrelInlineFollowActionShotModule)ScriptableObject.CreateInstance("BarrelInlineFollowActionShotModule");
+                break;
+            case 2:
+                currentActionShot = (AerialViewActionShotModule)ScriptableObject.CreateInstance("AerialViewActionShotModule");
                 break;
         }
 
