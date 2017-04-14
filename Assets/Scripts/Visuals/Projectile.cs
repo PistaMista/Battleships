@@ -53,10 +53,10 @@ public class Projectile : MonoBehaviour
     /// </summary>
     protected virtual void Update()
     {
-        if (travelTimeLeft >= 0)
+        if (travelTimeLeft > 0)
         {
             travelTimeLeft -= Time.deltaTime;
-            if (travelTimeLeft < 0)
+            if (travelTimeLeft <= 0)
             {
                 if (onHit != null)
                 {
