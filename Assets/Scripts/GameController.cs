@@ -1,13 +1,47 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// All the possible game states.
+/// </summary>
 public enum GameState
 {
+    /// <summary>
+    /// The starting state.
+    /// </summary>
     NONE,
+    /// <summary>
+    /// The title screen state.
+    /// </summary>
     TITLE,
+    /// <summary>
+    /// Ships are being placed.
+    /// </summary>
     PLACING_SHIPS,
+    /// <summary>
+    /// Main battle competitors are being selected.
+    /// </summary>
     PLAYER_SELECTION,
+    /// <summary>
+    /// The battle is in progress.
+    /// </summary>
     BATTLING
+}
+
+/// <summary>
+/// All the possible damage types.
+/// </summary>
+public enum AttackType
+{
+    /// <summary>
+    /// Artillery shell damage.
+    /// </summary>
+    SHELL,
+    /// <summary>
+    /// Torpedo damage.
+    /// </summary>
+    TORPEDO
 }
 
 public class GameController : MonoBehaviour
@@ -51,35 +85,122 @@ public class GameController : MonoBehaviour
     public GameObject[] defaultPlayerOverheadStatusMarkers;
     //Sets all switch times in battles to zero - TESTING FEATURE
     public bool nullifyBattleSwitchTimes;
+    //The default acceleration due to gravity
+    public float defaultGravity;
+    //The prefab for cannon shells
+    public GameObject defaultCannonShell;
+    //The effect used for ship explosions
+    public GameObject defaultShipExplosion;
+    //The effect used for ship fires
+    public GameObject defaultShipFire;
+    //The sea level
+    public float defaultSeaLevel;
+    //Skips showing action shots of AI vs AI attacks in main battles
+    public bool defaultSkipAIvsAIActionShots;
+    //The effect used for water splashes.
+    public GameObject defaultWaterSplashEffect;
+    //The total amount of board tiles in the game. Used to limit the length of each match.
+    public int defaultTotalBoardTileLimit;
 
     //Values accessed by code
+    /// <summary>
+    /// The dimensions of playing boards.
+    /// </summary>
     public static int playerBoardDimensions;
+    /// <summary>
+    /// The y position of each playing board.
+    /// </summary>
     public static float playerBoardElevation;
+    /// <summary>
+    /// The distance of each playing board from the center of the map.
+    /// </summary>
     public static float playerBoardDistanceFromCenter;
+    /// <summary>
+    /// The material used for rendering playing board grids.
+    /// </summary>
     public static Material playerBoardGridMaterial;
+    /// <summary>
+    /// The material used for marking tiles on playing boards.
+    /// </summary>
     public static Material playerBoardMarkerMaterial;
+    /// <summary>
+    /// A set of prefabs used to display player status in overhead view.
+    /// </summary>
     public static GameObject[] playerOverheadStatusMarkers;
-    //The battle the game will focus on
+    /// <summary>
+    /// The main battle of the game.
+    /// </summary>
     public static Battle mainBattle;
-    //The secondary battles
+    /// <summary>
+    /// The secondary battles currently going on.
+    /// </summary>
     public static List<Battle> secondaryBattles;
-    //Is there only one human player?
-    public static bool singleplayer = false;
+    /// <summary>
+    /// The number of human players participating in the game.
+    /// </summary>
+    public static int humanPlayers;
     public static bool switchTimesNill = false;
+    /// <summary>
+    /// The acceleration due to gravity.
+    /// </summary>
+    public static float gravity;
+    /// <summary>
+    /// The prefab for cannon shells.
+    /// </summary>
+    public static GameObject cannonShell;
+    /// <summary>
+    /// The prefab for ship explosions.
+    /// </summary>
+    public static GameObject shipExplosion;
+    /// <summary>
+    /// The prefab for ship fires.
+    /// </summary>
+    public static GameObject shipFire;
+    /// <summary>
+    /// The sea level height.
+    /// </summary>
+    public static float seaLevel;
+    /// <summary>
+    /// Skips action shots of AI vs AI attacks in main battles.
+    /// </summary>
+    public static bool skipAIvsAIActionShots;
+    /// <summary>
+    /// The prefab for water splashes.
+    /// </summary>
+    public static GameObject waterSplashEffect;
+    /// <summary>
+    /// The total amount of board tiles in the game. Used to limit the length of each match.
+    /// </summary>
+    public static int totalBoardTileLimit;
 
+    /// <summary>
+    /// Awake function.
+    /// </summary>
     void Awake()
     {
+        totalBoardTileLimit = defaultTotalBoardTileLimit;
         playerBoardDimensions = defaultPlayerBoardDimensions;
         playerBoardElevation = defaultPlayerBoardElevation;
         playerBoardDistanceFromCenter = defaultPlayerBoardDistanceFromCenter;
         playerBoardGridMaterial = defaultPlayerBoardGridMaterial;
         playerBoardMarkerMaterial = defaultPlayerBoardMarkerMaterial;
         playerOverheadStatusMarkers = defaultPlayerOverheadStatusMarkers;
+        gravity = defaultGravity;
+        cannonShell = defaultCannonShell;
+        shipExplosion = defaultShipExplosion;
+        shipFire = defaultShipFire;
+        seaLevel = defaultSeaLevel;
+        waterSplashEffect = defaultWaterSplashEffect;
+        skipAIvsAIActionShots = defaultSkipAIvsAIActionShots;
+
         switchTimesNill = nullifyBattleSwitchTimes;
         secondaryBattles = new List<Battle>();
     }
 
     // Update is called once per frame
+    /// <summary>
+    /// Update function.
+    /// </summary>
     void Update()
     {
         if (state == GameState.TITLE && InputController.beginPress)
@@ -88,11 +209,17 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Begins a new battle.
+    /// </summary>
+    /// <param name="playersToAdd">The player initializers of players to participate in the battle.</param>
+    /// <param name="focus">Whether this battle is the main battle of the game.</param>
     public static void NewBattle(PlayerInitializer[] playersToAdd, bool focus)
     {
         Player[] players = new Player[playersToAdd.Length];
         //state = GameState.PLACING_SHIPS;
-        int humanPlayers = 0;
+        humanPlayers = 0;
+        playerBoardDimensions = Mathf.FloorToInt(Mathf.Sqrt((float)totalBoardTileLimit / (float)players.Length));
         //For all players create their own board
         for (int i = 0; i < players.Length; i++)
         {
@@ -134,7 +261,6 @@ public class GameController : MonoBehaviour
                 secondaryBattle.End();
             }
 
-            singleplayer = humanPlayers <= 1;
             secondaryBattles = new List<Battle>();
         }
         else
@@ -145,6 +271,10 @@ public class GameController : MonoBehaviour
         battle.Initialize(players);
     }
 
+    /// <summary>
+    /// Changes the state of the game.
+    /// </summary>
+    /// <param name="state">The game state to change to.</param>
     public static void ChangeState(GameState state)
     {
         switch (GameController.state)
@@ -165,7 +295,7 @@ public class GameController : MonoBehaviour
 
                 }
 
-                Cameraman.TakePosition("Overhead View");
+                Cameraman.TakePosition("Overhead Title View");
                 Interface.SwitchMenu("Title Screen");
 
                 NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true) }, false);
@@ -182,6 +312,9 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Accessed by gui elements to return back to the title screen.
+    /// </summary>    
     public void BackToTitle()
     {
         GameController.ChangeState(GameState.TITLE);

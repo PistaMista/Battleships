@@ -6,32 +6,59 @@ public class InputController : MonoBehaviour
 {
 
     //The y layer at which to process input
+    /// <summary>
+    /// The y layer at which to process input.
+    /// </summary>
     public static float referenceY;
 
-    //The current input position
+    /// <summary>
+    /// The current input world position.
+    /// </summary>
     public static Vector3 currentInputPosition;
-    //The current input position (in screen space)
+    /// <summary>
+    /// The current input screen position.
+    /// </summary>
     public static Vector3 currentScreenInputPosition;
-    //Last input position
+    /// <summary>
+    /// Last input world position.
+    /// </summary>
     public static Vector3 lastInputPosition;
-    //Did the screen begin to get pressed in this frame?
+    /// <summary>
+    /// Whether the screen began to get pressed this frame.
+    /// </summary>
     public static bool beginPress = false;
-    //Did the screen get released in this frame?
+    /// <summary>
+    /// Whether the screen ended getting pressed this frame.
+    /// </summary>
     public static bool endPress = false;
-    //Did the player release the screen without initiating a drag?
+    /// <summary>
+    /// Whether the player released the screen without dragging.
+    /// </summary>
     public static bool tap = false;
-    //Is the player dragging on the screen?
+    /// <summary>
+    /// Whether the player is dragging.
+    /// </summary>
     public static bool dragging = false;
-    //The initial input position
+    /// <summary>
+    /// The initial input world position.
+    /// </summary>
     public static Vector3 initialInputPosition;
-    //Is the screen pressed
+    /// <summary>
+    /// Whether the screen is pressed.
+    /// </summary>
     public static bool pressed = false;
-    //The distance between the initial and current inputPositions
+    /// <summary>
+    /// The distance between initial and current world input positions.
+    /// </summary>
     public static float deviation = 0f;
-    //The distance the player needs to drag in order to register dragging
+    /// <summary>
+    /// The distance the player needs to drag in order to register dragging.
+    /// </summary>
     public float dragRegisterDistance = 0.3f;
 
-    // Update is called once per frame
+    /// <summary>
+    /// The update function.
+    /// </summary>
     void Update()
     {
         if (Application.isMobilePlatform)
@@ -48,7 +75,9 @@ public class InputController : MonoBehaviour
         lastInputPosition = currentInputPosition;
     }
 
-    //Methods unique to pc
+    /// <summary>
+    /// Methods used to calculate input for PC.
+    /// </summary>
     void PCInput()
     {
         float clippingDistance = Camera.main.transform.position.y - referenceY;
@@ -58,8 +87,11 @@ public class InputController : MonoBehaviour
         pressed = Input.GetMouseButton(0);
     }
 
-    //Methods unique to mobile
+
     bool lastState;
+    /// <summary>
+    /// Methods used to calculate input for mobile.
+    /// </summary>
     void MobileInput()
     {
         float clippingDistance = Camera.main.transform.position.y - referenceY;
@@ -80,7 +112,9 @@ public class InputController : MonoBehaviour
         lastState = pressed;
     }
 
-    //Shared methods
+    /// <summary>
+    /// The methods used to calculate input for PC and mobile.
+    /// </summary>
     void Shared()
     {
         if (beginPress)

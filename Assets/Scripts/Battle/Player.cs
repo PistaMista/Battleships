@@ -6,33 +6,65 @@ public class Player : MonoBehaviour
 {
 
     // Use this for initialization
-    //The ID number of this player
+    /// <summary>
+    /// The ID number of this player.
+    /// </summary>
     public int ID;
-    //Is the player still alive?
+    /// <summary>
+    /// Whether this player is alive.
+    /// </summary>    
     public bool alive = true;
-    //The color of this Player
+    /// <summary>
+    /// The color of this player.
+    /// </summary>
     public Color color;
-    //This player's ship board
+    /// <summary>
+    /// This player's board.
+    /// </summary>
     public Board board;
-    //The places on enemy boards this player has hit
+    /// <summary>
+    /// The positions of tiles on enemy boards this player has hit.
+    /// </summary>
     public Dictionary<int, List<Vector2>> hits;
-    //The places on enemy boards this player has missed
+    /// <summary>
+    /// The positions of tiles on enemy boards this player has missed.
+    /// </summary>
     public Dictionary<int, List<Vector2>> misses;
-    //Is this player controlled by AI?
+    /// <summary>
+    /// Whether this player is controlled by AI.
+    /// </summary>
     public bool AI = false;
-    //The macro marker of this player (markers shown in the overhead view such as if the player is on the turn/dead)
+    /// <summary>
+    /// The marker used to mark this player's status in battle overhead view. 
+    /// </summary>
     public GameObject macroMarker;
-    //The ships owned by this player
-    public List<Ship> ships;
+    /// <summary>
+    /// All ships owned by this player.
+    /// </summary>
+    public List<Ship> allShips;
+    /// <summary>
+    /// Ships owned by this player which are still intact.
+    /// </summary>
+    public List<Ship> livingShips;
+    /// <summary>
+    /// The battle this player is taking part in.
+    /// </summary>
+    public Battle battle;
 
+    /// <summary>
+    /// The awake function.
+    /// </summary>    
     void Awake()
     {
         hits = new Dictionary<int, List<Vector2>>();
         misses = new Dictionary<int, List<Vector2>>();
-        ships = new List<Ship>();
+        allShips = new List<Ship>();
+        livingShips = new List<Ship>();
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// The update function.
+    /// </summary>
     void Update()
     {
         //TEST
@@ -49,14 +81,35 @@ public class Player : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows or hides this player's ships.
+    /// </summary>
+    /// <param name="enabled">Ships shown.</param>
+    public void ShipsShown(bool enabled, bool onlyLiving)
+    {
+        foreach (Ship ship in allShips)
+        {
+            if (onlyLiving && !ship.eliminated || !onlyLiving)
+            {
+                ship.gameObject.SetActive(enabled);
+            }
+        }
+    }
+    /// <summary>
+    /// Shows or hides this player's ships.
+    /// </summary>
+    /// <param name="enabled">Ships shown.</param>
     public void ShipsShown(bool enabled)
     {
-        foreach (Ship ship in ships)
+        foreach (Ship ship in allShips)
         {
             ship.gameObject.SetActive(enabled);
         }
     }
-
+    /// <summary>
+    /// Sets this player's macro marker.
+    /// </summary>
+    /// <param name="markerID">The ID of the marker to use - more info in GameController.</param>
     public void SetMacroMarker(int markerID)
     {
         Destroy(macroMarker);
@@ -72,7 +125,9 @@ public class Player : MonoBehaviour
             macroMarker.transform.localScale = new Vector3(board.dimensions, 1f, board.dimensions);
         }
     }
-
+    /// <summary>
+    /// Updates the marker.
+    /// </summary>
     public void UpdateSpecialMarkerBehaviour()
     {
         switch (macroMarker.name)
@@ -82,14 +137,31 @@ public class Player : MonoBehaviour
                 break;
         }
     }
-
+    /// <summary>
+    /// Registers that the specified ship of the player's fleet has been destroyed.
+    /// </summary>
+    /// <param name="ship">The subject ship.</param>
     public void ShipSunk(Ship ship)
     {
-        ships.Remove(ship);
+        livingShips.Remove(ship);
 
-        if (ships.Count == 0)
+        if (livingShips.Count == 0)
         {
             alive = false;
+            if (!AI)
+            {
+                GameController.humanPlayers--;
+            }
         }
+    }
+    /// <summary>
+    /// Assigns a ship to the player's fleet.
+    /// </summary>
+    /// <param name="ship">The ship to assign.</param>
+    public void AssignShip(Ship ship)
+    {
+        allShips.Add(ship);
+        livingShips.Add(ship);
+        ship.owner = this;
     }
 }

@@ -6,24 +6,59 @@ using UnityEngine.UI;
 public class PlayerSelector : MonoBehaviour
 {
     //The colors of players which will be available
+    /// <summary>
+    /// The available player colors.
+    /// </summary>
     public Color[] defaultAvailablePlayerColors;
+    /// <summary>
+    /// The selection screen.
+    /// </summary>
     public Canvas defaultSelectionScreen;
+    /// <summary>
+    /// The selection screen.
+    /// </summary>
     static Canvas selectionScreen;
+    /// <summary>
+    /// The available player colors.
+    /// </summary>
     static Color[] availablePlayerColors;
 
-    //The sprite used for human players
+    /// <summary>
+    /// The sprite used for human players.
+    /// </summary>
     public Sprite defaultHumanPlayerIcon;
+    /// <summary>
+    /// The sprite used for human players.
+    /// </summary>
     static Sprite humanPlayerIcon;
-    //The sprite used for AI players
+    /// <summary>
+    /// The sprite used for AI players.
+    /// </summary>
     public Sprite defaultAIPlayerIcon;
+    /// <summary>
+    /// The sprite used for AI players.
+    /// </summary>
     static Sprite AIPlayerIcon;
-    //What players will compete in the battle
+    /// <summary>
+    /// The players set to compete in the new battle.
+    /// </summary>
     static Dictionary<Color, bool> selectedPlayers;
+    /// <summary>
+    /// The anchors.
+    /// </summary>
     static Image[] anchors;
-
+    /// <summary>
+    /// Top anchors.
+    /// </summary>
     static List<Image> topAnchors;
+    /// <summary>
+    /// Center anchors.
+    /// </summary>
     static List<Image> centerAnchors;
 
+    /// <summary>
+    /// Awake function.
+    /// </summary>
     void Awake()
     {
         availablePlayerColors = defaultAvailablePlayerColors;
@@ -35,9 +70,13 @@ public class PlayerSelector : MonoBehaviour
         //UpdateGraphics();
     }
 
-    // Update is called once per frame
-
+    /// <summary>
+    /// The currently dragged anchor.
+    /// </summary>
     Image currentlyDragged;
+    /// <summary>
+    /// The update function.
+    /// </summary>
     void Update()
     {
         if (InputController.beginPress)
@@ -68,9 +107,12 @@ public class PlayerSelector : MonoBehaviour
                 }
                 else
                 {
-                    topAnchors.Add(currentlyDragged);
-                    centerAnchors.Remove(currentlyDragged);
-                    selectedPlayers.Remove(currentlyDragged.color);
+                    if (!topAnchors.Contains(currentlyDragged))
+                    {
+                        topAnchors.Add(currentlyDragged);
+                        centerAnchors.Remove(currentlyDragged);
+                        selectedPlayers.Remove(currentlyDragged.color);
+                    }
                 }
             }
 
@@ -86,6 +128,9 @@ public class PlayerSelector : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Selection done.
+    /// </summary>
     public void Done()
     {
 
@@ -93,12 +138,11 @@ public class PlayerSelector : MonoBehaviour
         {
             //GameController.NewBattle(selectedPlayers.ToArray(), true);
             GameController.PlayerInitializer[] initializers = new GameController.PlayerInitializer[selectedPlayers.Count];
-            List<Color> playerColors = new List<Color>(selectedPlayers.Keys);
-            List<bool> aiPlayers = new List<bool>(selectedPlayers.Values);
 
-            for (int i = 0; i < initializers.Length; i++)
+            for (int i = 0; i < centerAnchors.Count; i++)
             {
-                initializers[i] = new GameController.PlayerInitializer(playerColors[i], aiPlayers[i]);
+
+                initializers[i] = new GameController.PlayerInitializer(centerAnchors[i].color, selectedPlayers[centerAnchors[i].color]);
             }
 
             GameController.NewBattle(initializers, true);
@@ -106,7 +150,9 @@ public class PlayerSelector : MonoBehaviour
             Reset();
         }
     }
-
+    /// <summary>
+    /// Resets the selection screen.
+    /// </summary>
     public static void Reset()
     {
         if (anchors != null)
@@ -141,7 +187,9 @@ public class PlayerSelector : MonoBehaviour
 
         UpdateGraphics();
     }
-
+    /// <summary>
+    /// Updates the selection screen.
+    /// </summary>
     static void UpdateGraphics()
     {
 
@@ -189,7 +237,11 @@ public class PlayerSelector : MonoBehaviour
             }
         }
     }
-
+    /// <summary>
+    /// Gets the anchor at position.
+    /// </summary>
+    /// <param name="position">The screen position to check.</param>
+    /// <returns>The anchor at position.</returns>
     static Image GetAnchorAtPosition(Vector2 position)
     {
         foreach (Image anchor in anchors)

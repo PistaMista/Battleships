@@ -4,21 +4,38 @@ using UnityEngine;
 
 public class BattleInterface : MonoBehaviour
 {
+    /// <summary>
+    /// The marker to show what tile is being shot.
+    /// </summary>
     public GameObject defaultRecentlyShotTileMarker;
+    /// <summary>
+    /// The marker to show what tile is being shot.
+    /// </summary>
     static GameObject recentlyShotTileMarker;
+    /// <summary>
+    /// The speed at which the marker lands on tile being shot.
+    /// </summary>
     static float markerDescentSpeed;
-    //The battle currently managed by the interface 
-    static Battle battle;
-    //The indicator used to show tiles currently being fired at
+    /// <summary>
+    /// The battle the interface is attached to.
+    /// </summary>
+    public static Battle battle;
+    /// <summary>
+    /// The instance of the marker to show the tile being shot.
+    /// </summary>
     static GameObject recentlyShotTileIndicator;
-    //The tile which was most recently shot
-    static Vector2 recentlyShot;
 
+    /// <summary>
+    /// The awake function.
+    /// </summary>
     void Awake()
     {
         recentlyShotTileMarker = defaultRecentlyShotTileMarker;
     }
 
+    /// <summary>
+    /// The update function.
+    /// </summary>    
     void Update()
     {
         if (battle)
@@ -54,17 +71,14 @@ public class BattleInterface : MonoBehaviour
                         break;
                     case BattleState.FRIENDLY_SHIP_PREVIEW:
                         BackToOverhead();
+                        battle.switchTime = 0f;
                         break;
                     case BattleState.CHOOSING_TILE_TO_SHOOT:
                         Vector2 candidateTargetPosition = battle.defendingPlayer.board.WorldToTilePosition(InputController.currentInputPosition);
-                        recentlyShot = candidateTargetPosition;
 
-                        bool shotSuccessful = battle.ShootAtTile(candidateTargetPosition);
 
-                        if (shotSuccessful)
-                        {
-                            battle.defendingPlayer.board.ShowToEnemy(battle.attackingPlayer);
-                        }
+                        battle.HitTile(candidateTargetPosition);
+
 
                         break;
                 }
@@ -74,15 +88,16 @@ public class BattleInterface : MonoBehaviour
                 AIPlayerActions();
             }
 
-            if (battle.state == BattleState.FIRING)
+            if (battle.state == BattleState.SHOWING_HIT_TILE)
             {
-                recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
+                recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation + 0.1f, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
             }
         }
-
-
     }
 
+    /// <summary>
+    /// Manages the actions for AI players.
+    /// </summary>    
     static void AIPlayerActions()
     {
         if (battle.switchTime <= -0.1f)
@@ -98,35 +113,31 @@ public class BattleInterface : MonoBehaviour
 
                     if (battle.SelectTarget(battle.players[randomTargetID]))
                     {
-                        battle.ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1.8f);
+                        if (GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI && GameController.humanPlayers > 0)
+                        {
+                            Debug.Log(battle.HitTile(battle.ChooseTileToAttackForAIPlayer()));
+                        }
+                        else
+                        {
+                            battle.ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1.8f);
+                        }
 
                         ViewPlayer(battle.defendingPlayer);
                     }
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     Vector2 positionToShoot = battle.ChooseTileToAttackForAIPlayer();
-                    recentlyShot = positionToShoot;
-                    while (!battle.ShootAtTile(positionToShoot))
-                    {
-                        positionToShoot = battle.ChooseTileToAttackForAIPlayer();
-                        recentlyShot = positionToShoot;
-                    }
 
-
-
-                    if (GameController.singleplayer && !battle.defendingPlayer.AI)
-                    {
-                        battle.defendingPlayer.board.ShowToFriendly();
-                    }
-                    else
-                    {
-                        battle.defendingPlayer.board.ShowToEnemy(battle.attackingPlayer);
-                    }
+                    battle.HitTile(positionToShoot);
                     break;
             }
         }
     }
 
+    /// <summary>
+    /// Attaches a battle to the interface.
+    /// </summary>
+    /// <param name="battle">The battle to attach.</param>
     public static void Attach(Battle battle)
     {
         BattleInterface.battle = battle;
@@ -136,17 +147,19 @@ public class BattleInterface : MonoBehaviour
         SetUpOverhead();
     }
 
+    /// <summary>
+    /// Dettaches the current battle from the interface.
+    /// </summary>
     public static void Dettach()
     {
         battle = null;
         Destroy(recentlyShotTileIndicator);
     }
 
-    public static void Disable()
-    {
-        battle = null;
-    }
-
+    /// <summary>
+    /// Gets the player, who should be selected considering input position.
+    /// </summary>
+    /// <returns>The player, who should be selected.</returns>
     static Player PlayerBeingSelected()
     {
         foreach (Player player in battle.players)
@@ -164,11 +177,14 @@ public class BattleInterface : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Sets up the overhead view.
+    /// </summary>
     static void SetUpOverhead()
     {
         foreach (Player player in battle.players)
         {
-            player.board.CamouflageBoard();
+            player.board.Set(BoardState.OVERHEAD);
             if (player == battle.attackingPlayer)
             {
                 player.SetMacroMarker(0);
@@ -181,62 +197,115 @@ public class BattleInterface : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Shows a player's board.
+    /// </summary>
+    /// <param name="player">The player, who's board to show.</param>
     static void ViewPlayer(Player player)
     {
-        player.board.SetGridEnabled(true);
         player.SetMacroMarker(-1);
-
-        if (player == battle.attackingPlayer || (GameController.singleplayer && !player.AI))
+        if (player == battle.attackingPlayer || (GameController.humanPlayers == 1 && !player.AI) || GameController.humanPlayers == 0)
         {
-            player.board.ShowToFriendly();
+            player.board.Set(BoardState.FRIENDLY);
+        }
+        else if (!battle.attackingPlayer.AI || GameController.humanPlayers == 0)
+        {
+            player.board.Set(BoardState.ENEMY);
         }
         else
         {
-            player.board.ShowToEnemy(battle.attackingPlayer);
+            player.board.Set(BoardState.OVERHEAD);
         }
-        Cameraman.TakePosition("Board " + (player.ID + 1), 0.6f);
+        Cameraman.TakePosition("Board " + (player.ID + 1), 0.3f);
     }
 
+    /// <summary>
+    /// On player switch.
+    /// </summary>
+    /// <param name="switchingFrom">...</param>
+    /// <param name="switchingTo">...</param>
     static void OnPlayerSwitch(Player switchingFrom, Player switchingTo)
     {
         switchingFrom.SetMacroMarker(-1);
         switchingTo.SetMacroMarker(0);
 
+        foreach (Ship ship in switchingFrom.allShips)
+        {
+            battle.DisableSunkShip(ship);
+        }
+
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
     }
 
+    /// <summary>
+    /// On battle state change.
+    /// </summary>
+    /// <param name="switchingFrom">...</param>
+    /// <param name="switchingTo">...</param>
     static void OnBattleStateChange(BattleState switchingFrom, BattleState switchingTo)
     {
         switch (switchingFrom)
         {
-            case BattleState.FIRING:
+            case BattleState.SHOWING_HIT_TILE:
                 Destroy(recentlyShotTileIndicator);
+                break;
+            case BattleState.FIRING:
+                foreach (Ship ship in battle.attackingPlayer.livingShips)
+                {
+                    ship.PositionOnPlayingBoard();
+                    ship.gameObject.SetActive(false);
+                }
+
+
                 break;
         }
 
         switch (switchingTo)
         {
             case BattleState.FIRING:
+                battle.ChangeState(BattleState.SHOWING_HIT_TILE, 1f);
+                Actionman.ActionView();
+
+                break;
+            case BattleState.SHOWING_HIT_TILE:
+                battle.ChangeState(BattleState.TURN_FINISHED, 1f);
+                ViewPlayer(battle.defendingPlayer);
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
-                recentlyShotTileIndicator.transform.position = battle.defendingPlayer.board.tiles[(int)recentlyShot.x, (int)recentlyShot.y].worldPosition + Vector3.up * 3f;
+                recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.attackedTileWorldPosition + Vector3.up * 3f;
+
+
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();
-                Cameraman.TakePosition("Overhead View");
+                Cameraman.TakePosition("Overhead View", 0.45f);
                 Interface.SwitchMenu("Overhead");
+                break;
+            case BattleState.CHOOSING_TILE_TO_SHOOT:
                 break;
         }
     }
 
+    /// <summary>
+    /// On guns firing. Sets up the action camera and attack fleet.
+    /// </summary>
     static void OnFire()
     {
-
+        if (!(GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI && GameController.humanPlayers > 0))
+        {
+            battle.ChangeState(BattleState.FIRING);
+        }
     }
 
+
+
+    /// <summary>
+    /// Used by UI elements to return back to overhead view.
+    /// </summary>
     public void BackToOverhead()
     {
         SetUpOverhead();
-        Cameraman.TakePosition("Overhead View");
+        Cameraman.TakePosition("Overhead View", 0.45f);
         Interface.SwitchMenu("Overhead");
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
     }
