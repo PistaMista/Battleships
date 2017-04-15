@@ -61,8 +61,13 @@ public class Projectile : MonoBehaviour
                 if (onHit != null)
                 {
                     onHit(this);
+                    onHit = null;
                 }
             }
+        }
+        else
+        {
+            travelTimeLeft -= Time.deltaTime;
         }
     }
 }

@@ -102,7 +102,7 @@ public class Ship : MonoBehaviour
                 }
                 else if (sinkProgress < 1f)
                 {
-                    transform.position = new Vector3(transform.position.x, Mathf.SmoothStep(GameController.seaLevel, -length / 2f, (sinkProgress - 0.5f) / 0.5f), transform.position.z);
+                    transform.position = new Vector3(transform.position.x, Mathf.SmoothStep(GameController.seaLevel, -length / 2f - GameController.seaLevel, (sinkProgress - 0.5f) / 0.5f), transform.position.z);
                 }
 
 
