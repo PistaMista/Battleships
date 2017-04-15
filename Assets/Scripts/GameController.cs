@@ -97,6 +97,8 @@ public class GameController : MonoBehaviour
     public float defaultSeaLevel;
     //Skips showing action shots of AI vs AI attacks in main battles
     public bool defaultSkipAIvsAIActionShots;
+    //The effect used for water splashes.
+    public GameObject defaultWaterSplashEffect;
     //The total amount of board tiles in the game. Used to limit the length of each match.
     public int defaultTotalBoardTileLimit;
 
@@ -163,6 +165,10 @@ public class GameController : MonoBehaviour
     /// </summary>
     public static bool skipAIvsAIActionShots;
     /// <summary>
+    /// The prefab for water splashes.
+    /// </summary>
+    public static GameObject waterSplashEffect;
+    /// <summary>
     /// The total amount of board tiles in the game. Used to limit the length of each match.
     /// </summary>
     public static int totalBoardTileLimit;
@@ -184,6 +190,7 @@ public class GameController : MonoBehaviour
         shipExplosion = defaultShipExplosion;
         shipFire = defaultShipFire;
         seaLevel = defaultSeaLevel;
+        waterSplashEffect = defaultWaterSplashEffect;
         skipAIvsAIActionShots = defaultSkipAIvsAIActionShots;
 
         switchTimesNill = nullifyBattleSwitchTimes;

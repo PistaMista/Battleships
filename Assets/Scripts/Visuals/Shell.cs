@@ -18,6 +18,18 @@ public class Shell : Projectile
         transform.position += velocity * Time.deltaTime;
         if (travelTimeLeft < 0f)
         {
+            bool condition = weapon.turret.ship.owner.battle.recentAttackInfo.hitShip == null;
+
+
+            if (condition)
+            {
+                GameObject tmp = Instantiate(GameController.waterSplashEffect);
+                Vector3 position = gameObject.transform.position;
+                position.y = GameController.seaLevel;
+
+                tmp.transform.position = position;
+                tmp.transform.parent = weapon.turret.ship.owner.battle.gameObject.transform;
+            }
             Destroy(gameObject);
         }
     }

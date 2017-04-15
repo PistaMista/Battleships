@@ -5,6 +5,11 @@ using UnityEngine;
 public class AerialViewActionShotModule : FleetAttackFormationBaseModule
 {
     /// <summary>
+    /// The time needed for the fired shells to land.
+    /// </summary>
+    float timeNeeded = 0f;
+
+    /// <summary>
     /// Prepares the action view.
     /// </summary>
     public override void Prepare()
@@ -33,12 +38,18 @@ public class AerialViewActionShotModule : FleetAttackFormationBaseModule
         Vector3 targetCameraPosition = Vector3.Lerp(fleetPosition, BattleInterface.battle.recentAttackInfo.attackedTileWorldPosition, 0.5f);
         targetCameraPosition.y = 35f;
 
-        Cameraman.TakePosition(new Cameraman.CameraPosition(1f, targetCameraPosition, Vector3.right * 90f));
+        Cameraman.TakePosition(new Cameraman.CameraPosition(0.45f, targetCameraPosition, Vector3.right * 90f));
 
         foreach (Ship ship in attackers)
         {
             //ship.PrepareToFireAt(BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition, BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].containedShip);
-            ship.PrepareToFireAt(BattleInterface.battle.recentAttackInfo.attackedTileWorldPosition, BattleInterface.battle.recentAttackInfo.hitShip);
+            float time = ship.PrepareToFireAt(BattleInterface.battle.recentAttackInfo.attackedTileWorldPosition, BattleInterface.battle.recentAttackInfo.hitShip);
+            timeNeeded = (time > timeNeeded) ? time : timeNeeded;
+        }
+
+        if (attackers.Count == 0)
+        {
+            Actionman.EndActionView();
         }
     }
 
@@ -51,7 +62,7 @@ public class AerialViewActionShotModule : FleetAttackFormationBaseModule
         switch (stage)
         {
             case 0:
-                if (lifetime > 2f)
+                if (Cameraman.transitionProgress > 98f)
                 {
                     foreach (Ship ship in attackers)
                     {
@@ -61,7 +72,7 @@ public class AerialViewActionShotModule : FleetAttackFormationBaseModule
                 }
                 break;
             case 1:
-                if (lifetime > 5f)
+                if (lifetime > 3.5f)
                 {
                     Actionman.EndActionView();
                 }
