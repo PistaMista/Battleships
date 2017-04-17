@@ -57,6 +57,27 @@ public class FleetAttackFormationBaseModule : ActionShotModule
             }
         }
 
+        if (attackers.Count == 0)
+        {
+            foreach (Ship ship in BattleInterface.battle.attackingPlayer.livingShips)
+            {
+
+                attackers.Add(ship);
+                switch (ship.length)
+                {
+                    case 3:
+                        destroyers.Add(ship);
+                        break;
+                    case 4:
+                        cruisers.Add(ship);
+                        break;
+                    case 5:
+                        battleships.Add(ship);
+                        break;
+                }
+            }
+        }
+
         Vector3 position = Vector3.zero;
         //Place the BattleInterface.battleships
         for (int i = 0; i < battleships.Count; i++)
