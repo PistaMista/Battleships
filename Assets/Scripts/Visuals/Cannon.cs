@@ -28,10 +28,6 @@ public class Cannon : Weapon
     /// The effect used to show the muzzle flash of the cannon.
     /// </summary>
     public GameObject muzzleFlashEffect;
-    /// <summary>
-    /// The sound played upon firing the cannon.
-    /// </summary>
-    AudioSource firingSound;
 
     /// <summary>
     /// The start function.
@@ -40,7 +36,6 @@ public class Cannon : Weapon
     {
         recoilDistance = barrel.transform.localScale.z * 0.45f;
         defaultBarrelPosition = barrel.transform.localPosition.z;
-        firingSound = gameObject.GetComponent<AudioSource>();
     }
     /// <summary>
     /// The update function.
@@ -78,8 +73,6 @@ public class Cannon : Weapon
         {
             muzzleFlashEffect.GetComponent<ParticleSystem>().Play();
         }
-
-        firingSound.Play();
 
         return shell;
     }

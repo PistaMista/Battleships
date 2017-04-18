@@ -50,7 +50,7 @@ public class Shell : Projectile
         miss = weapon.turret.ship.owner.battle.recentAttackInfo.hitShip == null;
         if (!miss)
         {
-            miss = weapon.turret.ship.owner.battle.recentAttackInfo.hitShip.eliminated;
+            miss = weapon.turret.ship.owner.battle.recentAttackInfo.hitShip.eliminated && !weapon.turret.ship.owner.battle.recentAttackInfo.shipSunk;
         }
     }
 }
