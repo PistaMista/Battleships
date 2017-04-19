@@ -303,6 +303,7 @@ public class GameController : MonoBehaviour
             case GameState.BATTLING:
                 Cameraman.TakePosition("Overhead View");
                 Interface.SwitchMenu("Overhead");
+                Soundman.ChangeTrack(2, true, true);
                 break;
             case GameState.PLACING_SHIPS:
                 Soundman.ChangeTrack(-1, true, false);
