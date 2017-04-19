@@ -73,6 +73,18 @@ public class Cannon : Weapon
         {
             muzzleFlashEffect.GetComponent<ParticleSystem>().Play();
         }
+        switch (turret.ship.length)
+        {
+            case 3:
+                Soundman.PlaySoundAt(2, this.transform.position);
+                break;
+            case 4:
+                Soundman.PlaySoundAt(1, this.transform.position);
+                break;
+            case 5:
+                Soundman.PlaySoundAt(0, this.transform.position);
+                break;
+        }
 
         return shell;
     }

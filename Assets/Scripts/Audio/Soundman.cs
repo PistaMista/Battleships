@@ -133,5 +133,30 @@ public class Soundman : MonoBehaviour
             primaryMusicPlayer.loop = repeat;
         }
     }
+    /// <summary>
+    /// Plays a sound at a world position.
+    /// </summary>
+    /// <param name="id">ID of the sound to play.</param>
+    /// <param name="worldPosition">The position at which to play it.</param>
+    public static void PlaySoundAt(int id, Vector3 worldPosition)
+    {
+        GameObject tmp = Instantiate(soundFX[id]);
+        tmp.transform.position = worldPosition;
+        AudioSource sound = tmp.GetComponent<AudioSource>();
+        sound.Play();
+    }
+    /// <summary>
+    /// Plays a sound at a world position.
+    /// </summary>
+    /// <param name="id">ID of the sound to play.</param>
+    /// <param name="worldPosition">The position at which to play it.</param>
+    public static void PlaySoundAt(int id, Vector3 worldPosition, Transform parent)
+    {
+        GameObject tmp = Instantiate(soundFX[id]);
+        tmp.transform.position = worldPosition;
+        tmp.transform.parent = parent;
+        AudioSource sound = tmp.GetComponent<AudioSource>();
+        sound.Play();
+    }
 
 }
