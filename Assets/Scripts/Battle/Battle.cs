@@ -309,7 +309,7 @@ public class Battle : MonoBehaviour
                             if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit)
                             {
                                 defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.RegisterHit();
-                                //recentAttackInfo.shipSunk = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.eliminated;
+                                recentAttackInfo.shipSunk = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.eliminated;
                             }
                         }
                         else
