@@ -297,15 +297,19 @@ public class GameController : MonoBehaviour
 
                 Cameraman.TakePosition("Overhead Title View");
                 Interface.SwitchMenu("Title Screen");
-
+                Soundman.ChangeTrack(0, true, true);
                 NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true) }, false);
                 break;
             case GameState.BATTLING:
                 Cameraman.TakePosition("Overhead View");
                 Interface.SwitchMenu("Overhead");
                 break;
+            case GameState.PLACING_SHIPS:
+                Soundman.ChangeTrack(-1, true, false);
+                break;
             case GameState.PLAYER_SELECTION:
                 Cameraman.SetBlur(true);
+                Soundman.ChangeTrack(1, true, false);
                 Interface.SwitchMenu("Player Selection Screen");
                 PlayerSelector.Reset();
                 break;
