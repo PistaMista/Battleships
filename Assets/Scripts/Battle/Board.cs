@@ -35,49 +35,49 @@ public enum BoardState
 
 public class Board : MonoBehaviour
 {
-    /// <summary>
-    /// The tiles the board is made up of.
-    /// </summary>
-    public struct BoardTile
-    {
-        /// <summary>
-        /// The ship which occupies this tile.
-        /// </summary>
-        public Ship containedShip;
-        /// <summary>
-        /// Whether this tile was hit by a shell.
-        /// </summary>
-        public bool hit;
-        /// <summary>
-        /// The position in the world of this tile.
-        /// </summary>
-        public Vector3 worldPosition;
-        /// <summary>
-        /// The marker object of this tile.
-        /// </summary>
-        GameObject marker;
-        /// <summary>
-        /// Sets the color of this tile's marker.
-        /// </summary>
-        /// <param name="color">The color to set.</param>
-        /// <param name="parent">Which transform to parent the marker object to.</param>
-        public void SetMarker(Color color, Transform parent)
-        {
-            Destroy(marker);
-            if (color.a != 0)
-            {
-                marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                marker.transform.position = worldPosition;
-                marker.transform.parent = parent;
-                marker.transform.localScale = new Vector3(0.9f, 0.1f, 0.9f);
-                marker.layer = 5;
-                color.a = 0.6f;
-                Renderer renderer = marker.GetComponent<Renderer>();
-                renderer.material = GameController.playerBoardMarkerMaterial;
-                renderer.material.SetColor("_Color", color);
-            }
-        }
-    }
+    //     /// <summary>
+    //     /// The tiles the board is made up of.
+    //     /// </summary>
+    //     public struct BoardTile
+    //     {
+    //         /// <summary>
+    //         /// The ship which occupies this tile.
+    //         /// </summary>
+    //         public Ship containedShip;
+    //         /// <summary>
+    //         /// Whether this tile was hit by a shell.
+    //         /// </summary>
+    //         public bool hit;
+    //         /// <summary>
+    //         /// The position in the world of this tile.
+    //         /// </summary>
+    //         public Vector3 worldPosition;
+    //         /// <summary>
+    //         /// The marker object of this tile.
+    //         /// </summary>
+    //         GameObject marker;
+    //         /// <summary>
+    //         /// Sets the color of this tile's marker.
+    //         /// </summary>
+    //         /// <param name="color">The color to set.</param>
+    //         /// <param name="parent">Which transform to parent the marker object to.</param>
+    //         public void SetMarker(Color color, Transform parent)
+    //         {
+    //             Destroy(marker);
+    //             if (color.a != 0)
+    //             {
+    //                 marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    //                 marker.transform.position = worldPosition;
+    //                 marker.transform.parent = parent;
+    //                 marker.transform.localScale = new Vector3(0.9f, 0.1f, 0.9f);
+    //                 marker.layer = 5;
+    //                 color.a = 0.6f;
+    //                 Renderer renderer = marker.GetComponent<Renderer>();
+    //                 renderer.material = GameController.playerBoardMarkerMaterial;
+    //                 renderer.material.SetColor("_Color", color);
+    //             }
+    //         }
+    //     }
 
     /// <summary>
     /// The player who owns the board.
@@ -119,7 +119,9 @@ public class Board : MonoBehaviour
         {
             for (int y = 0; y < dimensions; y++)
             {
-                tiles[x, y].worldPosition = position - new Vector3(1f, 0, 1f) * ((float)dimensions / 2f + 0.5f) + new Vector3(x + 1, 0f, y + 1);
+                tiles[x, y] = new GameObject("Tile X: " + x + " Y: " + y).AddComponent<BoardTile>();
+                tiles[x, y].transform.position = -new Vector3(1f, 0, 1f) * ((float)dimensions / 2f + 0.5f) + new Vector3(x + 1, 0f, y + 1);
+                tiles[x, y].transform.parent = this.transform;
             }
         }
 

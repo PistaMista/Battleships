@@ -292,7 +292,7 @@ public class Battle : MonoBehaviour
                 if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
                 {
                     recentAttackInfo.tilePosition = tile;
-                    recentAttackInfo.attackedTileWorldPosition = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].worldPosition;
+                    recentAttackInfo.attackedTileWorldPosition = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].transform.position;
                     recentAttackInfo.type = AttackType.SHELL;
 
                     targetState = BattleState.TURN_FINISHED;
@@ -568,7 +568,7 @@ public class Battle : MonoBehaviour
         float highestTravelTime = 0f;
         foreach (Ship ship in attackingPlayer.livingShips)
         {
-            Vector3 targetPosition = defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].worldPosition;
+            Vector3 targetPosition = defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].transform.position;
             targetPosition.y = 0f;
             float travelTime = ship.PrepareToFireAt(targetPosition, defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip);
             ship.Fire();
