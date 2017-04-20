@@ -502,7 +502,7 @@ public class ShipPlacer : MonoBehaviour
         {
             Destroy(previewParent);
             previewParent = new GameObject("Ship Preview");
-            previewParent.transform.position = player.board.position + (Vector3.left * ((float)player.board.dimensions / 2f + 1f));
+            previewParent.transform.position = player.board.transform.position + (Vector3.left * ((float)player.board.dimensions / 2f + 1f));
 
             currentlyPreviewed = ship;
             Vector3 originPosition = new Vector3(0f, 0f, -1.1f * (Mathf.Floor(ship.length / 2f) - (ship.length + 1) % 2 * 0.5f));

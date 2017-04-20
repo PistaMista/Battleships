@@ -164,8 +164,8 @@ public class BattleInterface : MonoBehaviour
     {
         foreach (Player player in battle.players)
         {
-            Vector3 corner1 = player.board.position - new Vector3(player.board.dimensions / 2f, 0f, player.board.dimensions / 2f);
-            Vector3 corner2 = player.board.position + new Vector3(player.board.dimensions / 2f, 0f, player.board.dimensions / 2f);
+            Vector3 corner1 = player.board.transform.position - new Vector3(player.board.dimensions / 2f, 0f, player.board.dimensions / 2f);
+            Vector3 corner2 = player.board.transform.position + new Vector3(player.board.dimensions / 2f, 0f, player.board.dimensions / 2f);
             Vector3 checkedPosition = InputController.currentInputPosition;
 
             if (checkedPosition.x > corner1.x && checkedPosition.x < corner2.x && checkedPosition.z > corner1.z && checkedPosition.z < corner2.z)

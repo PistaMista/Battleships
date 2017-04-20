@@ -227,7 +227,7 @@ public class GameController : MonoBehaviour
             float angle = 360 / players.Length * i * Mathf.Deg2Rad;
             Vector3 boardPosition = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * playerBoardDistanceFromCenter + Vector3.up * playerBoardElevation;
             Player player = players[i];
-            player.board = ScriptableObject.CreateInstance<Board>();
+            player.board = new GameObject("Board " + i).AddComponent<Board>();
             player.board.Initialize(playerBoardDimensions, boardPosition, player, playerBoardGridMaterial);
             Cameraman.AddPosition(3f, new Vector3(boardPosition.x, playerBoardDimensions + playerBoardElevation, boardPosition.z), new Vector3(90, 0, 0), "Board " + (i + 1));
             player.color = playersToAdd[i].playerColor;

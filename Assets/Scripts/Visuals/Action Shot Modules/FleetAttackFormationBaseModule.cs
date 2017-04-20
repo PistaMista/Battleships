@@ -15,15 +15,15 @@ public class FleetAttackFormationBaseModule : ActionShotModule
         Vector3 fleetPosition = Vector3.zero;
         float fleetRotation = 0f;
 
-        if (Mathf.Abs(BattleInterface.battle.defendingPlayer.board.position.z) < Mathf.Abs(BattleInterface.battle.defendingPlayer.board.position.x))
+        if (Mathf.Abs(BattleInterface.battle.defendingPlayer.board.transform.position.z) < Mathf.Abs(BattleInterface.battle.defendingPlayer.board.transform.position.x))
         {
-            fleetPosition = BattleInterface.battle.defendingPlayer.board.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.position.x) * 1.5f;
-            fleetRotation = 90f * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.position.x);
+            fleetPosition = BattleInterface.battle.defendingPlayer.board.transform.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.x) * 1.5f;
+            fleetRotation = 90f * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.x);
         }
         else
         {
-            fleetPosition = BattleInterface.battle.defendingPlayer.board.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.position.z) * 1.5f;
-            fleetRotation = 90f - 90f * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.position.z);
+            fleetPosition = BattleInterface.battle.defendingPlayer.board.transform.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.z) * 1.5f;
+            fleetRotation = 90f - 90f * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.z);
         }
 
         fleetPosition.y = GameController.seaLevel;

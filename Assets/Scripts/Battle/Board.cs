@@ -33,7 +33,7 @@ public enum BoardState
     DISABLED
 }
 
-public class Board : ScriptableObject
+public class Board : MonoBehaviour
 {
     /// <summary>
     /// The tiles the board is made up of.
@@ -84,10 +84,6 @@ public class Board : ScriptableObject
     /// </summary>
     public Player owner;
     /// <summary>
-    /// The position of this board in the world.
-    /// </summary>
-    public Vector3 position;
-    /// <summary>
     /// The tiles, that the board is made up of.
     /// </summary>
     public BoardTile[,] tiles;
@@ -127,8 +123,11 @@ public class Board : ScriptableObject
             }
         }
 
-        this.position = position;
+        //this.position = position;
+        this.transform.position = position;
+        this.transform.parent = owner.transform;
         this.owner = owner;
+
 
         this.dimensions = dimensions;
         this.gridMaterial = gridMaterial;
@@ -190,7 +189,8 @@ public class Board : ScriptableObject
             tmp.layer = 5;
         }
 
-        grid.transform.position = position;
+        grid.transform.parent = this.transform;
+        grid.transform.localPosition = Vector3.zero;
     }
 
     /// <summary>
@@ -266,7 +266,8 @@ public class Board : ScriptableObject
                 break;
             case BoardState.OVERHEAD:
                 grid = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                grid.transform.position = position;
+                grid.transform.parent = this.transform;
+                grid.transform.localPosition = Vector3.zero;
                 grid.transform.localScale = new Vector3(1f, 1f / (float)dimensions, 1f) * (float)dimensions;
                 grid.name = "Player Icon";
                 Renderer tmp = grid.GetComponent<Renderer>();
@@ -291,7 +292,7 @@ public class Board : ScriptableObject
     /// <returns>The converted board position.</returns>
     public Vector2 WorldToTilePosition(Vector3 position)
     {
-        Vector3 result = position - this.position + Vector3.one * ((float)dimensions / 2f);
+        Vector3 result = position - this.transform.position + Vector3.one * ((float)dimensions / 2f);
         if (result.x < 0 || result.x >= dimensions || result.z < 0 || result.z >= dimensions)
         {
             result = -Vector3.one;

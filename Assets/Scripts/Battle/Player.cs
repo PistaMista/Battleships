@@ -121,7 +121,7 @@ public class Player : MonoBehaviour
         else
         {
             macroMarker = Instantiate(GameController.playerOverheadStatusMarkers[markerID]);
-            macroMarker.transform.position = board.position + Vector3.up * 2f;
+            macroMarker.transform.position = board.transform.position + Vector3.up * 2f;
             macroMarker.transform.localScale = new Vector3(board.dimensions, 1f, board.dimensions);
         }
     }
