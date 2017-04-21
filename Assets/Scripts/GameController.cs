@@ -299,6 +299,7 @@ public class GameController : MonoBehaviour
                 Interface.SwitchMenu("Title Screen");
                 Soundman.ChangeTrack(0, true, true);
                 NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true) }, false);
+                //NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true) }, false);
                 break;
             case GameState.BATTLING:
                 Cameraman.TakePosition("Overhead View");

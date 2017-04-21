@@ -122,6 +122,8 @@ public class Board : MonoBehaviour
                 tiles[x, y] = new GameObject("Tile X: " + x + " Y: " + y).AddComponent<BoardTile>();
                 tiles[x, y].transform.position = -new Vector3(1f, 0, 1f) * ((float)dimensions / 2f + 0.5f) + new Vector3(x + 1, 0f, y + 1);
                 tiles[x, y].transform.parent = this.transform;
+                tiles[x, y].boardCoordinates = new Vector2(x, y);
+                tiles[x, y].board = this;
             }
         }
 
@@ -203,6 +205,9 @@ public class Board : MonoBehaviour
     {
         Destroy(grid);
         gridRendered = true;
+
+
+
         switch (state)
         {
             case BoardState.DISABLED:
@@ -229,40 +234,40 @@ public class Board : MonoBehaviour
                 break;
             case BoardState.FRIENDLY:
                 DrawGrid(dimensions, GameController.playerBoardGridMaterial);
-                for (int x = 0; x < dimensions; x++)
-                {
-                    for (int y = 0; y < dimensions; y++)
-                    {
-                        BoardTile tile = tiles[x, y];
-                        if (tile.containedShip)
-                        {
-                            if (tile.containedShip.eliminated)
-                            {
-                                SetMarker(tile, new Color(180f / 255f, 0f, 0f));
-                            }
-                            else
-                            {
-                                if (tile.hit)
-                                {
-                                    SetMarker(tile, Color.red);
-                                }
-                                else
-                                {
-                                    SetMarker(tile, Color.green);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (tile.hit)
-                            {
-                                SetMarker(tile, Color.black);
-                            }
-                        }
+                // for (int x = 0; x < dimensions; x++)
+                // {
+                //     for (int y = 0; y < dimensions; y++)
+                //     {
+                //         BoardTile tile = tiles[x, y];
+                //         if (tile.containedShip)
+                //         {
+                //             if (tile.containedShip.eliminated)
+                //             {
+                //                 SetMarker(tile, new Color(180f / 255f, 0f, 0f));
+                //             }
+                //             else
+                //             {
+                //                 if (tile.hit)
+                //                 {
+                //                     SetMarker(tile, Color.red);
+                //                 }
+                //                 else
+                //                 {
+                //                     SetMarker(tile, Color.green);
+                //                 }
+                //             }
+                //         }
+                //         else
+                //         {
+                //             if (tile.hit)
+                //             {
+                //                 SetMarker(tile, Color.black);
+                //             }
+                //         }
 
-                        tiles[x, y] = tile;
-                    }
-                }
+                //         tiles[x, y] = tile;
+                //     }
+                // }
 
                 owner.ShipsShown(true, true);
                 break;
@@ -284,6 +289,11 @@ public class Board : MonoBehaviour
                 gridRendered = false;
                 owner.ShipsShown(true, true);
                 break;
+        }
+
+        foreach (BoardTile tile in tiles)
+        {
+            tile.Refresh(state);
         }
     }
 

@@ -133,6 +133,7 @@ public class ShipPlacer : MonoBehaviour
                     {
                         Ship lastShip = shipsToPlace[0];
                         FinishPlacingShip(); //Finish placing the ship
+                        player.board.Set(BoardState.FRIENDLY);
                         if (shipsToPlace.Count == 0) //If all ships are placed...
                         {
                             Interface.SwitchMenu("Placing Done"); //Switch the interface to show a button to go to the next player
