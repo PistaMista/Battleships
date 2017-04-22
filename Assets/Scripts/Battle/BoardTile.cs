@@ -73,11 +73,24 @@ public class BoardTile : MonoBehaviour
                     if (hit)
                     {
                         DrawShipStrip(Color.red);
+                        List<Color> hitBy = new List<Color>();
+                        foreach (Player player in board.owner.battle.players)
+                        {
+                            if (player.hits.ContainsKey(board.owner.ID))
+                            {
+                                if (player.hits[board.owner.ID].Contains(boardCoordinates))
+                                {
+                                    hitBy.Add(player.color);
+                                }
+                            }
+                        }
+
+                        DrawSideStrips(hitBy.ToArray());
                     }
                     else
                     {
                         DrawShipStrip(Color.green);
-                        DrawSideStrips(new Color[] { new Color(230f / 255f, 230f / 255f, 100f / 255f, 1f) });
+                        DrawSideStrips(new Color[] { new Color(10f / 255f, 120f / 255f, 0f, 1f) });
                     }
                 }
                 else
@@ -162,8 +175,8 @@ public class BoardTile : MonoBehaviour
             else
             {
                 scaleModifier = (0.45f - stripWidth / 2f);
-                float positionModifier = (scaleModifier + stripWidth) / 4f;
-                strip.transform.localPosition = new Vector3(shipDirection.x, 0f, shipDirection.y) * positionModifier;
+                float positionModifier = (scaleModifier + stripWidth) / 2f;
+                strip.transform.localPosition = new Vector3(shipDirection.x, 0f, shipDirection.y) * 0.45f - new Vector3(shipDirection.x, 0f, shipDirection.y) * positionModifier;
             }
             strip.transform.localScale = new Vector3(stripWidth + scaleModifier * Mathf.Abs(shipDirection.x), 0.1f, stripWidth + scaleModifier * Mathf.Abs(shipDirection.y));
         }
@@ -204,29 +217,47 @@ public class BoardTile : MonoBehaviour
         {
             for (int color = 0; color < colors.Length; color++)
             {
+                GameObject strip;
+                Renderer renderer;
+                float scaleModifier;
+                Vector3 positionModifier;
+                Vector3 secondaryPositionModifier;
+                Vector3 stripLengthScaleModifier;
+                Vector3 stripWidthScaleModifier;
                 for (int i = -1; i <= 1; i += 2)
                 {
-                    float scaleModifier = (0.45f + stripWidth / 2f);
-                    float positionCoefficient = (scaleModifier + stripWidth) / 4f;
+                    scaleModifier = (0.45f + stripWidth / 2f) + individualStripWidth * color;
+                    float positionCoefficient = scaleModifier / 2f;
 
-                    Vector3 positionModifier = new Vector3(-shipDirection.y, 0f, shipDirection.x) * (startingPosition + individualStripWidth * color) * i;
-                    //Vector3 secondaryPositionModifier = new Vector3(shipDirection.x, 0f, shipDirection.y) * positionCoefficient;
+                    positionModifier = new Vector3(-shipDirection.y, 0f, shipDirection.x) * (startingPosition + individualStripWidth * color) * i;
+                    secondaryPositionModifier = new Vector3(shipDirection.x, 0f, shipDirection.y) * 0.45f - new Vector3(shipDirection.x, 0f, shipDirection.y) * positionCoefficient;
 
-                    Vector3 stripLengthScaleModifier = new Vector3((shipDirection.x != 0) ? scaleModifier : 0, 0.1f, (shipDirection.y != 0) ? scaleModifier : 0);
-                    Vector3 stripWidthScaleModifier = new Vector3((stripLengthScaleModifier.x == 0) ? individualStripWidth : 0, 0f, (stripLengthScaleModifier.z == 0) ? individualStripWidth : 0);
+                    stripLengthScaleModifier = new Vector3((shipDirection.x != 0) ? scaleModifier : 0, 0.1f, (shipDirection.y != 0) ? scaleModifier : 0);
+                    stripWidthScaleModifier = new Vector3((stripLengthScaleModifier.x == 0) ? individualStripWidth : 0, 0f, (stripLengthScaleModifier.z == 0) ? individualStripWidth : 0);
 
-                    GameObject strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     strip.transform.parent = marker.transform;
-                    strip.transform.localPosition = positionModifier;
+                    strip.transform.localPosition = positionModifier + secondaryPositionModifier;
                     strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
 
-                    Renderer renderer = strip.GetComponent<Renderer>();
+                    renderer = strip.GetComponent<Renderer>();
                     renderer.material = GameController.playerBoardMarkerMaterial;
                     renderer.material.SetColor("_Color", colors[color]);
                 }
+                scaleModifier = stripWidth + 2f * individualStripWidth * (color + 1);
+                positionModifier = -new Vector3(shipDirection.x, 0f, shipDirection.y) * (startingPosition + individualStripWidth * color);
+                stripLengthScaleModifier = new Vector3((shipDirection.y != 0) ? scaleModifier : 0, 0.1f, (shipDirection.x != 0) ? scaleModifier : 0);
+                stripWidthScaleModifier = new Vector3((stripLengthScaleModifier.x == 0) ? individualStripWidth : 0, 0f, (stripLengthScaleModifier.z == 0) ? individualStripWidth : 0);
+
+                strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                strip.transform.parent = marker.transform;
+                strip.transform.localPosition = positionModifier;
+                strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
+
+                renderer = strip.GetComponent<Renderer>();
+                renderer.material = GameController.playerBoardMarkerMaterial;
+                renderer.material.SetColor("_Color", colors[color]);
             }
-
-
         }
     }
 }
