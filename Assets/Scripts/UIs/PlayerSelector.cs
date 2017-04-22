@@ -146,14 +146,27 @@ public class PlayerSelector : MonoBehaviour
             }
 
             GameController.NewBattle(initializers, true);
-
-            Reset();
         }
     }
     /// <summary>
+    /// Code that gets executed when this object is deactivated in the scene.
+    /// </summary>
+    void OnDisable()
+    {
+        //Reset();
+    }
+    /// <summary>
+    /// Code that gets executed when this object is activated in the scene.
+    /// </summary>
+    void OnEnable()
+    {
+        Reset();
+    }
+
+    /// <summary>
     /// Resets the selection screen.
     /// </summary>
-    public static void Reset()
+    static void Reset()
     {
         if (anchors != null)
         {

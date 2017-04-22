@@ -28,6 +28,10 @@ public enum BoardState
     /// </summary>
     SHIPS,
     /// <summary>
+    /// Mode to be used while placing ships.
+    /// </summary>
+    PLACING,
+    /// <summary>
     /// Disables all graphical features of the board.
     /// </summary>
     DISABLED
@@ -234,42 +238,10 @@ public class Board : MonoBehaviour
                 break;
             case BoardState.FRIENDLY:
                 DrawGrid(dimensions, GameController.playerBoardGridMaterial);
-                // for (int x = 0; x < dimensions; x++)
-                // {
-                //     for (int y = 0; y < dimensions; y++)
-                //     {
-                //         BoardTile tile = tiles[x, y];
-                //         if (tile.containedShip)
-                //         {
-                //             if (tile.containedShip.eliminated)
-                //             {
-                //                 SetMarker(tile, new Color(180f / 255f, 0f, 0f));
-                //             }
-                //             else
-                //             {
-                //                 if (tile.hit)
-                //                 {
-                //                     SetMarker(tile, Color.red);
-                //                 }
-                //                 else
-                //                 {
-                //                     SetMarker(tile, Color.green);
-                //                 }
-                //             }
-                //         }
-                //         else
-                //         {
-                //             if (tile.hit)
-                //             {
-                //                 SetMarker(tile, Color.black);
-                //             }
-                //         }
-
-                //         tiles[x, y] = tile;
-                //     }
-                // }
-
                 owner.ShipsShown(true, true);
+                break;
+            case BoardState.PLACING:
+                DrawGrid(dimensions, GameController.playerBoardGridMaterial);
                 break;
             case BoardState.OVERHEAD:
                 grid = GameObject.CreatePrimitive(PrimitiveType.Cube);

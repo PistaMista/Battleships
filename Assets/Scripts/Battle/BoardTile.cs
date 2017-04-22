@@ -101,6 +101,13 @@ public class BoardTile : MonoBehaviour
                     }
                 }
                 break;
+            case BoardState.PLACING:
+                if (containedShip != null)
+                {
+                    DrawShipStrip(Color.blue);
+                    DrawSideStrips(new Color[] { Color.cyan, Color.blue });
+                }
+                break;
             case BoardState.ENEMY:
                 if (board.owner.battle.attackingPlayer.hits[board.owner.ID].Contains(boardCoordinates))
                 {

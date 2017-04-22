@@ -281,7 +281,6 @@ public class GameController : MonoBehaviour
         {
             case GameState.PLAYER_SELECTION:
                 Cameraman.SetBlur(false);
-                PlayerSelector.Reset();
                 break;
         }
         GameController.state = state;
@@ -313,7 +312,6 @@ public class GameController : MonoBehaviour
                 Cameraman.SetBlur(true);
                 Soundman.ChangeTrack(1, true, false);
                 Interface.SwitchMenu("Player Selection Screen");
-                PlayerSelector.Reset();
                 break;
         }
     }
