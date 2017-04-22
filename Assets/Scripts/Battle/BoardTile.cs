@@ -77,6 +77,7 @@ public class BoardTile : MonoBehaviour
                     else
                     {
                         DrawShipStrip(Color.green);
+                        DrawSideStrips(new Color[] { new Color(230f / 255f, 230f / 255f, 100f / 255f, 1f) });
                     }
                 }
                 else
@@ -102,49 +103,130 @@ public class BoardTile : MonoBehaviour
     }
 
     /// <summary>
+    /// Whether this ship strip is in the middle of a ship.
+    /// </summary>
+    bool middleSegment;
+    /// <summary>
+    /// The orientation of the ship contained in this tile.
+    /// </summary>
+    Vector2 shipDirection;
+    /// <summary>
+    /// The last color of the ship strip.
+    /// </summary>
+    Color lastColor;
+    /// <summary>
+    /// The width of the ship strip.
+    /// </summary>
+    float stripWidth = 0.35f;
+    /// <summary>
     /// Draws the central strip showing the location of the contained ship.
     /// </summary>
     /// <param name="stripColor"></param>
     void DrawShipStrip(Color stripColor)
     {
-
-        float stripWidth = 0.35f;
-        stripColor.a = 0.85f;
-        Destroy(marker);
-        marker = new GameObject("Marker - " + name + " Ship.");
-        marker.transform.parent = board.grid.transform;
-        marker.transform.position = transform.position;
-
-        GameObject strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        strip.name = "Ship Strip";
-        Renderer renderer = strip.GetComponent<Renderer>();
-        renderer.material = GameController.playerBoardMarkerMaterial;
-        renderer.material.SetColor("_Color", stripColor);
-        strip.transform.parent = marker.transform;
-        strip.transform.localPosition = Vector3.zero;
-        Vector2 shipDirection = Vector2.zero;
-        bool middleSegment = false;
-        foreach (Vector2 position in containedShip.tiles)
+        if (stripColor != lastColor)
         {
-            int distance = (int)(Mathf.Abs(position.x - boardCoordinates.x) + Mathf.Abs(position.y - boardCoordinates.y));
-            if (distance == 1)
-            {
-                if (shipDirection != Vector2.zero)
-                {
-                    middleSegment = true;
-                }
-                shipDirection = position - boardCoordinates;
-            }
-        }
+            stripColor.a = 0.85f;
+            Destroy(marker);
+            marker = new GameObject("Marker - " + name + " Ship.");
+            marker.transform.parent = board.grid.transform;
+            marker.transform.position = transform.position;
 
+            GameObject strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            strip.name = "Ship Strip";
+            Renderer renderer = strip.GetComponent<Renderer>();
+            renderer.material = GameController.playerBoardMarkerMaterial;
+            renderer.material.SetColor("_Color", stripColor);
+            strip.transform.parent = marker.transform;
+            strip.transform.localPosition = Vector3.zero;
+            shipDirection = Vector2.zero;
+            middleSegment = false;
+            foreach (Vector2 position in containedShip.tiles)
+            {
+                int distance = (int)(Mathf.Abs(position.x - boardCoordinates.x) + Mathf.Abs(position.y - boardCoordinates.y));
+                if (distance == 1)
+                {
+                    if (shipDirection != Vector2.zero)
+                    {
+                        middleSegment = true;
+                    }
+                    shipDirection = position - boardCoordinates;
+                }
+            }
+
+            float scaleModifier = 0f;
+            if (middleSegment)
+            {
+                scaleModifier = (0.9f - stripWidth);
+            }
+            else
+            {
+                scaleModifier = (0.45f - stripWidth / 2f);
+                float positionModifier = (scaleModifier + stripWidth) / 4f;
+                strip.transform.localPosition = new Vector3(shipDirection.x, 0f, shipDirection.y) * positionModifier;
+            }
+            strip.transform.localScale = new Vector3(stripWidth + scaleModifier * Mathf.Abs(shipDirection.x), 0.1f, stripWidth + scaleModifier * Mathf.Abs(shipDirection.y));
+        }
+        lastColor = stripColor;
+    }
+
+    /// <summary>
+    /// Draws the side strip, showing the color of players who have hit this tile.
+    /// </summary>
+    void DrawSideStrips(Color[] colors)
+    {
+        float totalStripWidth = 0.45f - stripWidth / 2f;
+        float individualStripWidth = totalStripWidth / colors.Length;
+        float startingPosition = stripWidth / 2f + individualStripWidth / 2f;
         if (middleSegment)
         {
-            strip.transform.localScale = new Vector3(stripWidth + (0.9f - stripWidth) * Mathf.Abs(shipDirection.x), 0.1f, stripWidth + (0.9f - stripWidth) * Mathf.Abs(shipDirection.y));
+            for (int color = 0; color < colors.Length; color++)
+            {
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    Vector3 positionModifier = new Vector3(-shipDirection.y, 0f, shipDirection.x) * (startingPosition + individualStripWidth * color) * i;
+
+                    Vector3 stripLengthScaleModifier = new Vector3((shipDirection.x != 0) ? 0.9f : 0, 0.1f, (shipDirection.y != 0) ? 0.9f : 0);
+                    Vector3 stripWidthScaleModifier = new Vector3((stripLengthScaleModifier.x == 0) ? individualStripWidth : 0, 0f, (stripLengthScaleModifier.z == 0) ? individualStripWidth : 0);
+
+                    GameObject strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    strip.transform.parent = marker.transform;
+                    strip.transform.localPosition = positionModifier;
+                    strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
+
+                    Renderer renderer = strip.GetComponent<Renderer>();
+                    renderer.material = GameController.playerBoardMarkerMaterial;
+                    renderer.material.SetColor("_Color", colors[color]);
+                }
+            }
         }
         else
         {
-            strip.transform.localScale = new Vector3(stripWidth + (0.45f - stripWidth) * Mathf.Abs(shipDirection.x), 0.1f, stripWidth + (0.45f - stripWidth) * Mathf.Abs(shipDirection.y));
-            strip.transform.localPosition = Vector3.Scale(new Vector3(0.225f, 0f, 0.225f), new Vector3(shipDirection.x, 0f, shipDirection.y));
+            for (int color = 0; color < colors.Length; color++)
+            {
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    float scaleModifier = (0.45f + stripWidth / 2f);
+                    float positionCoefficient = (scaleModifier + stripWidth) / 4f;
+
+                    Vector3 positionModifier = new Vector3(-shipDirection.y, 0f, shipDirection.x) * (startingPosition + individualStripWidth * color) * i;
+                    //Vector3 secondaryPositionModifier = new Vector3(shipDirection.x, 0f, shipDirection.y) * positionCoefficient;
+
+                    Vector3 stripLengthScaleModifier = new Vector3((shipDirection.x != 0) ? scaleModifier : 0, 0.1f, (shipDirection.y != 0) ? scaleModifier : 0);
+                    Vector3 stripWidthScaleModifier = new Vector3((stripLengthScaleModifier.x == 0) ? individualStripWidth : 0, 0f, (stripLengthScaleModifier.z == 0) ? individualStripWidth : 0);
+
+                    GameObject strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    strip.transform.parent = marker.transform;
+                    strip.transform.localPosition = positionModifier;
+                    strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
+
+                    Renderer renderer = strip.GetComponent<Renderer>();
+                    renderer.material = GameController.playerBoardMarkerMaterial;
+                    renderer.material.SetColor("_Color", colors[color]);
+                }
+            }
+
+
         }
     }
 }
