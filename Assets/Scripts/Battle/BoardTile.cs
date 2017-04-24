@@ -104,8 +104,8 @@ public class BoardTile : MonoBehaviour
             case BoardState.PLACING:
                 if (containedShip != null)
                 {
-                    DrawShipStrip(Color.blue);
-                    DrawSideStrips(new Color[] { Color.cyan, Color.blue });
+                    DrawShipStrip(Color.yellow);
+                    DrawSideStrips(new Color[] { Color.black });
                 }
                 break;
             case BoardState.ENEMY:

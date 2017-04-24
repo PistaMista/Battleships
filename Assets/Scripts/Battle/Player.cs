@@ -123,6 +123,19 @@ public class Player : MonoBehaviour
             macroMarker = Instantiate(GameController.playerOverheadStatusMarkers[markerID]);
             macroMarker.transform.position = board.transform.position + Vector3.up * 2f;
             macroMarker.transform.localScale = new Vector3(board.dimensions, 1f, board.dimensions);
+            switch (markerID)
+            {
+                case 0:
+                    SquarePulserEffect effect = macroMarker.GetComponent<SquarePulserEffect>();
+                    effect.color = color;
+                    effect.pulseInterval = 0.4f;
+                    effect.maxDistance = 1.25f;
+                    effect.pulseSpeed = 5f;
+                    effect.squareWidth = 0.15f;
+                    effect.insideLength = board.dimensions * 0.1f;
+                    macroMarker.transform.position = board.transform.position;
+                    break;
+            }
         }
     }
     /// <summary>
