@@ -29,12 +29,22 @@ public class SquarePulserEffect : MonoBehaviour
     /// The speed of the pulses.
     /// </summary>
     public float pulseSpeed;
+    /// <summary>
+    /// The material used to render the squares.
+    /// </summary>
+    public Material material;
+    /// <summary>
+    /// Whether the squares will be rendered as opaque.
+    /// </summary>
+    public bool opaque = false;
+
 
     void Start()
     {
         sideCubes = new List<GameObject>();
         topCubes = new List<GameObject>();
         cubes = new List<SquareSide>();
+        material.renderQueue = 9000;
     }
 
     struct SquareSide
@@ -69,13 +79,20 @@ public class SquarePulserEffect : MonoBehaviour
 
 
             Renderer renderer = side.cube.GetComponent<Renderer>();
-            renderer.material = GameController.playerBoardMarkerMaterial;
+            renderer.material = material;
+
             Color color2 = color;
             color2.a = (1f - distance / (maxDistance + insideLength / 2f));
             //color2.g = color.g * (1f - distance / (maxDistance + insideLength / 2f));
             //color2.b = color.b * (1f - distance / (maxDistance + insideLength / 2f));
-
-            renderer.material.SetColor("_Color", color2);
+            if (!opaque)
+            {
+                renderer.material.SetColor("_Color", color2);
+            }
+            else
+            {
+                renderer.material.SetColor("_Color", color);
+            }
 
             if (color2.a <= 0.01f)
             {
@@ -101,9 +118,8 @@ public class SquarePulserEffect : MonoBehaviour
             sideCube.transform.localScale = new Vector3(squareWidth, 0.1f, insideLength);
 
             Renderer renderer = sideCube.GetComponent<Renderer>();
-            renderer.material = GameController.playerBoardMarkerMaterial;
+            renderer.material = material;
             renderer.material.SetColor("_Color", color);
-
             tmp.cube = sideCube;
             tmp.currentVelocity = 0;
             //sideCubes.Add(sideCube);
@@ -120,7 +136,7 @@ public class SquarePulserEffect : MonoBehaviour
             topCube.transform.localScale = new Vector3(insideLength + 2f * squareWidth, 0.1f, squareWidth);
 
             Renderer renderer = topCube.GetComponent<Renderer>();
-            renderer.material = GameController.playerBoardMarkerMaterial;
+            renderer.material = material;
             renderer.material.SetColor("_Color", color);
 
             tmp.cube = topCube;

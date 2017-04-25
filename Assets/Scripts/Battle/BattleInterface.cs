@@ -273,11 +273,10 @@ public class BattleInterface : MonoBehaviour
                 SquarePulserEffect effect = recentlyShotTileIndicator.GetComponent<SquarePulserEffect>();
                 effect.pulseInterval = 0.2f;
                 effect.insideLength = 1f;
-                effect.maxDistance = 1f;
-                effect.pulseSpeed = 5f;
-                effect.squareWidth = 0.15f;
+                effect.maxDistance = 2f;
+                effect.pulseSpeed = 10f;
+                effect.squareWidth = 0.2f;
                 effect.color = (battle.recentAttackInfo.hitShip != null) ? Color.red : Color.black;
-
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();

@@ -163,14 +163,14 @@ public class Board : MonoBehaviour
                 material = new Material(gridMaterial);
                 material.SetColor("_Color", Color.clear);
                 material.SetColor("_EmissionColor", owner.color);
-                tmp.transform.localPosition = new Vector3(pos, 0.01f, 0f);
+                tmp.transform.localPosition = new Vector3(pos, 0.1f, 0f);
             }
             else
             {
                 tmp.transform.localPosition = new Vector3(pos, 0f, 0f);
             }
             tmp.GetComponent<Renderer>().material = material;
-            tmp.transform.localScale = new Vector3(0.1f, 0.1f, (float)dimensions);
+            tmp.transform.localScale = new Vector3(0.1f, 0.01f, (float)dimensions);
             tmp.transform.parent = grid.transform;
             tmp.layer = 5;
         }
@@ -185,14 +185,14 @@ public class Board : MonoBehaviour
                 material = new Material(gridMaterial);
                 material.SetColor("_Color", Color.clear);
                 material.SetColor("_EmissionColor", owner.color);
-                tmp.transform.localPosition = new Vector3(0f, 0.01f, pos);
+                tmp.transform.localPosition = new Vector3(0f, 0.1f, pos);
             }
             else
             {
                 tmp.transform.localPosition = new Vector3(0f, 0f, pos);
             }
             tmp.GetComponent<Renderer>().material = material;
-            tmp.transform.localScale = new Vector3((float)dimensions, 0.1f, 0.1f);
+            tmp.transform.localScale = new Vector3((float)dimensions, 0.01f, 0.1f);
             tmp.transform.parent = grid.transform;
             tmp.layer = 5;
         }
