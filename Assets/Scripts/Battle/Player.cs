@@ -132,7 +132,7 @@ public class Player : MonoBehaviour
                     effect.maxDistance = 1.25f;
                     effect.pulseSpeed = 5f;
                     effect.squareWidth = 0.15f;
-                    effect.insideLength = board.dimensions * 0.1f;
+                    effect.insideLength = board.dimensions * 0.1f - effect.squareWidth;
                     macroMarker.transform.position = board.transform.position;
                     break;
             }

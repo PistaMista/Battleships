@@ -53,9 +53,16 @@ public class BoardTile : MonoBehaviour
             marker.transform.localScale = new Vector3(0.9f, 0.1f, 0.9f);
             marker.layer = 5;
             color.a = 0.6f;
+            // Renderer renderer = tmp.GetComponent<Renderer>();
+            // renderer.material = GameController.playerBoardMarkerMaterial;
+            // renderer.material.SetColor("_Color", color);
+
             Renderer renderer = tmp.GetComponent<Renderer>();
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
             renderer.material = GameController.playerBoardMarkerMaterial;
-            renderer.material.SetColor("_Color", color);
+            block.SetColor("_Color", color);
+            //renderer.material.SetColor("_Color", colors[color]);
+            renderer.SetPropertyBlock(block);
         }
     }
 
@@ -154,9 +161,16 @@ public class BoardTile : MonoBehaviour
 
             GameObject strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
             strip.name = "Ship Strip";
+            // Renderer renderer = strip.GetComponent<Renderer>();
+            // renderer.material = GameController.playerBoardMarkerMaterial;
+            // renderer.material.SetColor("_Color", stripColor);
             Renderer renderer = strip.GetComponent<Renderer>();
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
             renderer.material = GameController.playerBoardMarkerMaterial;
-            renderer.material.SetColor("_Color", stripColor);
+            block.SetColor("_Color", stripColor);
+            //renderer.material.SetColor("_Color", colors[color]);
+            renderer.SetPropertyBlock(block);
+
             strip.transform.parent = marker.transform;
             strip.transform.localPosition = Vector3.zero;
             shipDirection = Vector2.zero;
@@ -215,8 +229,11 @@ public class BoardTile : MonoBehaviour
                     strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
 
                     Renderer renderer = strip.GetComponent<Renderer>();
+                    MaterialPropertyBlock block = new MaterialPropertyBlock();
                     renderer.material = GameController.playerBoardMarkerMaterial;
-                    renderer.material.SetColor("_Color", colors[color]);
+                    block.SetColor("_Color", colors[color]);
+                    //renderer.material.SetColor("_Color", colors[color]);
+                    renderer.SetPropertyBlock(block);
                 }
             }
         }
@@ -226,6 +243,7 @@ public class BoardTile : MonoBehaviour
             {
                 GameObject strip;
                 Renderer renderer;
+                MaterialPropertyBlock block;
                 float scaleModifier;
                 Vector3 positionModifier;
                 Vector3 secondaryPositionModifier;
@@ -248,8 +266,11 @@ public class BoardTile : MonoBehaviour
                     strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
 
                     renderer = strip.GetComponent<Renderer>();
+                    block = new MaterialPropertyBlock();
                     renderer.material = GameController.playerBoardMarkerMaterial;
-                    renderer.material.SetColor("_Color", colors[color]);
+                    block.SetColor("_Color", colors[color]);
+                    //renderer.material.SetColor("_Color", colors[color]);
+                    renderer.SetPropertyBlock(block);
                 }
                 scaleModifier = stripWidth + 2f * individualStripWidth * (color + 1);
                 positionModifier = -new Vector3(shipDirection.x, 0f, shipDirection.y) * (startingPosition + individualStripWidth * color);
@@ -262,8 +283,10 @@ public class BoardTile : MonoBehaviour
                 strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
 
                 renderer = strip.GetComponent<Renderer>();
+                block = new MaterialPropertyBlock();
                 renderer.material = GameController.playerBoardMarkerMaterial;
-                renderer.material.SetColor("_Color", colors[color]);
+                block.SetColor("_Color", colors[color]);
+                renderer.SetPropertyBlock(block);
             }
         }
     }

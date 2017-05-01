@@ -41,8 +41,6 @@ public class SquarePulserEffect : MonoBehaviour
 
     void Start()
     {
-        sideCubes = new List<GameObject>();
-        topCubes = new List<GameObject>();
         cubes = new List<SquareSide>();
         material.renderQueue = 9000;
     }
@@ -52,8 +50,6 @@ public class SquarePulserEffect : MonoBehaviour
         public float currentVelocity;
         public GameObject cube;
     }
-    List<GameObject> sideCubes;
-    List<GameObject> topCubes;
     List<SquareSide> cubes;
     float elapsedTime = 0f;
     void Update()
@@ -69,38 +65,44 @@ public class SquarePulserEffect : MonoBehaviour
         for (int i = 0; i < cubes.Count; i++)
         {
             SquareSide side = cubes[i];
-            Vector3 direction = side.cube.transform.localPosition.normalized;
+            Vector3 heading = side.cube.transform.localPosition.normalized;
             float distance = Mathf.Abs(side.cube.transform.localPosition.x) + Mathf.Abs(side.cube.transform.localPosition.z);
 
             distance = Mathf.SmoothDamp(distance, maxDistance + insideLength, ref side.currentVelocity, maxDistance / pulseSpeed);
-            side.cube.transform.localScale = new Vector3(squareWidth + Mathf.Abs(direction.z) * (2f * distance - 2f * squareWidth), 0.1f, squareWidth + Mathf.Abs(direction.x) * (2f * distance));
+            side.cube.transform.localScale = new Vector3(squareWidth + Mathf.Abs(heading.z) * (2f * distance - 2f * squareWidth), 0.1f, squareWidth + Mathf.Abs(heading.x) * (2f * distance));
 
-            side.cube.transform.localPosition = direction * distance;
+            side.cube.transform.localPosition = heading * distance;
 
 
             Renderer renderer = side.cube.GetComponent<Renderer>();
-            renderer.material = material;
+            //renderer.material = material;
 
             Color color2 = color;
-            color2.a = (1f - distance / (maxDistance + insideLength / 2f));
+            color2.a = (distance / (maxDistance + insideLength / 2f) > 0.55f) ? (1f - (distance / (maxDistance + insideLength / 2f) - 0.55f) / 0.45f) : 1;
             //color2.g = color.g * (1f - distance / (maxDistance + insideLength / 2f));
             //color2.b = color.b * (1f - distance / (maxDistance + insideLength / 2f));
             if (!opaque)
             {
-                renderer.material.SetColor("_Color", color2);
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
+                block.SetColor("_Color", color2);
+                renderer.SetPropertyBlock(block);
             }
             else
             {
-                renderer.material.SetColor("_Color", color);
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
+                block.SetColor("_Color", color);
+                renderer.SetPropertyBlock(block);
             }
 
             if (color2.a <= 0.01f)
             {
-                Destroy(side.cube);
                 cubes.RemoveAt(i);
+                Destroy(side.cube);
                 i--;
             }
         }
+
+        Debug.Log(cubes.Count);
     }
 
     /// <summary>
@@ -112,17 +114,14 @@ public class SquarePulserEffect : MonoBehaviour
         {
             Vector3 position = Vector3.right * (insideLength / 2f + squareWidth / 2f) * i;
             SquareSide tmp = new SquareSide();
-            GameObject sideCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            sideCube.transform.parent = transform;
-            sideCube.transform.localPosition = position;
-            sideCube.transform.localScale = new Vector3(squareWidth, 0.1f, insideLength);
+            tmp.cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            tmp.cube.transform.parent = transform;
+            tmp.cube.transform.localPosition = position;
+            tmp.cube.transform.localScale = new Vector3(squareWidth, 0.1f, insideLength);
 
-            Renderer renderer = sideCube.GetComponent<Renderer>();
+            Renderer renderer = tmp.cube.GetComponent<Renderer>();
             renderer.material = material;
-            renderer.material.SetColor("_Color", color);
-            tmp.cube = sideCube;
             tmp.currentVelocity = 0;
-            //sideCubes.Add(sideCube);
             cubes.Add(tmp);
         }
 
@@ -130,18 +129,14 @@ public class SquarePulserEffect : MonoBehaviour
         {
             Vector3 position = Vector3.forward * (insideLength / 2f + squareWidth / 2f) * i;
             SquareSide tmp = new SquareSide();
-            GameObject topCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            topCube.transform.parent = transform;
-            topCube.transform.localPosition = position;
-            topCube.transform.localScale = new Vector3(insideLength + 2f * squareWidth, 0.1f, squareWidth);
+            tmp.cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            tmp.cube.transform.parent = transform;
+            tmp.cube.transform.localPosition = position;
+            tmp.cube.transform.localScale = new Vector3(insideLength + 2f * squareWidth, 0.1f, squareWidth);
 
-            Renderer renderer = topCube.GetComponent<Renderer>();
+            Renderer renderer = tmp.cube.GetComponent<Renderer>();
             renderer.material = material;
-            renderer.material.SetColor("_Color", color);
-
-            tmp.cube = topCube;
             tmp.currentVelocity = 0;
-            //topCubes.Add(topCube);
             cubes.Add(tmp);
         }
     }

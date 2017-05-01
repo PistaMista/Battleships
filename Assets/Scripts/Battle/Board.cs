@@ -157,20 +157,24 @@ public class Board : MonoBehaviour
         {
             float pos = -(float)dimensions / 2f + x;
             GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Material material = gridMaterial;
+            Renderer renderer = tmp.GetComponent<Renderer>();
+            renderer.material = gridMaterial;
+
             if (x == 1 || x == dimensions - 1)
             {
-                material = new Material(gridMaterial);
-                material.SetColor("_Color", Color.clear);
-                material.SetColor("_EmissionColor", owner.color);
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
+                block.SetColor("_Color", Color.clear);
+                block.SetColor("_EmissionColor", owner.color);
+                renderer.SetPropertyBlock(block);
+
                 tmp.transform.localPosition = new Vector3(pos, 0.1f, 0f);
             }
             else
             {
                 tmp.transform.localPosition = new Vector3(pos, 0f, 0f);
             }
-            tmp.GetComponent<Renderer>().material = material;
-            tmp.transform.localScale = new Vector3(0.1f, 0.01f, (float)dimensions);
+
+            tmp.transform.localScale = new Vector3(0.1f, 0.1f, (float)dimensions);
             tmp.transform.parent = grid.transform;
             tmp.layer = 5;
         }
@@ -179,20 +183,24 @@ public class Board : MonoBehaviour
         {
             float pos = -(float)dimensions / 2f + y;
             GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Material material = gridMaterial;
+            Renderer renderer = tmp.GetComponent<Renderer>();
+            renderer.material = gridMaterial;
+
             if (y == 1 || y == dimensions - 1)
             {
-                material = new Material(gridMaterial);
-                material.SetColor("_Color", Color.clear);
-                material.SetColor("_EmissionColor", owner.color);
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
+                block.SetColor("_Color", Color.clear);
+                block.SetColor("_EmissionColor", owner.color);
+                renderer.SetPropertyBlock(block);
+
                 tmp.transform.localPosition = new Vector3(0f, 0.1f, pos);
             }
             else
             {
                 tmp.transform.localPosition = new Vector3(0f, 0f, pos);
             }
-            tmp.GetComponent<Renderer>().material = material;
-            tmp.transform.localScale = new Vector3((float)dimensions, 0.01f, 0.1f);
+
+            tmp.transform.localScale = new Vector3((float)dimensions, 0.1f, 0.1f);
             tmp.transform.parent = grid.transform;
             tmp.layer = 5;
         }
@@ -251,9 +259,10 @@ public class Board : MonoBehaviour
                 grid.name = "Player Icon";
                 Renderer tmp = grid.GetComponent<Renderer>();
                 tmp.material = gridMaterial;
-                tmp.material.SetColor("_Color", owner.color);
-                tmp.material.SetColor("_EmissionColor", Color.clear);
-
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
+                block.SetColor("_Color", owner.color);
+                block.SetColor("_EmissionColor", Color.clear);
+                tmp.SetPropertyBlock(block);
                 gridRendered = false;
                 owner.ShipsShown(false);
                 break;

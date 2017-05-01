@@ -515,9 +515,11 @@ public class ShipPlacer : MonoBehaviour
                 tmp.transform.parent = previewParent.transform;
 
                 Renderer renderer = tmp.GetComponent<Renderer>();
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
 
                 renderer.material = GameController.playerBoardMarkerMaterial;
-                renderer.material.SetColor("_Color", selectedTileColor);
+                block.SetColor("_Color", selectedTileColor);
+                renderer.SetPropertyBlock(block);
 
                 tmp.transform.localPosition = originPosition + Vector3.forward * i * 1.1f;
             }
