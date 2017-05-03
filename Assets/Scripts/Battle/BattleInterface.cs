@@ -271,11 +271,11 @@ public class BattleInterface : MonoBehaviour
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
                 recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.attackedTileWorldPosition + Vector3.up * 0.12f;
                 SquarePulserEffect effect = recentlyShotTileIndicator.GetComponent<SquarePulserEffect>();
-                effect.pulseInterval = 0.2f;
-                effect.insideLength = 1f;
+                effect.pulseInterval = 0.45f;
+                effect.insideLength = 0.9f;
                 effect.maxDistance = 2f;
-                effect.pulseSpeed = 10f;
-                effect.squareWidth = 0.2f;
+                effect.pulseSpeed = 7f;
+                effect.squareWidth = 0.35f;
                 effect.color = (battle.recentAttackInfo.hitShip != null) ? Color.red : Color.black;
                 break;
             case BattleState.TURN_FINISHED:

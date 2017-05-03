@@ -453,6 +453,25 @@ public class ShipPlacer : MonoBehaviour
 
                 while (shipsToPlace.Count > 0)
                 {
+                    if (validPositions.Count == 0)
+                    {
+                        selectedPositions = new List<Vector2>();
+                        foreach (BoardTile tile in player.board.tiles)
+                        {
+                            tile.containedShip = null;
+                        }
+
+                        foreach (Ship ship in player.allShips)
+                        {
+                            Destroy(ship.gameObject);
+                        }
+
+                        player.allShips = new List<Ship>();
+                        player.livingShips = new List<Ship>();
+                        i--;
+                        break;
+                    }
+
                     Vector2 pickedPosition = validPositions[(int)Random.Range(0f, validPositions.Count)];
 
                     SelectPosition(pickedPosition); //Select the tile to have the ship in it
