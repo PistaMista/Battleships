@@ -19,6 +19,10 @@ public class Interface : MonoBehaviour
     /// </summary>
     static Canvas currentMenu;
     /// <summary>
+    /// The last menu.
+    /// </summary>
+    static Canvas lastMenu;
+    /// <summary>
     /// Awake function.
     /// </summary>    
     void Awake()
@@ -36,16 +40,39 @@ public class Interface : MonoBehaviour
     /// <param name="menuName">Name of the menu to switch to. (The name of its game object)</param>
     public static void SwitchMenu(string menuName)
     {
-        if (menus[menuName] != currentMenu)
+        if (menus.ContainsKey(menuName))
         {
-            if (currentMenu != null)
+            if (menus[menuName] != currentMenu)
             {
-                currentMenu.gameObject.SetActive(false);
-            }
+                if (currentMenu != null)
+                {
+                    currentMenu.gameObject.SetActive(false);
+                }
 
-            currentMenu = menus[menuName];
-            currentMenu.gameObject.SetActive(true);
+                lastMenu = currentMenu;
+                currentMenu = menus[menuName];
+                currentMenu.gameObject.SetActive(true);
+            }
+        }
+        else
+        {
+            if (menuName == "Last")
+            {
+                Canvas menu = currentMenu;
+                currentMenu.gameObject.SetActive(false);
+                currentMenu = lastMenu;
+                currentMenu.gameObject.SetActive(true);
+                lastMenu = menu;
+            }
         }
     }
 
+    /// <summary>
+    /// Switches the menu by buttons.
+    /// </summary>
+    /// <param name="menuName"></param>
+    public void SwitchUIMenu(string menuName)
+    {
+        Interface.SwitchMenu(menuName);
+    }
 }
