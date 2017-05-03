@@ -231,4 +231,13 @@ public class Cameraman : MonoBehaviour
         bool cond3 = position1.transitionTime == position2.transitionTime;
         return cond1 && cond2 && cond3;
     }
+
+    /// <summary>
+    /// Function to set the blur by buttons.
+    /// </summary>
+    /// <param name="enabled"></param>
+    public void SetUIBlur(bool enabled)
+    {
+        Cameraman.SetBlur(enabled);
+    }
 }

@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: c8526d36c625b4a3395931ee0ccd083e
+timeCreated: 1493803909
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Cranberry Gin
+  fontNames:
+  - Cranberry Gin
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

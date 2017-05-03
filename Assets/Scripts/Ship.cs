@@ -76,6 +76,10 @@ public class Ship : MonoBehaviour
     /// </summary>
     public Ship targetedShip;
     /// <summary>
+	/// The list of players who are able to detect a ship in this tile, without shooting at it.
+	/// </summary>
+    public List<Player> revealedTo;
+    /// <summary>
     /// The awake function.
     /// </summary> 
     void Awake()
@@ -83,6 +87,7 @@ public class Ship : MonoBehaviour
         tiles = new Vector2[length];
         effects = new List<GameObject>();
         lengthRemaining = length;
+        revealedTo = new List<Player>();
     }
 
     /// <summary>

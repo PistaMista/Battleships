@@ -24,13 +24,13 @@ public class AerialViewActionShotModule : FleetAttackFormationBaseModule
             }
         }
 
-        if (Mathf.Abs(BattleInterface.battle.defendingPlayer.board.position.z) < Mathf.Abs(BattleInterface.battle.defendingPlayer.board.position.x))
+        if (Mathf.Abs(BattleInterface.battle.defendingPlayer.board.transform.position.z) < Mathf.Abs(BattleInterface.battle.defendingPlayer.board.transform.position.x))
         {
-            fleetPosition = BattleInterface.battle.defendingPlayer.board.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.position.x) * 1.5f;
+            fleetPosition = BattleInterface.battle.defendingPlayer.board.transform.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.x) * 1.5f;
         }
         else
         {
-            fleetPosition = BattleInterface.battle.defendingPlayer.board.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.position.z) * 1.5f;
+            fleetPosition = BattleInterface.battle.defendingPlayer.board.transform.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.z) * 1.5f;
         }
 
         fleetPosition.y = GameController.seaLevel;

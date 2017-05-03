@@ -133,6 +133,7 @@ public class ShipPlacer : MonoBehaviour
                     {
                         Ship lastShip = shipsToPlace[0];
                         FinishPlacingShip(); //Finish placing the ship
+                        player.board.Set(BoardState.PLACING);
                         if (shipsToPlace.Count == 0) //If all ships are placed...
                         {
                             Interface.SwitchMenu("Placing Done"); //Switch the interface to show a button to go to the next player
@@ -180,8 +181,8 @@ public class ShipPlacer : MonoBehaviour
 
         //processedShip.gameObject.SetActive(showShip); //Shows the ship
         //processedShip.transform.position = player.board.tiles[(int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].x, (int)selectedPositions[Mathf.CeilToInt((float)processedShip.length / 2f) - 1].y].worldPosition - Vector3.up * (GameController.playerBoardElevation - 0.4f); //Sets up the position of the ship
-        Vector3 position1 = player.board.tiles[(int)selectedPositions[0].x, (int)selectedPositions[0].y].worldPosition;
-        Vector3 position2 = player.board.tiles[(int)selectedPositions[selectedPositions.Count - 1].x, (int)selectedPositions[selectedPositions.Count - 1].y].worldPosition;
+        Vector3 position1 = player.board.tiles[(int)selectedPositions[0].x, (int)selectedPositions[0].y].transform.position;
+        Vector3 position2 = player.board.tiles[(int)selectedPositions[selectedPositions.Count - 1].x, (int)selectedPositions[selectedPositions.Count - 1].y].transform.position;
 
         processedShip.boardPosition = position1 + (position2 - position1) / 2f - Vector3.up * (GameController.playerBoardElevation - GameController.seaLevel);
         if ((selectedPositions[0] - selectedPositions[1]).x != 0) //Rotates the ship correctly
@@ -452,6 +453,25 @@ public class ShipPlacer : MonoBehaviour
 
                 while (shipsToPlace.Count > 0)
                 {
+                    if (validPositions.Count == 0)
+                    {
+                        selectedPositions = new List<Vector2>();
+                        foreach (BoardTile tile in player.board.tiles)
+                        {
+                            tile.containedShip = null;
+                        }
+
+                        foreach (Ship ship in player.allShips)
+                        {
+                            Destroy(ship.gameObject);
+                        }
+
+                        player.allShips = new List<Ship>();
+                        player.livingShips = new List<Ship>();
+                        i--;
+                        break;
+                    }
+
                     Vector2 pickedPosition = validPositions[(int)Random.Range(0f, validPositions.Count)];
 
                     SelectPosition(pickedPosition); //Select the tile to have the ship in it
@@ -502,7 +522,7 @@ public class ShipPlacer : MonoBehaviour
         {
             Destroy(previewParent);
             previewParent = new GameObject("Ship Preview");
-            previewParent.transform.position = player.board.position + (Vector3.left * ((float)player.board.dimensions / 2f + 1f));
+            previewParent.transform.position = player.board.transform.position + (Vector3.left * ((float)player.board.dimensions / 2f + 1f));
 
             currentlyPreviewed = ship;
             Vector3 originPosition = new Vector3(0f, 0f, -1.1f * (Mathf.Floor(ship.length / 2f) - (ship.length + 1) % 2 * 0.5f));
@@ -514,9 +534,11 @@ public class ShipPlacer : MonoBehaviour
                 tmp.transform.parent = previewParent.transform;
 
                 Renderer renderer = tmp.GetComponent<Renderer>();
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
 
                 renderer.material = GameController.playerBoardMarkerMaterial;
-                renderer.material.SetColor("_Color", selectedTileColor);
+                block.SetColor("_Color", selectedTileColor);
+                renderer.SetPropertyBlock(block);
 
                 tmp.transform.localPosition = originPosition + Vector3.forward * i * 1.1f;
             }

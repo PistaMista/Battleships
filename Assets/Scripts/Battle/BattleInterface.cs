@@ -87,11 +87,6 @@ public class BattleInterface : MonoBehaviour
             {
                 AIPlayerActions();
             }
-
-            if (battle.state == BattleState.SHOWING_HIT_TILE)
-            {
-                recentlyShotTileIndicator.transform.position = new Vector3(recentlyShotTileIndicator.transform.position.x, Mathf.SmoothDamp(recentlyShotTileIndicator.transform.position.y, GameController.playerBoardElevation + 0.1f, ref markerDescentSpeed, 0.2f, Mathf.Infinity), recentlyShotTileIndicator.transform.position.z);
-            }
         }
     }
 
@@ -164,8 +159,8 @@ public class BattleInterface : MonoBehaviour
     {
         foreach (Player player in battle.players)
         {
-            Vector3 corner1 = player.board.position - new Vector3(player.board.dimensions / 2f, 0f, player.board.dimensions / 2f);
-            Vector3 corner2 = player.board.position + new Vector3(player.board.dimensions / 2f, 0f, player.board.dimensions / 2f);
+            Vector3 corner1 = player.board.transform.position - new Vector3(player.board.dimensions / 2f, 0f, player.board.dimensions / 2f);
+            Vector3 corner2 = player.board.transform.position + new Vector3(player.board.dimensions / 2f, 0f, player.board.dimensions / 2f);
             Vector3 checkedPosition = InputController.currentInputPosition;
 
             if (checkedPosition.x > corner1.x && checkedPosition.x < corner2.x && checkedPosition.z > corner1.z && checkedPosition.z < corner2.z)
@@ -204,7 +199,9 @@ public class BattleInterface : MonoBehaviour
     /// <param name="player">The player, who's board to show.</param>
     static void ViewPlayer(Player player)
     {
+
         player.SetMacroMarker(-1);
+
         if (player == battle.attackingPlayer || (GameController.humanPlayers == 1 && !player.AI) || GameController.humanPlayers == 0)
         {
             player.board.Set(BoardState.FRIENDLY);
@@ -269,12 +266,17 @@ public class BattleInterface : MonoBehaviour
 
                 break;
             case BattleState.SHOWING_HIT_TILE:
-                battle.ChangeState(BattleState.TURN_FINISHED, 1f);
+                battle.ChangeState(BattleState.TURN_FINISHED, 1.5f);
                 ViewPlayer(battle.defendingPlayer);
                 recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
-                recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.attackedTileWorldPosition + Vector3.up * 3f;
-
-
+                recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.attackedTileWorldPosition + Vector3.up * 0.12f;
+                SquarePulserEffect effect = recentlyShotTileIndicator.GetComponent<SquarePulserEffect>();
+                effect.pulseInterval = 0.45f;
+                effect.insideLength = 0.9f;
+                effect.maxDistance = 2f;
+                effect.pulseSpeed = 7f;
+                effect.squareWidth = 0.35f;
+                effect.color = (battle.recentAttackInfo.hitShip != null) ? Color.red : Color.black;
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();

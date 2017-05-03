@@ -25,6 +25,9 @@ public class Actionman : MonoBehaviour
     public static void ActionView()
     {
         int randomModuleID = Random.Range(1, 3);
+        //TEST
+        randomModuleID = 1;
+        //TEST
         switch (randomModuleID)
         {
             case 1:

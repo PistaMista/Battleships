@@ -15,6 +15,10 @@ public class PlayerSelector : MonoBehaviour
     /// </summary>
     public Canvas defaultSelectionScreen;
     /// <summary>
+    /// The perimeter circle.
+    /// </summary>
+    public Image defaultPerimeter;
+    /// <summary>
     /// The selection screen.
     /// </summary>
     static Canvas selectionScreen;
@@ -55,6 +59,10 @@ public class PlayerSelector : MonoBehaviour
     /// Center anchors.
     /// </summary>
     static List<Image> centerAnchors;
+    /// <summary>
+    /// The perimeter circle.
+    /// </summary>
+    static Image perimeter;
 
     /// <summary>
     /// Awake function.
@@ -65,6 +73,9 @@ public class PlayerSelector : MonoBehaviour
         selectionScreen = defaultSelectionScreen;
         humanPlayerIcon = defaultHumanPlayerIcon;
         AIPlayerIcon = defaultAIPlayerIcon;
+        perimeter = defaultPerimeter;
+        perimeter.rectTransform.localScale = new Vector3(1, 1, 1) * Screen.height / 2f;
+
         //topAnchors = new List<Image>();
         //centerAnchors = new List<Image>();
         //UpdateGraphics();
@@ -96,7 +107,7 @@ public class PlayerSelector : MonoBehaviour
         {
             if (currentlyDragged != null)
             {
-                if (Vector2.Distance(new Vector2(Screen.width / 2f, Screen.height / 2f), currentlyDragged.rectTransform.position) < Screen.height / 3f)
+                if (Vector2.Distance(new Vector2(Screen.width / 2f, Screen.height / 2f), currentlyDragged.rectTransform.position) < Screen.height / 3.5f)
                 {
                     if (!selectedPlayers.ContainsKey(currentlyDragged.color))
                     {
@@ -146,14 +157,27 @@ public class PlayerSelector : MonoBehaviour
             }
 
             GameController.NewBattle(initializers, true);
-
-            Reset();
         }
     }
     /// <summary>
+    /// Code that gets executed when this object is deactivated in the scene.
+    /// </summary>
+    void OnDisable()
+    {
+        //Reset();
+    }
+    /// <summary>
+    /// Code that gets executed when this object is activated in the scene.
+    /// </summary>
+    void OnEnable()
+    {
+        Reset();
+    }
+
+    /// <summary>
     /// Resets the selection screen.
     /// </summary>
-    public static void Reset()
+    static void Reset()
     {
         if (anchors != null)
         {
