@@ -279,19 +279,25 @@ public class Board : MonoBehaviour
     }
 
     /// <summary>
-    /// Converts a position in the world to a position of the tile on this board.
+    /// Gets the board tile nearest to position.
     /// </summary>
-    /// <param name="position">The world position to convert.</param>
-    /// <returns>The converted board position.</returns>
-    public Vector2 WorldToTilePosition(Vector3 position)
+    /// <param name="position">The world position to search.</param>
+    /// <returns>The tile near position.</returns>
+    public BoardTile GetTileAtWorldPosition(Vector3 position)
     {
-        Vector3 result = position - this.transform.position + Vector3.one * ((float)dimensions / 2f);
-        if (result.x < 0 || result.x >= dimensions || result.z < 0 || result.z >= dimensions)
+        Vector3 pos = position - this.transform.position + Vector3.one * ((float)dimensions / 2f);
+        if (pos.x < 0 || pos.x >= dimensions || pos.z < 0 || pos.z >= dimensions)
         {
-            result = -Vector3.one;
+            pos = -Vector3.one;
         }
-
-        return new Vector2(Mathf.Floor(result.x), Mathf.Floor(result.z));
+        if (pos != -Vector3.one)
+        {
+            return tiles[(int)pos.x, (int)pos.z];
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /// <summary>

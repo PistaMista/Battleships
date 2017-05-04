@@ -90,10 +90,10 @@ public class ShipPlacer : MonoBehaviour
             if (InputController.beginPress && selectedPositions.Count == 0) //If the player presses the screen...
             {
                 placementLock = false; //Disable placement lock
-                Vector2 pos = player.board.WorldToTilePosition(InputController.currentInputPosition);
-                if (!(pos.x < 0))
+                BoardTile targetedTile = player.board.GetTileAtWorldPosition(InputController.currentInputPosition);
+                if (targetedTile != null)
                 {
-                    Ship targetShip = player.board.tiles[(int)pos.x, (int)pos.y].containedShip;
+                    Ship targetShip = targetedTile.containedShip;
                     if (targetShip) //If the player clicks on a tile containing a placed ship, remove it
                     {
                         for (int i = 0; i < targetShip.length; i++)
@@ -123,40 +123,42 @@ public class ShipPlacer : MonoBehaviour
 
             if (InputController.dragging && !placementLock)
             {
-                Vector2 candidatePosition = player.board.WorldToTilePosition(InputController.currentInputPosition);
-
-                if (validPositions.Contains(candidatePosition)) //If the positions being dragged over is valid, select it to contain the currently placed ship
+                BoardTile targetedTile = player.board.GetTileAtWorldPosition(InputController.currentInputPosition);
+                if (targetedTile != null)
                 {
-                    SelectPosition(candidatePosition); //Select the tile to have the ship in it
-
-                    if (selectedPositions.Count == shipsToPlace[0].length) //If the amount of selected tiles is equal to the ships length...
+                    if (validPositions.Contains(targetedTile.boardCoordinates)) //If the positions being dragged over is valid, select it to contain the currently placed ship
                     {
-                        Ship lastShip = shipsToPlace[0];
-                        FinishPlacingShip(); //Finish placing the ship
-                        player.board.Set(BoardState.PLACING);
-                        if (shipsToPlace.Count == 0) //If all ships are placed...
+                        SelectPosition(targetedTile.boardCoordinates); //Select the tile to have the ship in it
+
+                        if (selectedPositions.Count == shipsToPlace[0].length) //If the amount of selected tiles is equal to the ships length...
                         {
-                            Interface.SwitchMenu("Placing Done"); //Switch the interface to show a button to go to the next player
-                            foreach (Vector2 pos in validPositions) //Clear the tile colors of valid positions
+                            Ship lastShip = shipsToPlace[0];
+                            FinishPlacingShip(); //Finish placing the ship
+                            player.board.Set(BoardState.PLACING);
+                            if (shipsToPlace.Count == 0) //If all ships are placed...
                             {
-                                player.board.SetMarker(pos, Color.clear);
+                                Interface.SwitchMenu("Placing Done"); //Switch the interface to show a button to go to the next player
+                                foreach (Vector2 pos in validPositions) //Clear the tile colors of valid positions
+                                {
+                                    player.board.SetMarker(pos, Color.clear);
+                                }
+                                validPositions = new List<Vector2>(); //Clear the list of valid positions
+                                PlacementPreview(null);
                             }
-                            validPositions = new List<Vector2>(); //Clear the list of valid positions
-                            PlacementPreview(null);
-                        }
-                        else //If all ships are not placed...
-                        {
-                            RecalculateValidPositions(); //Recalculate the list of valid positions to start placing the next ship
-                            PlacementPreview(shipsToPlace[0]);
-                        }
+                            else //If all ships are not placed...
+                            {
+                                RecalculateValidPositions(); //Recalculate the list of valid positions to start placing the next ship
+                                PlacementPreview(shipsToPlace[0]);
+                            }
 
-                        placementLock = true; //Enable placement lock
-                        //player.ShipsShown(true);
-                        lastShip.gameObject.SetActive(true);
-                    }
-                    else //If the amount of selected tiles is not equal to the ship's length...
-                    {
-                        RecalculateValidPositions(); //Recalculate valid positions to place the next tile
+                            placementLock = true; //Enable placement lock
+                                                  //player.ShipsShown(true);
+                            lastShip.gameObject.SetActive(true);
+                        }
+                        else //If the amount of selected tiles is not equal to the ship's length...
+                        {
+                            RecalculateValidPositions(); //Recalculate valid positions to place the next tile
+                        }
                     }
                 }
             }

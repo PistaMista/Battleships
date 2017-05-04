@@ -11,19 +11,19 @@ public class Battle : MonoBehaviour
     public struct RecentAttackInformation
     {
         /// <summary>
-        /// The position which was attacked.
+        /// The position of the tile which was shot or the direction of launched torpedoes.
         /// </summary>
-        public Vector2 tilePosition;
+        public Vector2 target;
         /// <summary>
         /// The weapon used for the attack.
         /// </summary>
         public AttackType type;
         /// <summary>
-        /// Whether the hit ship was sunk by this attack.
+        /// Whether the hit ship was sunk by this attack. Deprecated.
         /// </summary>
         public bool shipSunk;
         /// <summary>
-        /// The ship which was hit.
+        /// The ship which was hit. Deprecated.
         /// </summary>
         public Ship hitShip;
         /// <summary>
@@ -164,9 +164,9 @@ public class Battle : MonoBehaviour
                     }
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
-                    Vector2 positionToShoot = ChooseTileToAttackForAIPlayer();
+                    BoardTile tileToShoot = ChooseTileToAttackForAIPlayer();
 
-                    Debug.Log(HitTile(positionToShoot));
+                    Debug.Log(ArtilleryAttack(tileToShoot));
 
                     ChangeState(BattleState.TURN_FINISHED, 0.2f);
                     break;
@@ -279,52 +279,26 @@ public class Battle : MonoBehaviour
     }
 
     /// <summary>
-    /// Registers a hit on the targeted player's tile.
+    /// Executes an artillery attack on the target tile of the defending player's board.
     /// </summary>
     /// <param name="tile">Position of the tile to hit.</param>
     /// <returns>Hit successful.</returns>
-    public bool HitTile(Vector2 tile)
+    public bool ArtilleryAttack(BoardTile tile)
     {
         if (defendingPlayer)
         {
-            if (defendingPlayer.board.IsPositionValid(tile))
+            if (tile != null)
             {
-                if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
+                if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile.boardCoordinates) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile.boardCoordinates))
                 {
-                    recentAttackInfo.tilePosition = tile;
-                    recentAttackInfo.attackedTileWorldPosition = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].transform.position;
+                    recentAttackInfo.target = tile.boardCoordinates;
+                    recentAttackInfo.attackedTileWorldPosition = tile.transform.position;
                     recentAttackInfo.type = AttackType.SHELL;
 
                     targetState = BattleState.TURN_FINISHED;
                     switchTime = 0.5f;
 
-
-
-                    if (defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip)
-                    {
-                        if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.eliminated)
-                        {
-                            attackingPlayer.hits[defendingPlayer.ID].Add(tile);
-                            recentAttackInfo.hitShip = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip;
-                            if (!defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit)
-                            {
-                                defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.RegisterHit();
-                                recentAttackInfo.shipSunk = defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].containedShip.eliminated;
-                            }
-                        }
-                        else
-                        {
-                            attackingPlayer.misses[defendingPlayer.ID].Add(tile);
-                            recentAttackInfo.hitShip = null;
-                        }
-                    }
-                    else
-                    {
-                        attackingPlayer.misses[defendingPlayer.ID].Add(tile);
-                        recentAttackInfo.hitShip = null;
-                    }
-
-                    defendingPlayer.board.tiles[(int)tile.x, (int)tile.y].hit = true;
+                    RegisterHitOnTile(tile);
 
                     if (onFire != null)
                     {
@@ -349,6 +323,39 @@ public class Battle : MonoBehaviour
 
         Debug.LogWarning("There was an attempt to shoot an invalid tile: " + tile + ". Things may break.");
         return false;
+    }
+
+    /// <summary>
+    /// Registers that a tile has been hit.
+    /// </summary>
+    /// <param name="tile">The tile that has been hit.</param>
+    public void RegisterHitOnTile(BoardTile tile)
+    {
+        if (tile.containedShip)
+        {
+            if (!tile.containedShip.eliminated)
+            {
+                attackingPlayer.hits[defendingPlayer.ID].Add(tile.boardCoordinates);
+                recentAttackInfo.hitShip = tile.containedShip;
+                if (!tile.hit)
+                {
+                    tile.containedShip.RegisterHit();
+                    recentAttackInfo.shipSunk = tile.containedShip.eliminated;
+                }
+            }
+            else
+            {
+                attackingPlayer.misses[defendingPlayer.ID].Add(tile.boardCoordinates);
+                recentAttackInfo.hitShip = null;
+            }
+        }
+        else
+        {
+            attackingPlayer.misses[defendingPlayer.ID].Add(tile.boardCoordinates);
+            recentAttackInfo.hitShip = null;
+        }
+
+        tile.hit = true;
     }
 
     /// <summary>
@@ -393,7 +400,7 @@ public class Battle : MonoBehaviour
     /// Calculates the optimal position of tile to attack for AI players.
     /// </summary>
     /// <returns>Position of optimal tile to target.</returns>
-    public Vector2 ChooseTileToAttackForAIPlayer()
+    public BoardTile ChooseTileToAttackForAIPlayer()
     {
         List<Vector2> hits = attackingPlayer.hits[defendingPlayer.ID];
         List<Vector2> misses = attackingPlayer.misses[defendingPlayer.ID];
@@ -510,7 +517,7 @@ public class Battle : MonoBehaviour
             }
         }
 
-        Vector2 result = Vector2.zero;
+        BoardTile result = null;
         //Choose a tile to attack
         int targetRank = Random.Range(0, highestRank - 1);
         //Choose a rank to pick a tile from
@@ -523,7 +530,8 @@ public class Battle : MonoBehaviour
             }
         }
 
-        result = rankedTiles[targetRank][Random.Range(0, rankedTiles[targetRank].Count - 1)];
+        Vector2 randomPosition = rankedTiles[targetRank][Random.Range(0, rankedTiles[targetRank].Count - 1)];
+        result = defendingPlayer.board.tiles[(int)randomPosition.x, (int)randomPosition.y];
 
         //Debug.Log(result);
         return result;
@@ -563,14 +571,14 @@ public class Battle : MonoBehaviour
     /// </summary>
     /// <param name="targetTile">The position of the tile to target.</param>
     /// <returns>The time it will take for the shells to arrive.</returns>
-    public float FireGunsAtTargetTile(Vector2 targetTile)
+    public float FireGunsAtTargetTile(BoardTile targetTile)
     {
         float highestTravelTime = 0f;
         foreach (Ship ship in attackingPlayer.livingShips)
         {
-            Vector3 targetPosition = defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].transform.position;
+            Vector3 targetPosition = targetTile.transform.position;
             targetPosition.y = 0f;
-            float travelTime = ship.PrepareToFireAt(targetPosition, defendingPlayer.board.tiles[(int)targetTile.x, (int)targetTile.y].containedShip);
+            float travelTime = ship.PrepareToFireAt(targetPosition, targetTile.containedShip);
             ship.Fire();
 
             if (travelTime > highestTravelTime)
