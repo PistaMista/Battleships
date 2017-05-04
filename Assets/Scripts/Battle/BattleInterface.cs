@@ -74,10 +74,10 @@ public class BattleInterface : MonoBehaviour
                         battle.switchTime = 0f;
                         break;
                     case BattleState.CHOOSING_TILE_TO_SHOOT:
-                        Vector2 candidateTargetPosition = battle.defendingPlayer.board.WorldToTilePosition(InputController.currentInputPosition);
+                        BoardTile candidateTargetTile = battle.defendingPlayer.board.GetTileAtWorldPosition(InputController.currentInputPosition);
 
 
-                        battle.HitTile(candidateTargetPosition);
+                        battle.ArtilleryAttack(candidateTargetTile);
 
 
                         break;
@@ -110,7 +110,7 @@ public class BattleInterface : MonoBehaviour
                     {
                         if (GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI && GameController.humanPlayers > 0)
                         {
-                            Debug.Log(battle.HitTile(battle.ChooseTileToAttackForAIPlayer()));
+                            Debug.Log(battle.ArtilleryAttack(battle.ChooseTileToAttackForAIPlayer()));
                         }
                         else
                         {
@@ -121,9 +121,9 @@ public class BattleInterface : MonoBehaviour
                     }
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
-                    Vector2 positionToShoot = battle.ChooseTileToAttackForAIPlayer();
+                    BoardTile tileToShoot = battle.ChooseTileToAttackForAIPlayer();
 
-                    battle.HitTile(positionToShoot);
+                    battle.ArtilleryAttack(tileToShoot);
                     break;
             }
         }
