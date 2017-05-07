@@ -243,8 +243,8 @@ public class GameController : MonoBehaviour
             {
                 if (x != i)
                 {
-                    player.hits.Add(x, new List<Vector2>());
-                    player.misses.Add(x, new List<Vector2>());
+                    player.hits.Add(x, new List<BoardTile>());
+                    player.misses.Add(x, new List<BoardTile>());
                 }
             }
         }

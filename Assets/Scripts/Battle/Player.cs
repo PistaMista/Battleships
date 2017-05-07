@@ -25,11 +25,11 @@ public class Player : MonoBehaviour
     /// <summary>
     /// The positions of tiles on enemy boards this player has hit.
     /// </summary>
-    public Dictionary<int, List<Vector2>> hits;
+    public Dictionary<int, List<BoardTile>> hits;
     /// <summary>
     /// The positions of tiles on enemy boards this player has missed.
     /// </summary>
-    public Dictionary<int, List<Vector2>> misses;
+    public Dictionary<int, List<BoardTile>> misses;
     /// <summary>
     /// Whether this player is controlled by AI.
     /// </summary>
@@ -56,8 +56,8 @@ public class Player : MonoBehaviour
     /// </summary>    
     void Awake()
     {
-        hits = new Dictionary<int, List<Vector2>>();
-        misses = new Dictionary<int, List<Vector2>>();
+        hits = new Dictionary<int, List<BoardTile>>();
+        misses = new Dictionary<int, List<BoardTile>>();
         allShips = new List<Ship>();
         livingShips = new List<Ship>();
     }

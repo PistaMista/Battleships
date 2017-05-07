@@ -85,7 +85,7 @@ public class BoardTile : MonoBehaviour
                         {
                             if (player.hits.ContainsKey(board.owner.ID))
                             {
-                                if (player.hits[board.owner.ID].Contains(boardCoordinates))
+                                if (player.hits[board.owner.ID].Contains(this))
                                 {
                                     hitBy.Add(player.color);
                                 }
@@ -116,12 +116,12 @@ public class BoardTile : MonoBehaviour
                 }
                 break;
             case BoardState.ENEMY:
-                if (board.owner.battle.attackingPlayer.hits[board.owner.ID].Contains(boardCoordinates))
+                if (board.owner.battle.attackingPlayer.hits[board.owner.ID].Contains(this))
                 {
                     SetMarker(Color.red, board.grid.transform);
                 }
 
-                if (board.owner.battle.attackingPlayer.misses[board.owner.ID].Contains(boardCoordinates))
+                if (board.owner.battle.attackingPlayer.misses[board.owner.ID].Contains(this))
                 {
                     SetMarker(Color.black, board.grid.transform);
                 }

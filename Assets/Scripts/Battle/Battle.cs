@@ -289,7 +289,7 @@ public class Battle : MonoBehaviour
         {
             if (tile != null)
             {
-                if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile.boardCoordinates) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile.boardCoordinates))
+                if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
                 {
                     recentAttackInfo.target = tile.boardCoordinates;
                     recentAttackInfo.attackedTileWorldPosition = tile.transform.position;
@@ -335,7 +335,7 @@ public class Battle : MonoBehaviour
         {
             if (!tile.containedShip.eliminated)
             {
-                attackingPlayer.hits[defendingPlayer.ID].Add(tile.boardCoordinates);
+                attackingPlayer.hits[defendingPlayer.ID].Add(tile);
                 recentAttackInfo.hitShip = tile.containedShip;
                 if (!tile.hit)
                 {
@@ -345,13 +345,13 @@ public class Battle : MonoBehaviour
             }
             else
             {
-                attackingPlayer.misses[defendingPlayer.ID].Add(tile.boardCoordinates);
+                attackingPlayer.misses[defendingPlayer.ID].Add(tile);
                 recentAttackInfo.hitShip = null;
             }
         }
         else
         {
-            attackingPlayer.misses[defendingPlayer.ID].Add(tile.boardCoordinates);
+            attackingPlayer.misses[defendingPlayer.ID].Add(tile);
             recentAttackInfo.hitShip = null;
         }
 
@@ -402,29 +402,29 @@ public class Battle : MonoBehaviour
     /// <returns>Position of optimal tile to target.</returns>
     public BoardTile ChooseTileToAttackForAIPlayer()
     {
-        List<Vector2> hits = attackingPlayer.hits[defendingPlayer.ID];
-        List<Vector2> misses = attackingPlayer.misses[defendingPlayer.ID];
+        List<BoardTile> hits = attackingPlayer.hits[defendingPlayer.ID];
+        List<BoardTile> misses = attackingPlayer.misses[defendingPlayer.ID];
 
-        List<Vector2> processedTiles = new List<Vector2>();
-        Dictionary<int, List<Vector2>> rankedTiles = new Dictionary<int, List<Vector2>>();
+        List<BoardTile> processedTiles = new List<BoardTile>();
+        Dictionary<int, List<BoardTile>> rankedTiles = new Dictionary<int, List<BoardTile>>();
 
         int highestRank = 0;
 
         for (int i = 1; i <= 10; i++)
         {
-            rankedTiles.Add(i, new List<Vector2>());
+            rankedTiles.Add(i, new List<BoardTile>());
         }
 
         Vector2[] cardinalDirections = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
 
         //Eliminate the misses
-        foreach (Vector2 miss in misses)
+        foreach (BoardTile miss in misses)
         {
             processedTiles.Add(miss);
         }
 
         //Analyze hits
-        foreach (Vector2 hit in hits)
+        foreach (BoardTile hit in hits)
         {
             if (!processedTiles.Contains(hit))
             {
@@ -434,10 +434,11 @@ public class Battle : MonoBehaviour
                 Vector2 examinedDirection = Vector2.zero;
                 foreach (Vector2 direction in cardinalDirections)
                 {
-                    Vector2 checkedPosition = hit + direction;
+                    Vector2 checkedPosition = hit.boardCoordinates + direction;
                     if (defendingPlayer.board.IsPositionValid(checkedPosition))
                     {
-                        if (hits.Contains(checkedPosition))
+                        BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
+                        if (hits.Contains(checkedTile))
                         {
                             examinedDirection = direction;
                             break;
@@ -451,22 +452,22 @@ public class Battle : MonoBehaviour
                     {
                         for (int i = 1; i < defendingPlayer.board.dimensions; i++)
                         {
-                            Vector2 checkedPosition = hit + examinedDirection * i * direction;
+                            Vector2 checkedPosition = hit.boardCoordinates + examinedDirection * i * direction;
                             if (defendingPlayer.board.IsPositionValid(checkedPosition))
                             {
-                                //if (!processedTiles.Contains(checkedPosition))
-                                //{
-                                processedTiles.Add(checkedPosition);
-                                if (!hits.Contains(checkedPosition) && !misses.Contains(checkedPosition))
+
+                                BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
+                                processedTiles.Add(checkedTile);
+                                if (!hits.Contains(checkedTile) && !misses.Contains(checkedTile))
                                 {
-                                    rankedTiles[10].Add(checkedPosition);
+                                    rankedTiles[10].Add(checkedTile);
                                     if (10 > highestRank)
                                     {
                                         highestRank = 10;
                                     }
                                     break;
                                 }
-                                else if (misses.Contains(checkedPosition))
+                                else if (misses.Contains(checkedTile))
                                 {
                                     break;
                                 }
@@ -483,14 +484,18 @@ public class Battle : MonoBehaviour
                 {
                     foreach (Vector2 direction in cardinalDirections)
                     {
-                        Vector2 checkedPosition = hit + direction;
-                        if (defendingPlayer.board.IsPositionValid(checkedPosition) && !processedTiles.Contains(checkedPosition))
+                        Vector2 checkedPosition = hit.boardCoordinates + direction;
+                        if (defendingPlayer.board.IsPositionValid(checkedPosition))
                         {
-                            processedTiles.Add(checkedPosition);
-                            rankedTiles[10].Add(checkedPosition);
-                            if (10 > highestRank)
+                            BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
+                            if (!processedTiles.Contains(checkedTile))
                             {
-                                highestRank = 10;
+                                processedTiles.Add(checkedTile);
+                                rankedTiles[10].Add(checkedTile);
+                                if (10 > highestRank)
+                                {
+                                    highestRank = 10;
+                                }
                             }
                         }
                     }
@@ -501,18 +506,14 @@ public class Battle : MonoBehaviour
 
 
         //Add the other tiles
-        for (int x = 0; x < defendingPlayer.board.dimensions; x++)
+        foreach (BoardTile candidateTile in defendingPlayer.board.tiles)
         {
-            for (int y = 0; y < defendingPlayer.board.dimensions; y++)
+            if (!processedTiles.Contains(candidateTile))
             {
-                Vector2 candidatePosition = new Vector2(x, y);
-                if (!processedTiles.Contains(candidatePosition))
+                rankedTiles[1].Add(candidateTile);
+                if (1 > highestRank)
                 {
-                    rankedTiles[1].Add(candidatePosition);
-                    if (1 > highestRank)
-                    {
-                        highestRank = 1;
-                    }
+                    highestRank = 1;
                 }
             }
         }
@@ -530,8 +531,7 @@ public class Battle : MonoBehaviour
             }
         }
 
-        Vector2 randomPosition = rankedTiles[targetRank][Random.Range(0, rankedTiles[targetRank].Count - 1)];
-        result = defendingPlayer.board.tiles[(int)randomPosition.x, (int)randomPosition.y];
+        result = rankedTiles[targetRank][Random.Range(0, rankedTiles[targetRank].Count - 1)];
 
         //Debug.Log(result);
         return result;
