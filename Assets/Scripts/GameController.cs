@@ -203,7 +203,7 @@ public class GameController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (state == GameState.TITLE && InputController.beginPress)
+        if (state == GameState.TITLE && InputController.GetBeginPress(63))
         {
             ChangeState(GameState.PLAYER_SELECTION);
         }
@@ -279,9 +279,7 @@ public class GameController : MonoBehaviour
     {
         switch (GameController.state)
         {
-            case GameState.PLAYER_SELECTION:
-                Cameraman.SetBlur(false);
-                break;
+
         }
         GameController.state = state;
         switch (state)
@@ -309,7 +307,6 @@ public class GameController : MonoBehaviour
                 Soundman.ChangeTrack(-1, true, false);
                 break;
             case GameState.PLAYER_SELECTION:
-                Cameraman.SetBlur(true);
                 Soundman.ChangeTrack(1, true, false);
                 Interface.SwitchMenu("Player Selection Screen");
                 break;

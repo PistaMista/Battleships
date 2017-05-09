@@ -87,7 +87,7 @@ public class ShipPlacer : MonoBehaviour
     {
         if (customers != null)
         {
-            if (InputController.beginPress && selectedPositions.Count == 0) //If the player presses the screen...
+            if (InputController.GetBeginPress(63) && selectedPositions.Count == 0) //If the player presses the screen...
             {
                 placementLock = false; //Disable placement lock
                 BoardTile targetedTile = player.board.GetTileAtWorldPosition(InputController.currentInputPosition);
@@ -121,7 +121,7 @@ public class ShipPlacer : MonoBehaviour
                 }
             }
 
-            if (InputController.dragging && !placementLock)
+            if (InputController.IsDragging(63) && !placementLock)
             {
                 BoardTile targetedTile = player.board.GetTileAtWorldPosition(InputController.currentInputPosition);
                 if (targetedTile != null)

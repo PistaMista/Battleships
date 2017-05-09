@@ -40,7 +40,7 @@ public class BattleInterface : MonoBehaviour
     {
         if (battle)
         {
-            if (InputController.beginPress && !battle.attackingPlayer.AI)
+            if (InputController.GetBeginPress(63) && !battle.attackingPlayer.AI)
             {
                 switch (battle.state)
                 {

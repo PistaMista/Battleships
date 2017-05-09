@@ -9,28 +9,28 @@ public class Interface : MonoBehaviour
     /// <summary>
     /// All the possible canvases to switch to.
     /// </summary>
-    public Canvas[] canvases;
+    public InterfaceScreen[] screens;
     /// <summary>
     /// All the possible menus.
     /// </summary>
-	static Dictionary<string, Canvas> menus;
+	static Dictionary<string, InterfaceScreen> menus;
     /// <summary>
     /// The current menu.
     /// </summary>
-    static Canvas currentMenu;
+    static InterfaceScreen currentMenu;
     /// <summary>
     /// The last menu.
     /// </summary>
-    static Canvas lastMenu;
+    static InterfaceScreen lastMenu;
     /// <summary>
     /// Awake function.
     /// </summary>    
     void Awake()
     {
-        menus = new Dictionary<string, Canvas>();
-        for (int i = 0; i < canvases.Length; i++)
+        menus = new Dictionary<string, InterfaceScreen>();
+        for (int i = 0; i < screens.Length; i++)
         {
-            menus.Add(canvases[i].name, canvases[i]);
+            menus.Add(screens[i].name, screens[i]);
         }
     }
 
@@ -47,20 +47,24 @@ public class Interface : MonoBehaviour
                 if (currentMenu != null)
                 {
                     currentMenu.gameObject.SetActive(false);
+                    currentMenu.OnSwitchFrom();
                 }
 
                 lastMenu = currentMenu;
                 currentMenu = menus[menuName];
                 currentMenu.gameObject.SetActive(true);
+                currentMenu.OnSwitchTo();
             }
         }
         else
         {
             if (menuName == "Last")
             {
-                Canvas menu = currentMenu;
+                InterfaceScreen menu = currentMenu;
                 currentMenu.gameObject.SetActive(false);
+                currentMenu.OnSwitchFrom();
                 currentMenu = lastMenu;
+                currentMenu.OnSwitchTo();
                 currentMenu.gameObject.SetActive(true);
                 lastMenu = menu;
             }

@@ -90,12 +90,12 @@ public class PlayerSelector : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (InputController.beginPress)
+        if (InputController.GetBeginPress(63))
         {
             currentlyDragged = GetAnchorAtPosition(InputController.currentScreenInputPosition);
         }
 
-        if (InputController.tap && currentlyDragged != null)
+        if (InputController.GetTap(63) && currentlyDragged != null)
         {
             if (selectedPlayers.ContainsKey(currentlyDragged.color))
             {
@@ -103,7 +103,7 @@ public class PlayerSelector : MonoBehaviour
             }
             UpdateGraphics();
         }
-        else if (InputController.endPress)
+        else if (InputController.GetEndPress(63))
         {
             if (currentlyDragged != null)
             {
@@ -133,7 +133,7 @@ public class PlayerSelector : MonoBehaviour
 
 
 
-        if (InputController.dragging && currentlyDragged != null)
+        if (InputController.IsDragging(63) && currentlyDragged != null)
         {
             currentlyDragged.rectTransform.position = InputController.currentScreenInputPosition;
         }
