@@ -21,7 +21,7 @@ public class Interface : MonoBehaviour
     /// <summary>
     /// The last menu.
     /// </summary>
-    static InterfaceScreen lastMenu;
+    static InterfaceScreen overrideMenu;
     /// <summary>
     /// Awake function.
     /// </summary>    
@@ -42,31 +42,54 @@ public class Interface : MonoBehaviour
     {
         if (menus.ContainsKey(menuName))
         {
-            if (menus[menuName] != currentMenu)
+            if (!menus[menuName].overrideMenuSwitching || overrideMenu == null)
             {
-                if (currentMenu != null)
+                if (menus[menuName] != currentMenu && overrideMenu == null)
                 {
-                    currentMenu.gameObject.SetActive(false);
-                    currentMenu.OnSwitchFrom();
-                }
+                    if (currentMenu != null)
+                    {
+                        currentMenu.gameObject.SetActive(false);
+                        currentMenu.OnSwitchFrom();
+                    }
 
-                lastMenu = currentMenu;
-                currentMenu = menus[menuName];
-                currentMenu.gameObject.SetActive(true);
-                currentMenu.OnSwitchTo();
+                    if (!menus[menuName].overrideMenuSwitching)
+                    {
+                        currentMenu = menus[menuName];
+                        currentMenu.gameObject.SetActive(true);
+                        currentMenu.OnSwitchTo();
+                    }
+                    else
+                    {
+                        overrideMenu = menus[menuName];
+                        overrideMenu.gameObject.SetActive(true);
+                        overrideMenu.OnSwitchTo();
+                    }
+                }
+            }
+            else
+            {
+                if (menus[menuName] != overrideMenu)
+                {
+                    overrideMenu.gameObject.SetActive(false);
+                    overrideMenu.OnSwitchFrom();
+
+                    overrideMenu = menus[menuName];
+                    overrideMenu.OnSwitchTo();
+                }
             }
         }
         else
         {
-            if (menuName == "Last")
+            if (menuName == "CANCEL_OVERRIDE" && overrideMenu != null)
             {
-                InterfaceScreen menu = currentMenu;
-                currentMenu.gameObject.SetActive(false);
-                currentMenu.OnSwitchFrom();
-                currentMenu = lastMenu;
-                currentMenu.OnSwitchTo();
-                currentMenu.gameObject.SetActive(true);
-                lastMenu = menu;
+                overrideMenu.gameObject.SetActive(false);
+                overrideMenu.OnSwitchFrom();
+                if (currentMenu != null)
+                {
+                    currentMenu.OnSwitchTo();
+                    currentMenu.gameObject.SetActive(true);
+                }
+                overrideMenu = null;
             }
         }
     }

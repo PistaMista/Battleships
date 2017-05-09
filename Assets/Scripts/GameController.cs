@@ -293,6 +293,7 @@ public class GameController : MonoBehaviour
                 }
 
                 Cameraman.TakePosition("Overhead Title View");
+                Interface.SwitchMenu("CANCEL_OVERRIDE");
                 Interface.SwitchMenu("Title Screen");
                 Soundman.ChangeTrack(0, true, true);
                 NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true) }, false);

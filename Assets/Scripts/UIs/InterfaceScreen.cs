@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class InterfaceScreen : MonoBehaviour
 {
-    public bool blur;
-    public int inputSecurityLevel;
+    public bool blur = false;
+    public int inputSecurityLevel = 63;
+    public bool overrideMenuSwitching = false;
 
     public virtual void OnSwitchTo()
     {
