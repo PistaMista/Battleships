@@ -44,25 +44,32 @@ public class Interface : MonoBehaviour
         {
             if (!menus[menuName].overrideMenuSwitching || overrideMenu == null)
             {
-                if (menus[menuName] != currentMenu && overrideMenu == null)
+                if (menus[menuName] != currentMenu)
                 {
-                    if (currentMenu != null)
+                    if (overrideMenu == null)
                     {
-                        currentMenu.gameObject.SetActive(false);
-                        currentMenu.OnSwitchFrom();
-                    }
+                        if (currentMenu != null)
+                        {
+                            currentMenu.gameObject.SetActive(false);
+                            currentMenu.OnSwitchFrom();
+                        }
 
-                    if (!menus[menuName].overrideMenuSwitching)
-                    {
-                        currentMenu = menus[menuName];
-                        currentMenu.gameObject.SetActive(true);
-                        currentMenu.OnSwitchTo();
+                        if (!menus[menuName].overrideMenuSwitching)
+                        {
+                            currentMenu = menus[menuName];
+                            currentMenu.gameObject.SetActive(true);
+                            currentMenu.OnSwitchTo();
+                        }
+                        else
+                        {
+                            overrideMenu = menus[menuName];
+                            overrideMenu.gameObject.SetActive(true);
+                            overrideMenu.OnSwitchTo();
+                        }
                     }
                     else
                     {
-                        overrideMenu = menus[menuName];
-                        overrideMenu.gameObject.SetActive(true);
-                        overrideMenu.OnSwitchTo();
+                        currentMenu = menus[menuName];
                     }
                 }
             }
