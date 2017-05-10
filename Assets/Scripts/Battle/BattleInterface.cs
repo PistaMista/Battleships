@@ -267,16 +267,32 @@ public class BattleInterface : MonoBehaviour
                 break;
             case BattleState.SHOWING_HIT_TILE:
                 battle.ChangeState(BattleState.TURN_FINISHED, 1.5f);
+                //DEPRECATED
                 ViewPlayer(battle.defendingPlayer);
-                recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
-                recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.attackedTileWorldPosition + Vector3.up * 0.12f;
-                SquarePulserEffect effect = recentlyShotTileIndicator.GetComponent<SquarePulserEffect>();
-                effect.pulseInterval = 0.45f;
-                effect.insideLength = 0.9f;
-                effect.maxDistance = 2f;
-                effect.pulseSpeed = 7f;
-                effect.squareWidth = 0.35f;
-                effect.color = (battle.recentAttackInfo.hitShip != null) ? Color.red : Color.black;
+                // recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
+                // recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.hitTiles + Vector3.up * 0.12f;
+                // SquarePulserEffect effect = recentlyShotTileIndicator.GetComponent<SquarePulserEffect>();
+                // effect.pulseInterval = 0.45f;
+                // effect.insideLength = 0.9f;
+                // effect.maxDistance = 2f;
+                // effect.pulseSpeed = 7f;
+                // effect.squareWidth = 0.35f;
+                // effect.color = (battle.recentAttackInfo.hitShips != null) ? Color.red : Color.black;
+                recentlyShotTileIndicator = new GameObject("Recent Hit Indicator");
+                foreach (BoardTile tile in battle.recentAttackInfo.hitTiles)
+                {
+                    GameObject tmp = Instantiate(recentlyShotTileMarker);
+                    tmp.transform.position = tile.transform.position + Vector3.up * 0.12f;
+                    tmp.transform.parent = recentlyShotTileIndicator.transform;
+                    SquarePulserEffect effect = tmp.GetComponent<SquarePulserEffect>();
+                    effect.pulseInterval = 0.45f;
+                    effect.insideLength = 0.9f;
+                    effect.maxDistance = 2f;
+                    effect.pulseSpeed = 7f;
+                    effect.squareWidth = 0.35f;
+                    effect.color = battle.recentAttackInfo.hitShips.Contains(tile.containedShip) ? Color.red : Color.black;
+                }
+                //DEPRECATED
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();

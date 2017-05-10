@@ -19,17 +19,17 @@ public class Battle : MonoBehaviour
         /// </summary>
         public AttackType type;
         /// <summary>
-        /// Whether the hit ship was sunk by this attack. Deprecated.
+        /// The ships which were sunk.
         /// </summary>
-        public bool shipSunk;
+        public List<Ship> sunkShips;
         /// <summary>
-        /// The ship which was hit. Deprecated.
+        /// The ships which were hit.
         /// </summary>
-        public Ship hitShip;
+        public List<Ship> hitShips;
         /// <summary>
-        /// The world position of the attacked tile.
+        /// The tiles which were hit.
         /// </summary>
-        public Vector3 attackedTileWorldPosition;
+        public List<BoardTile> hitTiles;
     }
     /// <summary>
     /// Whether the battle is in progress.
@@ -292,8 +292,12 @@ public class Battle : MonoBehaviour
                 if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
                 {
                     recentAttackInfo.target = tile.boardCoordinates;
-                    recentAttackInfo.attackedTileWorldPosition = tile.transform.position;
+                    //recentAttackInfo.attackedTileWorldPosition = tile.transform.position;
                     recentAttackInfo.type = AttackType.SHELL;
+
+                    recentAttackInfo.hitShips = new List<Ship>();
+                    recentAttackInfo.sunkShips = new List<Ship>();
+                    recentAttackInfo.hitTiles = new List<BoardTile>();
 
                     targetState = BattleState.TURN_FINISHED;
                     switchTime = 0.5f;
@@ -336,26 +340,31 @@ public class Battle : MonoBehaviour
             if (!tile.containedShip.eliminated)
             {
                 attackingPlayer.hits[defendingPlayer.ID].Add(tile);
-                recentAttackInfo.hitShip = tile.containedShip;
+                if (!recentAttackInfo.hitShips.Contains(tile.containedShip))
+                {
+                    recentAttackInfo.hitShips.Add(tile.containedShip);
+                }
                 if (!tile.hit)
                 {
                     tile.containedShip.RegisterHit();
-                    recentAttackInfo.shipSunk = tile.containedShip.eliminated;
+                    if (tile.containedShip.eliminated)
+                    {
+                        recentAttackInfo.sunkShips.Add(tile.containedShip);
+                    }
                 }
             }
             else
             {
                 attackingPlayer.misses[defendingPlayer.ID].Add(tile);
-                recentAttackInfo.hitShip = null;
             }
         }
         else
         {
             attackingPlayer.misses[defendingPlayer.ID].Add(tile);
-            recentAttackInfo.hitShip = null;
         }
 
         tile.hit = true;
+        recentAttackInfo.hitTiles.Add(tile);
     }
 
     /// <summary>
