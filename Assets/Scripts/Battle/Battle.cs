@@ -293,7 +293,7 @@ public class Battle : MonoBehaviour
                 {
                     recentAttackInfo.target = tile.boardCoordinates;
                     //recentAttackInfo.attackedTileWorldPosition = tile.transform.position;
-                    recentAttackInfo.type = AttackType.SHELL;
+                    recentAttackInfo.type = AttackType.ARTILLERY;
 
                     recentAttackInfo.hitShips = new List<Ship>();
                     recentAttackInfo.sunkShips = new List<Ship>();

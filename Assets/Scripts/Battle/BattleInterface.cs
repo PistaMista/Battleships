@@ -26,6 +26,11 @@ public class BattleInterface : MonoBehaviour
     static GameObject recentlyShotTileIndicator;
 
     /// <summary>
+    /// The weapon currently selected by the player.
+    /// </summary>
+    static AttackType selectedWeapon;
+
+    /// <summary>
     /// The awake function.
     /// </summary>
     void Awake()
@@ -57,6 +62,7 @@ public class BattleInterface : MonoBehaviour
                                         Interface.SwitchMenu("Attack Screen");
 
                                         battle.ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1f);
+                                        SelectWeapon(AttackType.ARTILLERY);
                                         ViewPlayer(candidatePlayer);
                                     }
                                 }
@@ -226,6 +232,7 @@ public class BattleInterface : MonoBehaviour
     {
         switchingFrom.SetMacroMarker(-1);
         switchingTo.SetMacroMarker(0);
+        SelectWeapon(AttackType.ARTILLERY);
 
         foreach (Ship ship in switchingFrom.allShips)
         {
@@ -326,5 +333,24 @@ public class BattleInterface : MonoBehaviour
         Cameraman.TakePosition("Overhead View", 0.45f);
         Interface.SwitchMenu("Overhead");
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
+    }
+
+    /// <summary>
+    /// Selects a weapon to use in the current attack.
+    /// </summary>
+    /// <param name="weapon">The type of weapon to select.</param>
+    static void SelectWeapon(AttackType weapon)
+    {
+        selectedWeapon = weapon;
+        if (!battle.attackingPlayer.AI)
+        {
+            switch (weapon)
+            {
+                case AttackType.ARTILLERY:
+                    break;
+                case AttackType.TORPEDO:
+                    break;
+            }
+        }
     }
 }

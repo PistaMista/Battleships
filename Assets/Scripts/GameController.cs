@@ -30,16 +30,16 @@ public enum GameState
 }
 
 /// <summary>
-/// All the possible damage types.
+/// All the possible attack types.
 /// </summary>
 public enum AttackType
 {
     /// <summary>
-    /// Artillery shell damage.
+    /// Artillery attacks.
     /// </summary>
-    SHELL,
+    ARTILLERY,
     /// <summary>
-    /// Torpedo damage.
+    /// Torpedo attacks.
     /// </summary>
     TORPEDO
 }

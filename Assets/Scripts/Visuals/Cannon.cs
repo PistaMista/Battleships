@@ -128,7 +128,7 @@ public class Cannon : Weapon
         shell.transform.parent = turret.ship.owner.battle.transform;
         shell.transform.position = transform.position + direction * barrel.transform.localScale.z;
         shell.TravelTime = GetTimeToTarget(turret.distanceToTarget);
-        shell.type = AttackType.SHELL;
+        shell.type = AttackType.ARTILLERY;
         shell.weapon = this;
         shell.Launch(direction * turret.projectileVelocity);
         return shell;

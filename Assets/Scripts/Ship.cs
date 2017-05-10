@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ShipType
+{
+    CRUISER,
+    BATTLESHIP,
+    DESTROYER
+}
 public class Ship : MonoBehaviour
 {
     /// <summary>
@@ -79,6 +85,10 @@ public class Ship : MonoBehaviour
 	/// The list of players who are able to detect a ship in this tile, without shooting at it.
 	/// </summary>
     public List<Player> revealedTo;
+    /// <summary>
+    /// The type of this ship.
+    /// </summary>
+    public ShipType type;
     /// <summary>
     /// The awake function.
     /// </summary> 
@@ -235,7 +245,7 @@ public class Ship : MonoBehaviour
     {
         switch (projectile.type)
         {
-            case AttackType.SHELL:
+            case AttackType.ARTILLERY:
                 if (eliminated && sinkTimeLeft > sinkTime)
                 {
                     BeginSinking();
