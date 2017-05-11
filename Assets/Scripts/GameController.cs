@@ -219,7 +219,7 @@ public class GameController : MonoBehaviour
         Player[] players = new Player[playersToAdd.Length];
         //state = GameState.PLACING_SHIPS;
         humanPlayers = 0;
-        playerBoardDimensions = Mathf.FloorToInt(Mathf.Sqrt((float)totalBoardTileLimit / (float)players.Length));
+        playerBoardDimensions = Mathf.Clamp(Mathf.FloorToInt(Mathf.Sqrt((float)totalBoardTileLimit / (float)players.Length)), 6, 20);
         //For all players create their own board
         for (int i = 0; i < players.Length; i++)
         {
