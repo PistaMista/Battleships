@@ -7,23 +7,12 @@ public class BattleInterface : MonoBehaviour
     /// <summary>
     /// The marker to show what tile is being shot.
     /// </summary>
-    public GameObject defaultRecentlyShotTileMarker;
-    /// <summary>
-    /// The marker to show what tile is being shot.
-    /// </summary>
     static GameObject recentlyShotTileMarker;
-    /// <summary>
-    /// The speed at which the marker lands on tile being shot.
-    /// </summary>
-    static float markerDescentSpeed;
     /// <summary>
     /// The battle the interface is attached to.
     /// </summary>
     public static Battle battle;
-    /// <summary>
-    /// The instance of the marker to show the tile being shot.
-    /// </summary>
-    static GameObject recentlyShotTileIndicator;
+
 
     /// <summary>
     /// The weapon currently selected by the player.
@@ -35,7 +24,6 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        recentlyShotTileMarker = defaultRecentlyShotTileMarker;
     }
 
     /// <summary>
@@ -154,7 +142,6 @@ public class BattleInterface : MonoBehaviour
     public static void Dettach()
     {
         battle = null;
-        Destroy(recentlyShotTileIndicator);
     }
 
     /// <summary>
@@ -252,7 +239,7 @@ public class BattleInterface : MonoBehaviour
         switch (switchingFrom)
         {
             case BattleState.SHOWING_HIT_TILE:
-                Destroy(recentlyShotTileIndicator);
+
                 break;
             case BattleState.FIRING:
                 foreach (Ship ship in battle.attackingPlayer.livingShips)
@@ -285,20 +272,6 @@ public class BattleInterface : MonoBehaviour
                 // effect.pulseSpeed = 7f;
                 // effect.squareWidth = 0.35f;
                 // effect.color = (battle.recentAttackInfo.hitShips != null) ? Color.red : Color.black;
-                recentlyShotTileIndicator = new GameObject("Recent Hit Indicator");
-                foreach (BoardTile tile in battle.recentAttackInfo.hitTiles)
-                {
-                    GameObject tmp = Instantiate(recentlyShotTileMarker);
-                    tmp.transform.position = tile.transform.position + Vector3.up * 0.12f;
-                    tmp.transform.parent = recentlyShotTileIndicator.transform;
-                    SquarePulserEffect effect = tmp.GetComponent<SquarePulserEffect>();
-                    effect.pulseInterval = 0.45f;
-                    effect.insideLength = 0.9f;
-                    effect.maxDistance = 2f;
-                    effect.pulseSpeed = 7f;
-                    effect.squareWidth = 0.35f;
-                    effect.color = battle.recentAttackInfo.hitShips.Contains(tile.containedShip) ? Color.red : Color.black;
-                }
                 //DEPRECATED
                 break;
             case BattleState.TURN_FINISHED:

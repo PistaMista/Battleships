@@ -104,11 +104,11 @@ public class ShipPlacer : MonoBehaviour
                         {
                             for (int i = 0; i < targetShip.length; i++)
                             {
-                                player.board.tiles[(int)targetShip.tiles[i].x, (int)targetShip.tiles[i].y].containedShip = null;
+                                targetShip.tiles[i].containedShip = null;
                                 player.board.SetMarker(targetShip.tiles[i], Color.clear);
                             }
 
-                            targetShip.tiles = new Vector2[targetShip.length];
+                            targetShip.tiles = new BoardTile[targetShip.length];
                             targetShip.gameObject.SetActive(false);
                             //player.allShips.Remove(targetShip);
                             //battle.ships.Remove(targetShip);
@@ -195,8 +195,9 @@ public class ShipPlacer : MonoBehaviour
         for (int i = 0; i < processedShip.length; i++)
         {
             Vector2 pos = selectedPositions[i];
-            player.board.tiles[(int)pos.x, (int)pos.y].containedShip = processedShip; //Marks the selected tiles, that they now contain a ship
-            processedShip.tiles[i] = pos; //Lets the ship know which tiles it is located in
+            BoardTile tile = player.board.tiles[(int)pos.x, (int)pos.y];
+            tile.containedShip = processedShip; //Marks the selected tiles, that they now contain a ship
+            processedShip.tiles[i] = tile; //Lets the ship know which tiles it is located in
         }
 
         //player.allShips.Add(processedShip); //Adds the ship to the players ship list

@@ -21,7 +21,7 @@ public class Ship : MonoBehaviour
     /// <summary>
     /// The positions on the board that this ship occupies.
     /// </summary>
-    public Vector2[] tiles;
+    public BoardTile[] tiles;
     /// <summary>
     /// Whether this ship has been eliminated.
     /// </summary>
@@ -94,7 +94,7 @@ public class Ship : MonoBehaviour
     /// </summary> 
     void Awake()
     {
-        tiles = new Vector2[length];
+        tiles = new BoardTile[length];
         effects = new List<GameObject>();
         lengthRemaining = length;
         revealedTo = new List<Player>();
@@ -266,5 +266,27 @@ public class Ship : MonoBehaviour
     {
         transform.position = boardPosition;
         transform.rotation = Quaternion.Euler(boardRotation);
+    }
+
+    /// <summary>
+    /// Checks if all the tiles of this ship are revealed to a player.
+    /// </summary>
+    /// <returns></returns>
+    public bool IsRevealedTo(Player player)
+    {
+        if (player == owner)
+        {
+            return true;
+        }
+
+        foreach (BoardTile tile in tiles)
+        {
+            if (!tile.revealedTo.Contains(player))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -28,9 +28,10 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
 
         if (BattleInterface.battle.recentAttackInfo.hitShips.Count > 0)
         {
-            if (BattleInterface.battle.recentAttackInfo.hitShips[0].eliminated)
+            Ship ship = BattleInterface.battle.recentAttackInfo.hitShips[0];
+            if (ship.eliminated && (ship.IsRevealedTo(BattleInterface.battle.attackingPlayer) || (GameController.humanPlayers == 1 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0))
             {
-                //killingShot = true;
+                killingShot = true;
             }
 
             if ((GameController.humanPlayers == 1 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0 || killingShot)

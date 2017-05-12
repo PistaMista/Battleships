@@ -302,7 +302,21 @@ public class Battle : MonoBehaviour
                     targetState = BattleState.TURN_FINISHED;
                     switchTime = 0.5f;
 
-                    RegisterHitOnTile(tile);
+                    if (tile.containedShip && Random.Range(0, 10) == 0)
+                    {
+                        if (!tile.containedShip.eliminated)
+                        {
+                            foreach (BoardTile t in tile.containedShip.tiles)
+                            {
+                                t.RevealTo(attackingPlayer);
+                                RegisterHitOnTile(t);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        RegisterHitOnTile(tile);
+                    }
 
                     if (onFire != null)
                     {
