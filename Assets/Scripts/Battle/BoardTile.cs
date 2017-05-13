@@ -107,13 +107,17 @@ public class BoardTile : MonoBehaviour
                     {
                         if (board.owner.battle.recentAttackInfo.hitTiles.Contains(this))
                         {
-                            flashColor = board.owner.battle.attackingPlayer.color;
-                            StartCoroutine(Flash(false));
+                            flashColor = board.owner.battle.recentAttackInfo.attacker.color;
+                            StartCoroutine(Flash(true));
                         }
                         else
                         {
                             flashColor = Color.clear;
                         }
+                    }
+                    else
+                    {
+                        flashColor = Color.clear;
                     }
                 }
                 else
@@ -132,6 +136,10 @@ public class BoardTile : MonoBehaviour
                             {
                                 flashColor = Color.clear;
                             }
+                        }
+                        else
+                        {
+                            flashColor = Color.clear;
                         }
                     }
                 }
@@ -160,14 +168,10 @@ public class BoardTile : MonoBehaviour
                     color = Color.magenta;
                 }
 
-                bool shipRevealed = true;
+                bool shipRevealed = false;
                 if (containedShip != null)
                 {
                     shipRevealed = containedShip.IsRevealedTo(board.owner.battle.attackingPlayer);
-                }
-                else
-                {
-                    shipRevealed = false;
                 }
 
                 if (!shipRevealed)
@@ -182,7 +186,7 @@ public class BoardTile : MonoBehaviour
                 }
 
                 color.a = 0.4f;
-                if (board.owner.battle.recentAttackInfo.hitTiles != null)
+                if (board.owner.battle.recentAttackInfo.hitTiles != null && board.owner.battle.state == BattleState.SHOWING_HIT_TILE)
                 {
                     if (board.owner.battle.recentAttackInfo.hitTiles.Contains(this))
                     {
@@ -193,6 +197,10 @@ public class BoardTile : MonoBehaviour
                     {
                         flashColor = Color.clear;
                     }
+                }
+                else
+                {
+                    flashColor = Color.clear;
                 }
 
                 break;

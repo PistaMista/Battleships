@@ -74,7 +74,7 @@ public class PlayerSelector : MonoBehaviour
         humanPlayerIcon = defaultHumanPlayerIcon;
         AIPlayerIcon = defaultAIPlayerIcon;
         perimeter = defaultPerimeter;
-        perimeter.rectTransform.localScale = new Vector3(1, 1, 1) * Screen.height / 2f;
+        perimeter.rectTransform.localScale = new Vector3(1, 1, 1) * Screen.height / 2f * (1200f / Screen.width);
 
         //topAnchors = new List<Image>();
         //centerAnchors = new List<Image>();
@@ -244,7 +244,7 @@ public class PlayerSelector : MonoBehaviour
 
         for (int i = 0; i < topAnchors.Count; i++)
         {
-            topAnchors[i].rectTransform.position = new Vector2(lengthStep * (i + 1), Screen.height - topAnchors[i].rectTransform.rect.height);
+            topAnchors[i].rectTransform.position = new Vector2(lengthStep * (i + 1), (Screen.height - topAnchors[i].rectTransform.rect.height / (1200f / Screen.width)));
             topAnchors[i].rectTransform.rotation = Quaternion.Euler(Vector3.zero);
         }
 

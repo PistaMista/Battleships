@@ -11,6 +11,10 @@ public class Battle : MonoBehaviour
     public struct RecentAttackInformation
     {
         /// <summary>
+        /// The attacker this turn.
+        /// </summary>
+        public Player attacker;
+        /// <summary>
         /// The position of the tile which was shot or the direction of launched torpedoes.
         /// </summary>
         public Vector2 target;
@@ -294,6 +298,7 @@ public class Battle : MonoBehaviour
                     recentAttackInfo.target = tile.boardCoordinates;
                     //recentAttackInfo.attackedTileWorldPosition = tile.transform.position;
                     recentAttackInfo.type = AttackType.ARTILLERY;
+                    recentAttackInfo.attacker = attackingPlayer;
 
                     recentAttackInfo.hitShips = new List<Ship>();
                     recentAttackInfo.sunkShips = new List<Ship>();
