@@ -33,7 +33,7 @@ public class ShipPlacer : MonoBehaviour
     /// <summary>
     /// The ship loadout for each player.
     /// </summary>
-    static GameObject[] shipLoadout;
+    public static GameObject[] shipLoadout;
     /// <summary>
     /// The ID of the player currently having his ships placed.
     /// </summary>

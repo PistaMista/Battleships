@@ -7,6 +7,14 @@ public class PlayerSelector : MonoBehaviour
 {
     //The colors of players which will be available
     /// <summary>
+    /// The slider used to select board dimensions.
+    /// </summary>
+    public Slider defaultBoardDimensionSelector;
+    /// <summary>
+    /// Text to display the estimated game time.
+    /// </summary>
+    public Text defaultGameTimeIndicator;
+    /// <summary>
     /// The available player colors.
     /// </summary>
     public Color[] defaultAvailablePlayerColors;
@@ -63,6 +71,14 @@ public class PlayerSelector : MonoBehaviour
     /// The perimeter circle.
     /// </summary>
     static Image perimeter;
+    /// <summary>
+    /// The slider used to select board dimensions.
+    /// </summary>
+    static Slider boardDimensionSelector;
+    /// <summary>
+    /// Text to display estimated game time.
+    /// </summary>
+    static Text gameTimeIndicator;
 
     /// <summary>
     /// Awake function.
@@ -75,6 +91,8 @@ public class PlayerSelector : MonoBehaviour
         AIPlayerIcon = defaultAIPlayerIcon;
         perimeter = defaultPerimeter;
         perimeter.rectTransform.localScale = new Vector3(1, 1, 1) * Screen.height / 2f * (1200f / Screen.width);
+        boardDimensionSelector = defaultBoardDimensionSelector;
+        gameTimeIndicator = defaultGameTimeIndicator;
 
         //topAnchors = new List<Image>();
         //centerAnchors = new List<Image>();
@@ -126,7 +144,7 @@ public class PlayerSelector : MonoBehaviour
                     }
                 }
             }
-
+            UpdateEstGameTime();
             UpdateGraphics();
             currentlyDragged = null;
         }
@@ -153,7 +171,7 @@ public class PlayerSelector : MonoBehaviour
             for (int i = 0; i < centerAnchors.Count; i++)
             {
 
-                initializers[i] = new GameController.PlayerInitializer(centerAnchors[i].color, selectedPlayers[centerAnchors[i].color]);
+                initializers[i] = new GameController.PlayerInitializer(centerAnchors[i].color, selectedPlayers[centerAnchors[i].color], (int)boardDimensionSelector.value);
             }
 
             GameController.NewBattle(initializers, true);
@@ -278,5 +296,13 @@ public class PlayerSelector : MonoBehaviour
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Executed when the player changes the board dimensions using the slider.
+    /// </summary>
+    public void UpdateEstGameTime()
+    {
+        gameTimeIndicator.text = Mathf.CeilToInt(GameController.GetGameTime(centerAnchors.Count, (int)boardDimensionSelector.value) / 60f).ToString() + " minutes.";
     }
 }

@@ -75,7 +75,7 @@ public class BoardTile : MonoBehaviour
         switch (boardState)
         {
             case BoardState.OVERHEAD:
-                flashColor = Color.clear;
+                flashFallColor = Color.clear;
                 break;
             case BoardState.FRIENDLY:
                 if (containedShip != null)
@@ -107,17 +107,17 @@ public class BoardTile : MonoBehaviour
                     {
                         if (board.owner.battle.recentAttackInfo.hitTiles.Contains(this))
                         {
-                            flashColor = board.owner.battle.recentAttackInfo.attacker.color;
+                            flashFallColor = board.owner.battle.recentAttackInfo.attacker.color;
                             StartCoroutine(Flash(true));
                         }
                         else
                         {
-                            flashColor = Color.clear;
+                            flashFallColor = Color.clear;
                         }
                     }
                     else
                     {
-                        flashColor = Color.clear;
+                        flashFallColor = Color.clear;
                     }
                 }
                 else
@@ -129,17 +129,17 @@ public class BoardTile : MonoBehaviour
                         {
                             if (board.owner.battle.recentAttackInfo.hitTiles.Contains(this))
                             {
-                                flashColor = Color.black;
+                                flashFallColor = Color.black;
                                 StartCoroutine(Flash(false));
                             }
                             else
                             {
-                                flashColor = Color.clear;
+                                flashFallColor = Color.clear;
                             }
                         }
                         else
                         {
-                            flashColor = Color.clear;
+                            flashFallColor = Color.clear;
                         }
                     }
                 }
@@ -190,17 +190,17 @@ public class BoardTile : MonoBehaviour
                 {
                     if (board.owner.battle.recentAttackInfo.hitTiles.Contains(this))
                     {
-                        flashColor = color;
+                        flashFallColor = color;
                         StartCoroutine(Flash(shipRevealed));
                     }
                     else
                     {
-                        flashColor = Color.clear;
+                        flashFallColor = Color.clear;
                     }
                 }
                 else
                 {
-                    flashColor = Color.clear;
+                    flashFallColor = Color.clear;
                 }
 
                 break;
@@ -393,7 +393,7 @@ public class BoardTile : MonoBehaviour
     /// <summary>
     /// The color which this tile will flash when hit.
     /// </summary>
-    Color flashColor;
+    Color flashFallColor;
     /// <summary>
     /// Whether the tile has flashed.
     /// </summary>
@@ -409,11 +409,11 @@ public class BoardTile : MonoBehaviour
         {
             if (sideStrips)
             {
-                DrawSideStrips(new Color[] { flashColor });
+                DrawSideStrips(new Color[] { flashFallColor });
             }
             else
             {
-                SetMarker(flashColor, board.grid.transform);
+                SetMarker(flashFallColor, board.grid.transform);
             }
         }
         else
@@ -431,9 +431,13 @@ public class BoardTile : MonoBehaviour
         flashed = !flashed;
 
         yield return new WaitForSeconds(0.35f);
-        if (flashColor != Color.clear && marker != null)
+        if (flashFallColor != Color.clear && marker != null)
         {
             StartCoroutine(Flash(sideStrips));
+        }
+        else
+        {
+            flashed = false;
         }
     }
 }
