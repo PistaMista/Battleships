@@ -8,6 +8,7 @@ public enum ShipType
     BATTLESHIP,
     DESTROYER
 }
+
 public class Ship : MonoBehaviour
 {
     /// <summary>
@@ -59,15 +60,6 @@ public class Ship : MonoBehaviour
     /// The sinking time left.
     /// </summary>
     float sinkTimeLeft;
-
-    /// <summary>
-    /// The time it will take for incoming projectiles to arrive. Deprecated.
-    /// </summary>
-    float incomingProjectileTravelTime = -1f;
-    /// <summary>
-    /// The type of incoming projectile. Deprecated.
-    /// </summary>
-    AttackType incomingProjectileDamageType;
 
     /// <summary>
     /// The world position of this ship's place on the playing board.

@@ -26,9 +26,9 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
 
         List<Turret> availableTurrets = new List<Turret>();
 
-        if (BattleInterface.battle.recentAttackInfo.hitShips.Count > 0)
+        if (BattleInterface.battle.recentTurnInformation.hitShips.Count > 0)
         {
-            Ship ship = BattleInterface.battle.recentAttackInfo.hitShips[0];
+            Ship ship = BattleInterface.battle.recentTurnInformation.hitShips[0];
             if (ship.eliminated && (ship.IsRevealedTo(BattleInterface.battle.attackingPlayer) || (GameController.humanPlayers == 1 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0))
             {
                 killingShot = true;
@@ -36,14 +36,14 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
 
             if ((GameController.humanPlayers == 1 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0 || killingShot)
             {
-                BattleInterface.battle.recentAttackInfo.hitShips[0].gameObject.SetActive(true);
+                BattleInterface.battle.recentTurnInformation.hitShips[0].gameObject.SetActive(true);
             }
         }
 
         foreach (Ship ship in attackers)
         {
             //ship.PrepareToFireAt(BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition, BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].containedShip);
-            ship.PrepareToFireAt(BattleInterface.battle.recentAttackInfo.hitTiles[0].transform.position, BattleInterface.battle.recentAttackInfo.hitShips.Count > 0 ? BattleInterface.battle.recentAttackInfo.hitShips[0] : null);
+            ship.PrepareToFireAt(BattleInterface.battle.recentTurnInformation.hitTiles[0].transform.position, BattleInterface.battle.recentTurnInformation.hitShips.Count > 0 ? BattleInterface.battle.recentTurnInformation.hitShips[0] : null);
             foreach (Turret turret in ship.turrets)
             {
                 if (turret.canFire && !turret.ignoredByActionCamera)
@@ -175,7 +175,7 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
 
     void CalculateEndStageCameraOffsetDirection()
     {
-        finalStageCameraOffset = -(BattleInterface.battle.recentAttackInfo.hitTiles[0].transform.position - selectedTurret.transform.position).normalized;
+        finalStageCameraOffset = -(BattleInterface.battle.recentTurnInformation.hitTiles[0].transform.position - selectedTurret.transform.position).normalized;
     }
 
     void EndStageCamera()
@@ -187,7 +187,7 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
             float elevation = 15f;
             float transitionTime = 0.6f;
             float horizontalDistance = Mathf.Tan((90f - angle.x) * Mathf.Deg2Rad) * elevation;
-            Vector3 position = BattleInterface.battle.recentAttackInfo.hitTiles[0].transform.position - finalStageCameraOffset * horizontalDistance;
+            Vector3 position = BattleInterface.battle.recentTurnInformation.hitTiles[0].transform.position - finalStageCameraOffset * horizontalDistance;
             position.y = elevation;
             Cameraman.TakePosition(new Cameraman.CameraPosition(transitionTime, position, angle));
         }
@@ -197,7 +197,7 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
             float elevation = 8f;
             float transitionTime = 0.5f;
             float horizontalDistance = Mathf.Tan((90f - angle.x) * Mathf.Deg2Rad) * elevation;
-            Vector3 position = BattleInterface.battle.recentAttackInfo.hitTiles[0].transform.position + finalStageCameraOffset * horizontalDistance;
+            Vector3 position = BattleInterface.battle.recentTurnInformation.hitTiles[0].transform.position + finalStageCameraOffset * horizontalDistance;
             position.y = elevation;
             Cameraman.TakePosition(new Cameraman.CameraPosition(transitionTime, position, angle));
         }

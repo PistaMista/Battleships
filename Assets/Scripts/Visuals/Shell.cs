@@ -47,10 +47,10 @@ public class Shell : Projectile
     public void Launch(Vector3 velocity)
     {
         this.velocity = velocity;
-        miss = weapon.turret.ship.owner.battle.recentAttackInfo.hitShips.Count == 0;
+        miss = weapon.turret.ship.owner.battle.recentTurnInformation.hitShips.Count == 0;
         if (!miss)
         {
-            miss = weapon.turret.ship.owner.battle.recentAttackInfo.hitShips[0].eliminated && !weapon.turret.ship.owner.battle.recentAttackInfo.sunkShips.Contains(weapon.turret.ship.targetedShip);
+            miss = weapon.turret.ship.owner.battle.recentTurnInformation.hitShips[0].eliminated && !weapon.turret.ship.owner.battle.recentTurnInformation.sunkShips.Contains(weapon.turret.ship.targetedShip);
         }
     }
 }

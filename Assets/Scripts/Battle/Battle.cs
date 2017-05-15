@@ -5,36 +5,7 @@ public enum BattleState { CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_
 
 public class Battle : MonoBehaviour
 {
-    /// <summary>
-    /// Holds the information about the most recent attack.
-    /// </summary>
-    public struct RecentAttackInformation
-    {
-        /// <summary>
-        /// The attacker this turn.
-        /// </summary>
-        public Player attacker;
-        /// <summary>
-        /// The position of the tile which was shot or the direction of launched torpedoes.
-        /// </summary>
-        public Vector2 target;
-        /// <summary>
-        /// The weapon used for the attack.
-        /// </summary>
-        public AttackType type;
-        /// <summary>
-        /// The ships which were sunk.
-        /// </summary>
-        public List<Ship> sunkShips;
-        /// <summary>
-        /// The ships which were hit.
-        /// </summary>
-        public List<Ship> hitShips;
-        /// <summary>
-        /// The tiles which were hit.
-        /// </summary>
-        public List<BoardTile> hitTiles;
-    }
+
     /// <summary>
     /// Whether the battle is in progress.
     /// </summary>
@@ -112,7 +83,7 @@ public class Battle : MonoBehaviour
     /// <summary>
     /// Stores information about the most recent attack.
     /// </summary>
-    public RecentAttackInformation recentAttackInfo;
+    public MoveInformator recentTurnInformation;
 
 
     /// <summary>
@@ -216,6 +187,8 @@ public class Battle : MonoBehaviour
 
         attackingPlayerID = -1;
         NextPlayer();
+        recentTurnInformation = (MoveInformator)ScriptableObject.CreateInstance("MoveInformator");
+        recentTurnInformation.Reset();
 
         if (isMainBattle)
         {
@@ -295,14 +268,11 @@ public class Battle : MonoBehaviour
             {
                 if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
                 {
-                    recentAttackInfo.target = tile.boardCoordinates;
-                    //recentAttackInfo.attackedTileWorldPosition = tile.transform.position;
-                    recentAttackInfo.type = AttackType.ARTILLERY;
-                    recentAttackInfo.attacker = attackingPlayer;
-
-                    recentAttackInfo.hitShips = new List<Ship>();
-                    recentAttackInfo.sunkShips = new List<Ship>();
-                    recentAttackInfo.hitTiles = new List<BoardTile>();
+                    recentTurnInformation.Reset();
+                    recentTurnInformation.target = tile.boardCoordinates;
+                    //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
+                    recentTurnInformation.type = AttackType.ARTILLERY;
+                    recentTurnInformation.attacker = attackingPlayer;
 
                     targetState = BattleState.TURN_FINISHED;
                     switchTime = 0.5f;
@@ -359,16 +329,16 @@ public class Battle : MonoBehaviour
             if (!tile.containedShip.eliminated)
             {
                 attackingPlayer.hits[defendingPlayer.ID].Add(tile);
-                if (!recentAttackInfo.hitShips.Contains(tile.containedShip))
+                if (!recentTurnInformation.hitShips.Contains(tile.containedShip))
                 {
-                    recentAttackInfo.hitShips.Add(tile.containedShip);
+                    recentTurnInformation.hitShips.Add(tile.containedShip);
                 }
                 if (!tile.hit)
                 {
                     tile.containedShip.RegisterHit();
                     if (tile.containedShip.eliminated)
                     {
-                        recentAttackInfo.sunkShips.Add(tile.containedShip);
+                        recentTurnInformation.sunkShips.Add(tile.containedShip);
                     }
                 }
             }
@@ -383,7 +353,7 @@ public class Battle : MonoBehaviour
         }
 
         tile.hit = true;
-        recentAttackInfo.hitTiles.Add(tile);
+        recentTurnInformation.hitTiles.Add(tile);
     }
 
     /// <summary>
