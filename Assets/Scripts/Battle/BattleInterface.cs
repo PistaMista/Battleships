@@ -24,6 +24,7 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     void Awake()
     {
+        torpedoTargetingLine = defaultTorpedoTargetingLine;
     }
 
     /// <summary>
@@ -68,10 +69,18 @@ public class BattleInterface : MonoBehaviour
                         battle.switchTime = 0f;
                         break;
                     case BattleState.CHOOSING_TILE_TO_SHOOT:
-                        BoardTile candidateTargetTile = battle.defendingPlayer.board.GetTileAtWorldPosition(InputController.currentInputPosition);
+                        switch (selectedWeapon)
+                        {
+                            case AttackType.ARTILLERY:
+                                BoardTile candidateTargetTile = battle.defendingPlayer.board.GetTileAtWorldPosition(InputController.currentInputPosition);
 
 
-                        battle.ArtilleryAttack(candidateTargetTile);
+                                battle.ArtilleryAttack(candidateTargetTile);
+                                break;
+                            case AttackType.TORPEDO:
+                                RefreshTorpedoTargeting();
+                                break;
+                        }
 
 
                         break;
@@ -170,6 +179,7 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     static void SetUpOverhead()
     {
+        ResetTargetingUI();
         foreach (Player player in battle.players)
         {
             player.board.Set(BoardState.OVERHEAD);
@@ -250,6 +260,9 @@ public class BattleInterface : MonoBehaviour
 
 
                 break;
+            case BattleState.CHOOSING_TILE_TO_SHOOT:
+                ResetTargetingUI();
+                break;
         }
 
         switch (switchingTo)
@@ -317,13 +330,60 @@ public class BattleInterface : MonoBehaviour
         selectedWeapon = weapon;
         if (!battle.attackingPlayer.AI)
         {
+            Debug.Log("Selected weapon: " + weapon.ToString());
+            ResetTargetingUI();
             switch (weapon)
             {
                 case AttackType.ARTILLERY:
                     break;
                 case AttackType.TORPEDO:
+                    torpedoTargetingLine.SetActive(true);
+                    Vector3 relativePosition = battle.defendingPlayer.board.transform.position - battle.GetTorpedoLaunchPosition();
+                    torpedoTargetingLine.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
+                    torpedoTargetingLine.transform.position = battle.GetTorpedoLaunchPosition() + Vector3.up * battle.defendingPlayer.board.transform.position.y;
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// The line used to show torpedo firing direction.
+    /// </summary>
+    public GameObject defaultTorpedoTargetingLine;
+    static GameObject torpedoTargetingLine;
+
+    /// <summary>
+    /// Selects a weapon, using the UI.
+    /// </summary>
+    /// <param name="weapon"></param>
+    public void SelectUIWeapon(string weapon)
+    {
+        switch (weapon)
+        {
+            case "artillery":
+                SelectWeapon(AttackType.ARTILLERY);
+                break;
+            case "torpedoes":
+                SelectWeapon(AttackType.TORPEDO);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Updates the torpedo targeting line.
+    /// </summary>
+    static void RefreshTorpedoTargeting()
+    {
+        Vector3 relativePosition = InputController.currentInputPosition - torpedoTargetingLine.transform.position;
+        torpedoTargetingLine.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
+
+    }
+
+    /// <summary>
+    /// Resets the targeting interface.
+    /// </summary>
+    static void ResetTargetingUI()
+    {
+        torpedoTargetingLine.SetActive(false);
     }
 }

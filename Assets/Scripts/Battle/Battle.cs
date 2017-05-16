@@ -594,4 +594,25 @@ public class Battle : MonoBehaviour
 
         return highestTravelTime;
     }
+
+    /// <summary>
+    /// Returns the position from which torpedoes will be launched if the player decides to use them.
+    /// </summary>
+    /// <returns></returns>
+    public Vector3 GetTorpedoLaunchPosition()
+    {
+        Vector3 position = Vector2.zero;
+
+        if (Mathf.Abs(defendingPlayer.board.transform.position.z) < Mathf.Abs(defendingPlayer.board.transform.position.x))
+        {
+            position = defendingPlayer.board.transform.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(defendingPlayer.board.transform.position.x);
+        }
+        else
+        {
+            position = defendingPlayer.board.transform.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(defendingPlayer.board.transform.position.z);
+        }
+
+        position.y = 0;
+        return position;
+    }
 }
