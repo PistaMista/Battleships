@@ -5,6 +5,14 @@ using UnityEngine;
 public class MoveInformator : ScriptableObject
 {
     /// <summary>
+    /// Provides information about torpedo attacks.
+    /// </summary>
+    public struct TorpedoInfo
+    {
+
+    }
+
+    /// <summary>
     /// The attacker this turn.
     /// </summary>
     public Player attacker;

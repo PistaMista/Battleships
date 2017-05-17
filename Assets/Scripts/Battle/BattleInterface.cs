@@ -141,7 +141,7 @@ public class BattleInterface : MonoBehaviour
         BattleInterface.battle = battle;
         battle.onBattleStateChange += OnBattleStateChange;
         battle.onPlayerSwitch += OnPlayerSwitch;
-        battle.onFire += OnFire;
+        battle.onAttack += OnFire;
         SetUpOverhead();
     }
 
@@ -304,7 +304,15 @@ public class BattleInterface : MonoBehaviour
     {
         if (!(GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI && GameController.humanPlayers > 0))
         {
-            battle.ChangeState(BattleState.FIRING);
+            switch (battle.recentTurnInformation.type)
+            {
+                case AttackType.ARTILLERY:
+                    battle.ChangeState(BattleState.FIRING);
+                    break;
+                case AttackType.TORPEDO:
+                    battle.ChangeState(BattleState.SHOWING_HIT_TILE, 2f);
+                    break;
+            }
         }
     }
 
@@ -327,7 +335,6 @@ public class BattleInterface : MonoBehaviour
     /// <param name="weapon">The type of weapon to select.</param>
     static void SelectWeapon(AttackType weapon)
     {
-        selectedWeapon = weapon;
         if (!battle.attackingPlayer.AI)
         {
             Debug.Log("Selected weapon: " + weapon.ToString());
@@ -335,15 +342,27 @@ public class BattleInterface : MonoBehaviour
             switch (weapon)
             {
                 case AttackType.ARTILLERY:
+                    if (battle.state == BattleState.CHOOSING_TILE_TO_SHOOT)
+                    {
+                        battle.defendingPlayer.board.Set(BoardState.ENEMY);
+                    }
                     break;
                 case AttackType.TORPEDO:
-                    torpedoTargetingLine.SetActive(true);
-                    Vector3 relativePosition = battle.defendingPlayer.board.transform.position - battle.GetTorpedoLaunchPosition();
-                    torpedoTargetingLine.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
-                    torpedoTargetingLine.transform.position = battle.GetTorpedoLaunchPosition() + Vector3.up * battle.defendingPlayer.board.transform.position.y;
+                    if (selectedWeapon != AttackType.TORPEDO)
+                    {
+                        torpedoTargetingLine.SetActive(true);
+                        Vector3 relativePosition = battle.defendingPlayer.board.transform.position - battle.GetTorpedoLaunchPosition();
+                        torpedoTargetingLine.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
+                        torpedoTargetingLine.transform.position = battle.GetTorpedoLaunchPosition() + Vector3.up * battle.defendingPlayer.board.transform.position.y;
+                    }
+                    else
+                    {
+                        battle.TorpedoAttack(torpedoFiringDirection);
+                    }
                     break;
             }
         }
+        selectedWeapon = weapon;
     }
 
     /// <summary>
@@ -351,6 +370,10 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     public GameObject defaultTorpedoTargetingLine;
     static GameObject torpedoTargetingLine;
+    /// <summary>
+    /// The direction the torpedoes are currently aimed in.
+    /// </summary>
+    static Vector3 torpedoFiringDirection;
 
     /// <summary>
     /// Selects a weapon, using the UI.
@@ -376,7 +399,16 @@ public class BattleInterface : MonoBehaviour
     {
         Vector3 relativePosition = InputController.currentInputPosition - torpedoTargetingLine.transform.position;
         torpedoTargetingLine.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
+        battle.defendingPlayer.board.Set(BoardState.ENEMY);
+        torpedoFiringDirection = relativePosition.normalized;
 
+        BoardTile[] hits = battle.GetTorpedoHits(battle.GetTorpedoLaunchPosition(), torpedoFiringDirection * 30f);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            BoardTile hit = hits[i];
+            Debug.Log("Hit #: " + i + " Pos: " + hit.boardCoordinates);
+            hit.SetMarker(Color.yellow, battle.defendingPlayer.board.grid.transform);
+        }
     }
 
     /// <summary>

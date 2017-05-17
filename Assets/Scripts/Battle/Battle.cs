@@ -75,11 +75,11 @@ public class Battle : MonoBehaviour
     /// <summary>
     /// On firing guns.
     /// </summary>
-    public delegate void OnFire();
+    public delegate void OnAttack();
     /// <summary>
     /// On firing guns.
     /// </summary>
-    public OnFire onFire;
+    public OnAttack onAttack;
     /// <summary>
     /// Stores information about the most recent attack.
     /// </summary>
@@ -262,60 +262,114 @@ public class Battle : MonoBehaviour
     /// <returns>Hit successful.</returns>
     public bool ArtilleryAttack(BoardTile tile)
     {
-        if (defendingPlayer)
+
+        if (tile != null)
         {
-            if (tile != null)
+            if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
             {
-                if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
+                recentTurnInformation.Reset();
+                recentTurnInformation.target = tile.boardCoordinates;
+                //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
+                recentTurnInformation.type = AttackType.ARTILLERY;
+                recentTurnInformation.attacker = attackingPlayer;
+
+                targetState = BattleState.TURN_FINISHED;
+                switchTime = 0.5f;
+
+                if (tile.containedShip && Random.Range(0, 10) == 0)
                 {
-                    recentTurnInformation.Reset();
-                    recentTurnInformation.target = tile.boardCoordinates;
-                    //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
-                    recentTurnInformation.type = AttackType.ARTILLERY;
-                    recentTurnInformation.attacker = attackingPlayer;
-
-                    targetState = BattleState.TURN_FINISHED;
-                    switchTime = 0.5f;
-
-                    if (tile.containedShip && Random.Range(0, 10) == 0)
+                    if (!tile.containedShip.eliminated)
                     {
-                        if (!tile.containedShip.eliminated)
+                        foreach (BoardTile t in tile.containedShip.tiles)
                         {
-                            foreach (BoardTile t in tile.containedShip.tiles)
-                            {
-                                t.RevealTo(attackingPlayer);
-                                RegisterHitOnTile(t);
-                            }
+                            t.RevealTo(attackingPlayer);
+                            RegisterHitOnTile(t);
                         }
                     }
-                    else
-                    {
-                        RegisterHitOnTile(tile);
-                    }
-
-                    if (onFire != null)
-                    {
-                        onFire();
-                    }
-
-                    if (!defendingPlayer.alive)
-                    {
-                        playersAlive--;
-                    }
-
-                    if (!isMainBattle)
-                    {
-                        FireGunsAtTargetTile(tile);
-                        ChangeState(BattleState.FIRING);
-                    }
-
-                    return true;
                 }
+                else
+                {
+                    RegisterHitOnTile(tile);
+                }
+
+                if (onAttack != null)
+                {
+                    onAttack();
+                }
+
+                if (!defendingPlayer.alive)
+                {
+                    playersAlive--;
+                }
+
+                if (!isMainBattle)
+                {
+                    FireGunsAtTargetTile(tile);
+                    ChangeState(BattleState.FIRING);
+                }
+
+                return true;
             }
         }
 
+
         Debug.LogWarning("There was an attempt to shoot an invalid tile: " + tile + ". Things may break.");
         return false;
+    }
+
+    /// <summary>
+    /// Executes a torpedo attack in the direction from the launch point.
+    /// </summary>
+    /// <param name="direction"></param>
+    public void TorpedoAttack(Vector3 direction)
+    {
+        recentTurnInformation.Reset();
+        recentTurnInformation.target = new Vector2(direction.x, direction.z);
+        //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
+        recentTurnInformation.type = AttackType.TORPEDO;
+        recentTurnInformation.attacker = attackingPlayer;
+
+        targetState = BattleState.TURN_FINISHED;
+        switchTime = 0.5f;
+
+        int torpedoes = 5;
+        Vector3 launchPosition = GetTorpedoLaunchPosition();
+        BoardTile[] hits = GetTorpedoHits(launchPosition, launchPosition + direction.normalized * 30f);
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            BoardTile inspectedTile = hits[i];
+            if (inspectedTile.containedShip)
+            {
+                foreach (BoardTile tile in inspectedTile.containedShip.tiles)
+                {
+                    int distance = (int)Vector2.Distance(tile.boardCoordinates, inspectedTile.boardCoordinates);
+                    if (distance <= 2)
+                    {
+                        RegisterHitOnTile(tile);
+                    }
+                }
+
+                if (inspectedTile.containedShip.eliminated)
+                {
+                    torpedoes--;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (torpedoes == 0)
+            {
+                break;
+            }
+        }
+
+        if (onAttack != null)
+        {
+            onAttack();
+        }
     }
 
     /// <summary>
@@ -614,5 +668,34 @@ public class Battle : MonoBehaviour
 
         position.y = 0;
         return position;
+    }
+
+    /// <summary>
+    /// Gets all the tiles in the line between launchPoint and stoppingPoint.
+    /// </summary>
+    /// <param name="launchPoint"></param>
+    /// <param name="stoppingPoint"></param>
+    /// <returns></returns>
+    public BoardTile[] GetTorpedoHits(Vector3 launchPoint, Vector3 stoppingPoint)
+    {
+        List<BoardTile> hits = new List<BoardTile>();
+
+        launchPoint.y = 0;
+        stoppingPoint.y = 0;
+
+        int steps = Mathf.CeilToInt(Vector3.Distance(launchPoint, stoppingPoint));
+
+        for (int i = 0; i < steps; i++)
+        {
+            Vector3 inspectedWorldPosition = Vector3.Lerp(launchPoint, stoppingPoint, (float)i / (float)steps);
+            BoardTile inspectedTile = defendingPlayer.board.GetTileAtWorldPosition(inspectedWorldPosition);
+
+            if (inspectedTile != null && !hits.Contains(inspectedTile))
+            {
+                hits.Add(inspectedTile);
+            }
+        }
+
+        return hits.ToArray();
     }
 }
