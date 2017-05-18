@@ -52,6 +52,11 @@ public class Player : MonoBehaviour
     public Battle battle;
 
     /// <summary>
+    /// The amount of turns left until torpedoes are recharged.
+    /// </summary>
+    public int torpedoRecharge = 1;
+
+    /// <summary>
     /// The awake function.
     /// </summary>    
     void Awake()
@@ -167,6 +172,7 @@ public class Player : MonoBehaviour
             }
         }
     }
+
     /// <summary>
     /// Assigns a ship to the player's fleet.
     /// </summary>

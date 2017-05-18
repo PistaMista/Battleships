@@ -218,6 +218,8 @@ public class Battle : MonoBehaviour
         }
 
         attackingPlayer = players[attackingPlayerID];
+        attackingPlayer.torpedoRecharge = (attackingPlayer.torpedoRecharge == 0) ? 0 : attackingPlayer.torpedoRecharge - 1;
+
         while (!attackingPlayer.alive)
         {
             attackingPlayerID++;
@@ -331,6 +333,28 @@ public class Battle : MonoBehaviour
 
         targetState = BattleState.TURN_FINISHED;
         switchTime = 0.5f;
+
+        int destroyers = 0;
+        foreach (Ship ship in attackingPlayer.livingShips)
+        {
+            if (ship.type == ShipType.DESTROYER && ship.lengthRemaining == ship.length)
+            {
+                destroyers++;
+            }
+        }
+
+        switch (destroyers)
+        {
+            case 2:
+                attackingPlayer.torpedoRecharge = 3;
+                break;
+            case 1:
+                attackingPlayer.torpedoRecharge = 5;
+                break;
+            case 0:
+                attackingPlayer.torpedoRecharge = 999999999;
+                break;
+        }
 
         int torpedoes = 5;
         Vector3 launchPosition = GetTorpedoLaunchPosition();

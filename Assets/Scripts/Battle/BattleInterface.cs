@@ -414,7 +414,7 @@ public class BattleInterface : MonoBehaviour
         //     hit.SetMarker(Color.yellow, battle.defendingPlayer.board.grid.transform);
         // }
 
-        if (battle.state == BattleState.CHOOSING_TILE_TO_SHOOT && battle.switchTime < -Time.deltaTime && !battle.attackingPlayer.AI)
+        if (battle.state == BattleState.CHOOSING_TILE_TO_SHOOT && battle.switchTime < -Time.deltaTime && !battle.attackingPlayer.AI && battle.attackingPlayer.torpedoRecharge == 0)
         {
             Vector3 launchPosition = battle.GetTorpedoLaunchPosition();
             Vector3 targetPosition = Vector3.zero;
