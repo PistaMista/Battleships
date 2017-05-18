@@ -24,7 +24,7 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        torpedoTargetingLine = defaultTorpedoTargetingLine;
+        dummyTorpedo = defaultDummyTorpedo;
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class BattleInterface : MonoBehaviour
     {
         if (battle)
         {
-            if (InputController.GetBeginPress(63) && !battle.attackingPlayer.AI)
+            if (InputController.GetTap(63) && !battle.attackingPlayer.AI)
             {
                 switch (battle.state)
                 {
@@ -69,20 +69,11 @@ public class BattleInterface : MonoBehaviour
                         battle.switchTime = 0f;
                         break;
                     case BattleState.CHOOSING_TILE_TO_SHOOT:
-                        switch (selectedWeapon)
-                        {
-                            case AttackType.ARTILLERY:
-                                BoardTile candidateTargetTile = battle.defendingPlayer.board.GetTileAtWorldPosition(InputController.currentInputPosition);
+
+                        BoardTile candidateTargetTile = battle.defendingPlayer.board.GetTileAtWorldPosition(InputController.currentInputPosition);
 
 
-                                battle.ArtilleryAttack(candidateTargetTile);
-                                break;
-                            case AttackType.TORPEDO:
-                                RefreshTorpedoTargeting();
-                                break;
-                        }
-
-
+                        battle.ArtilleryAttack(candidateTargetTile);
                         break;
                 }
             }
@@ -90,6 +81,8 @@ public class BattleInterface : MonoBehaviour
             {
                 AIPlayerActions();
             }
+
+            UpdateTorpedoOption();
         }
     }
 
@@ -350,10 +343,10 @@ public class BattleInterface : MonoBehaviour
                 case AttackType.TORPEDO:
                     if (selectedWeapon != AttackType.TORPEDO)
                     {
-                        torpedoTargetingLine.SetActive(true);
+                        dummyTorpedo.SetActive(true);
                         Vector3 relativePosition = battle.defendingPlayer.board.transform.position - battle.GetTorpedoLaunchPosition();
-                        torpedoTargetingLine.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
-                        torpedoTargetingLine.transform.position = battle.GetTorpedoLaunchPosition() + Vector3.up * battle.defendingPlayer.board.transform.position.y;
+                        dummyTorpedo.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
+                        dummyTorpedo.transform.position = battle.GetTorpedoLaunchPosition() + Vector3.up * battle.defendingPlayer.board.transform.position.y;
                     }
                     else
                     {
@@ -368,12 +361,23 @@ public class BattleInterface : MonoBehaviour
     /// <summary>
     /// The line used to show torpedo firing direction.
     /// </summary>
-    public GameObject defaultTorpedoTargetingLine;
-    static GameObject torpedoTargetingLine;
+    public GameObject defaultDummyTorpedo;
+    static GameObject dummyTorpedo;
+
     /// <summary>
     /// The direction the torpedoes are currently aimed in.
     /// </summary>
     static Vector3 torpedoFiringDirection;
+
+    /// <summary>
+    /// Whether the dummy torpedo is set up.
+    /// </summary>
+    static bool dummySetUp = false;
+
+    /// <summary>
+    /// Value used to determine whether the targeted tiles have changed.
+    /// </summary>
+    static Vector2 refreshDecisionTemplate;
 
     /// <summary>
     /// Selects a weapon, using the UI.
@@ -395,19 +399,90 @@ public class BattleInterface : MonoBehaviour
     /// <summary>
     /// Updates the torpedo targeting line.
     /// </summary>
-    static void RefreshTorpedoTargeting()
+    static void UpdateTorpedoOption()
     {
-        Vector3 relativePosition = InputController.currentInputPosition - torpedoTargetingLine.transform.position;
-        torpedoTargetingLine.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
-        battle.defendingPlayer.board.Set(BoardState.ENEMY);
-        torpedoFiringDirection = relativePosition.normalized;
+        // Vector3 relativePosition = InputController.currentInputPosition - dummyTorpedo.transform.position;
+        // dummyTorpedo.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
+        // battle.defendingPlayer.board.Set(BoardState.ENEMY);
+        // torpedoFiringDirection = relativePosition.normalized;
 
-        BoardTile[] hits = battle.GetTorpedoHits(battle.GetTorpedoLaunchPosition(), torpedoFiringDirection * 30f);
-        for (int i = 0; i < hits.Length; i++)
+        // BoardTile[] hits = battle.GetTorpedoHits(battle.GetTorpedoLaunchPosition(), torpedoFiringDirection * 30f);
+        // for (int i = 0; i < hits.Length; i++)
+        // {
+        //     BoardTile hit = hits[i];
+        //     Debug.Log("Hit #: " + i + " Pos: " + hit.boardCoordinates);
+        //     hit.SetMarker(Color.yellow, battle.defendingPlayer.board.grid.transform);
+        // }
+
+        if (battle.state == BattleState.CHOOSING_TILE_TO_SHOOT && battle.switchTime < -Time.deltaTime && !battle.attackingPlayer.AI)
         {
-            BoardTile hit = hits[i];
-            Debug.Log("Hit #: " + i + " Pos: " + hit.boardCoordinates);
-            hit.SetMarker(Color.yellow, battle.defendingPlayer.board.grid.transform);
+            Vector3 launchPosition = battle.GetTorpedoLaunchPosition();
+            Vector3 targetPosition = Vector3.zero;
+            Vector3 targetRotation = Vector3.zero;
+            if (InputController.IsDragging(63) && dummySetUp)
+            {
+                targetPosition = InputController.currentInputPosition;
+                targetPosition.y = battle.defendingPlayer.board.transform.position.y;
+                Vector3 relativePosition = InputController.currentInputPosition - launchPosition;
+                //dummyTorpedo.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
+                //battle.defendingPlayer.board.Set(BoardState.ENEMY);
+                torpedoFiringDirection = relativePosition.normalized;
+                targetRotation = new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0);
+
+                Vector2 deterministic = Vector2.zero;
+                BoardTile[] hits = battle.GetTorpedoHits(launchPosition, torpedoFiringDirection * 30f);
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    BoardTile hit = hits[i];
+                    //Debug.Log("Hit #: " + i + " Pos: " + hit.boardCoordinates);
+                    deterministic += hit.boardCoordinates;
+                }
+
+                if (deterministic != refreshDecisionTemplate)
+                {
+                    battle.defendingPlayer.board.Set(BoardState.ENEMY);
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        BoardTile hit = hits[i];
+                        hit.SetMarker(Color.yellow, battle.defendingPlayer.board.grid.transform);
+                    }
+                    Debug.Log("Refresh: " + deterministic);
+                    refreshDecisionTemplate = deterministic;
+                }
+
+            }
+            else
+            {
+                BoardTile[] hits = battle.GetTorpedoHits(launchPosition, torpedoFiringDirection * 30f);
+                if (InputController.GetEndPress(63) && hits.Length > 0)
+                {
+                    Debug.Log("Fire!");
+                    //ResetTargetingUI();
+                    battle.TorpedoAttack(torpedoFiringDirection);
+                }
+                targetPosition = battle.defendingPlayer.board.transform.position + Vector3.right * ((battle.defendingPlayer.board.dimensions / 2f + 1) + battle.defendingPlayer.board.dimensions * 0.075f);
+                targetRotation = Vector3.zero;
+            }
+
+            if (!dummySetUp)
+            {
+                dummyTorpedo.transform.position = targetPosition;
+                dummyTorpedo.transform.rotation = Quaternion.Euler(targetRotation);
+                dummyTorpedo.transform.localScale = Vector3.one * battle.defendingPlayer.board.dimensions;
+                dummyTorpedo.SetActive(true);
+                dummySetUp = true;
+            }
+
+            dummyTorpedo.transform.position = targetPosition;
+            dummyTorpedo.transform.rotation = Quaternion.Euler(targetRotation);
+        }
+        else
+        {
+            if (dummySetUp)
+            {
+                dummyTorpedo.SetActive(false);
+                dummySetUp = false;
+            }
         }
     }
 
@@ -416,6 +491,9 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     static void ResetTargetingUI()
     {
-        torpedoTargetingLine.SetActive(false);
+        if (battle.state == BattleState.CHOOSING_TILE_TO_SHOOT)
+        {
+            battle.defendingPlayer.board.Set(BoardState.ENEMY);
+        }
     }
 }

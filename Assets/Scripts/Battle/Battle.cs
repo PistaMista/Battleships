@@ -341,22 +341,26 @@ public class Battle : MonoBehaviour
             BoardTile inspectedTile = hits[i];
             if (inspectedTile.containedShip)
             {
-                foreach (BoardTile tile in inspectedTile.containedShip.tiles)
+                if (!inspectedTile.containedShip.eliminated)
                 {
-                    int distance = (int)Vector2.Distance(tile.boardCoordinates, inspectedTile.boardCoordinates);
-                    if (distance <= 2)
+                    foreach (BoardTile tile in inspectedTile.containedShip.tiles)
                     {
-                        RegisterHitOnTile(tile);
+                        int distance = (int)Vector2.Distance(tile.boardCoordinates, inspectedTile.boardCoordinates);
+                        if (distance <= 2)
+                        {
+                            RegisterHitOnTile(tile);
+                            tile.RevealTo(attackingPlayer);
+                        }
                     }
-                }
 
-                if (inspectedTile.containedShip.eliminated)
-                {
-                    torpedoes--;
-                }
-                else
-                {
-                    break;
+                    if (inspectedTile.containedShip.eliminated)
+                    {
+                        torpedoes--;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
 
