@@ -13,12 +13,6 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     public static Battle battle;
 
-
-    /// <summary>
-    /// The weapon currently selected by the player.
-    /// </summary>
-    static AttackType selectedWeapon;
-
     /// <summary>
     /// The awake function.
     /// </summary>
@@ -51,7 +45,6 @@ public class BattleInterface : MonoBehaviour
                                         Interface.SwitchMenu("Attack Screen");
 
                                         battle.ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1f);
-                                        SelectWeapon(AttackType.ARTILLERY);
                                         ViewPlayer(candidatePlayer);
                                     }
                                 }
@@ -222,7 +215,6 @@ public class BattleInterface : MonoBehaviour
     {
         switchingFrom.SetMacroMarker(-1);
         switchingTo.SetMacroMarker(0);
-        SelectWeapon(AttackType.ARTILLERY);
 
         foreach (Ship ship in switchingFrom.allShips)
         {
@@ -267,18 +259,7 @@ public class BattleInterface : MonoBehaviour
                 break;
             case BattleState.SHOWING_HIT_TILE:
                 battle.ChangeState(BattleState.TURN_FINISHED, 1.5f);
-                //DEPRECATED
                 ViewPlayer(battle.defendingPlayer);
-                // recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
-                // recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.hitTiles + Vector3.up * 0.12f;
-                // SquarePulserEffect effect = recentlyShotTileIndicator.GetComponent<SquarePulserEffect>();
-                // effect.pulseInterval = 0.45f;
-                // effect.insideLength = 0.9f;
-                // effect.maxDistance = 2f;
-                // effect.pulseSpeed = 7f;
-                // effect.squareWidth = 0.35f;
-                // effect.color = (battle.recentAttackInfo.hitShips != null) ? Color.red : Color.black;
-                //DEPRECATED
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();
@@ -323,42 +304,6 @@ public class BattleInterface : MonoBehaviour
     }
 
     /// <summary>
-    /// Selects a weapon to use in the current attack.
-    /// </summary>
-    /// <param name="weapon">The type of weapon to select.</param>
-    static void SelectWeapon(AttackType weapon)
-    {
-        if (!battle.attackingPlayer.AI)
-        {
-            Debug.Log("Selected weapon: " + weapon.ToString());
-            ResetTargetingUI();
-            switch (weapon)
-            {
-                case AttackType.ARTILLERY:
-                    if (battle.state == BattleState.CHOOSING_TILE_TO_SHOOT)
-                    {
-                        battle.defendingPlayer.board.Set(BoardState.ENEMY);
-                    }
-                    break;
-                case AttackType.TORPEDO:
-                    if (selectedWeapon != AttackType.TORPEDO)
-                    {
-                        dummyTorpedo.SetActive(true);
-                        Vector3 relativePosition = battle.defendingPlayer.board.transform.position - battle.GetTorpedoLaunchPosition();
-                        dummyTorpedo.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
-                        dummyTorpedo.transform.position = battle.GetTorpedoLaunchPosition() + Vector3.up * battle.defendingPlayer.board.transform.position.y;
-                    }
-                    else
-                    {
-                        battle.TorpedoAttack(torpedoFiringDirection);
-                    }
-                    break;
-            }
-        }
-        selectedWeapon = weapon;
-    }
-
-    /// <summary>
     /// The line used to show torpedo firing direction.
     /// </summary>
     public GameObject defaultDummyTorpedo;
@@ -380,40 +325,10 @@ public class BattleInterface : MonoBehaviour
     static Vector2 refreshDecisionTemplate;
 
     /// <summary>
-    /// Selects a weapon, using the UI.
-    /// </summary>
-    /// <param name="weapon"></param>
-    public void SelectUIWeapon(string weapon)
-    {
-        switch (weapon)
-        {
-            case "artillery":
-                SelectWeapon(AttackType.ARTILLERY);
-                break;
-            case "torpedoes":
-                SelectWeapon(AttackType.TORPEDO);
-                break;
-        }
-    }
-
-    /// <summary>
     /// Updates the torpedo targeting line.
     /// </summary>
     static void UpdateTorpedoOption()
     {
-        // Vector3 relativePosition = InputController.currentInputPosition - dummyTorpedo.transform.position;
-        // dummyTorpedo.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
-        // battle.defendingPlayer.board.Set(BoardState.ENEMY);
-        // torpedoFiringDirection = relativePosition.normalized;
-
-        // BoardTile[] hits = battle.GetTorpedoHits(battle.GetTorpedoLaunchPosition(), torpedoFiringDirection * 30f);
-        // for (int i = 0; i < hits.Length; i++)
-        // {
-        //     BoardTile hit = hits[i];
-        //     Debug.Log("Hit #: " + i + " Pos: " + hit.boardCoordinates);
-        //     hit.SetMarker(Color.yellow, battle.defendingPlayer.board.grid.transform);
-        // }
-
         if (battle.state == BattleState.CHOOSING_TILE_TO_SHOOT && battle.switchTime < -Time.deltaTime && !battle.attackingPlayer.AI && battle.attackingPlayer.torpedoRecharge == 0)
         {
             Vector3 launchPosition = battle.GetTorpedoLaunchPosition();
