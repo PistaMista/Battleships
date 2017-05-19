@@ -351,9 +351,6 @@ public class Battle : MonoBehaviour
             case 1:
                 attackingPlayer.torpedoRecharge = 5;
                 break;
-            case 0:
-                attackingPlayer.torpedoRecharge = 999999999;
-                break;
         }
 
         int torpedoes = 5;
@@ -725,5 +722,28 @@ public class Battle : MonoBehaviour
         }
 
         return hits.ToArray();
+    }
+
+    /// <summary>
+    /// Checks if a torpedo attack is available this turn.
+    /// </summary>
+    /// <returns></returns>
+    public bool TorpedoAttackAvailable()
+    {
+        int destroyers = 0;
+        foreach (Ship ship in attackingPlayer.livingShips)
+        {
+            if (ship.type == ShipType.DESTROYER && ship.lengthRemaining == ship.length)
+            {
+                destroyers++;
+            }
+        }
+
+        if (destroyers > 0 && attackingPlayer.torpedoRecharge == 0)
+        {
+            return true;
+        }
+
+        return false;
     }
 }
