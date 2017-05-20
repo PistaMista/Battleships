@@ -73,9 +73,6 @@ public class BattleInterface : MonoBehaviour
             {
                 AIPlayerActions();
             }
-
-            //UpdateTorpedoOption();
-            TorpedoTargetingBattleUIModule.Cycle();
         }
     }
 
@@ -165,7 +162,6 @@ public class BattleInterface : MonoBehaviour
     /// </summary>
     static void SetUpOverhead()
     {
-        ResetTargetingUI();
         foreach (Player player in battle.players)
         {
             player.board.Set(BoardState.OVERHEAD);
@@ -179,6 +175,7 @@ public class BattleInterface : MonoBehaviour
                 player.SetMacroMarker(1);
             }
         }
+        TorpedoTargetingBattleUIModule.Disable();
     }
 
 
@@ -198,6 +195,7 @@ public class BattleInterface : MonoBehaviour
         else if (!battle.attackingPlayer.AI || GameController.humanPlayers == 0)
         {
             player.board.Set(BoardState.ENEMY);
+            TorpedoTargetingBattleUIModule.Enable();
         }
         else
         {
@@ -246,7 +244,7 @@ public class BattleInterface : MonoBehaviour
 
                 break;
             case BattleState.CHOOSING_TILE_TO_SHOOT:
-                ResetTargetingUI();
+                TorpedoTargetingBattleUIModule.Disable();
                 break;
         }
 
@@ -301,16 +299,5 @@ public class BattleInterface : MonoBehaviour
         Cameraman.TakePosition("Overhead View", 0.45f);
         Interface.SwitchMenu("Overhead");
         battle.ChangeState(BattleState.CHOOSING_TARGET, 1f);
-    }
-
-    /// <summary>
-    /// Resets the targeting interface.
-    /// </summary>
-    static void ResetTargetingUI()
-    {
-        if (battle.state == BattleState.CHOOSING_TILE_TO_SHOOT)
-        {
-            battle.defendingPlayer.board.Set(BoardState.ENEMY);
-        }
     }
 }
