@@ -374,6 +374,8 @@ public class Battle : MonoBehaviour
                         }
                     }
 
+                    recentTurnInformation.torpedoInfo.hits.Add(inspectedTile.transform.position - Vector3.up * inspectedTile.transform.position.y);
+
                     if (inspectedTile.containedShip.eliminated)
                     {
                         torpedoes--;
@@ -389,6 +391,11 @@ public class Battle : MonoBehaviour
             {
                 break;
             }
+        }
+
+        foreach (Vector3 hit in recentTurnInformation.torpedoInfo.hits)
+        {
+            Debug.Log("Torpedo Hit: " + hit);
         }
 
         if (onAttack != null)
@@ -742,6 +749,11 @@ public class Battle : MonoBehaviour
         if (destroyers > 0 && attackingPlayer.torpedoRecharge == 0)
         {
             return true;
+        }
+
+        if (destroyers == 0)
+        {
+            attackingPlayer.torpedoRecharge = 9999999;
         }
 
         return false;

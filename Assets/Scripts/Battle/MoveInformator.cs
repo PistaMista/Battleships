@@ -9,7 +9,10 @@ public class MoveInformator : ScriptableObject
     /// </summary>
     public struct TorpedoInfo
     {
-
+        /// <summary>
+        /// The locations where the torpedoes stopped and hit a target.
+        /// </summary>
+        public List<Vector3> hits;
     }
 
     /// <summary>
@@ -36,6 +39,10 @@ public class MoveInformator : ScriptableObject
     /// The tiles which were hit.
     /// </summary>
     public List<BoardTile> hitTiles;
+    /// <summary>
+    /// Information about a torpedo attack.
+    /// </summary>
+    public TorpedoInfo torpedoInfo;
 
     /// <summary>
     /// Resets the informator.
@@ -48,5 +55,6 @@ public class MoveInformator : ScriptableObject
         sunkShips = new List<Ship>();
         hitShips = new List<Ship>();
         hitTiles = new List<BoardTile>();
+        torpedoInfo.hits = new List<Vector3>();
     }
 }
