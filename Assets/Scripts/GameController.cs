@@ -319,6 +319,7 @@ public class GameController : MonoBehaviour
             case GameState.PLAYER_SELECTION:
                 Soundman.ChangeTrack(1, true, false);
                 Interface.SwitchMenu("Player Selection Screen");
+                PlayerSelector.Reset();
                 break;
         }
     }

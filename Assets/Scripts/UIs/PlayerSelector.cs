@@ -189,19 +189,19 @@ public class PlayerSelector : MonoBehaviour
     /// </summary>
     void OnEnable()
     {
-        Reset();
+        //Reset();
     }
 
     /// <summary>
     /// Resets the selection screen.
     /// </summary>
-    static void Reset()
+    public static void Reset()
     {
         if (anchors != null)
         {
-            if (anchors.Length > 0)
+            foreach (Image anchor in anchors)
             {
-                foreach (Image anchor in anchors)
+                if (anchor != null)
                 {
                     Destroy(anchor.gameObject);
                 }
