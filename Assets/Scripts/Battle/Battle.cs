@@ -326,7 +326,7 @@ public class Battle : MonoBehaviour
     public void TorpedoAttack(Vector3 direction)
     {
         recentTurnInformation.Reset();
-        recentTurnInformation.target = new Vector2(direction.x, direction.z);
+        recentTurnInformation.target = new Vector2(direction.x, direction.z).normalized;
         //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
         recentTurnInformation.type = AttackType.TORPEDO;
         recentTurnInformation.attacker = attackingPlayer;
@@ -367,7 +367,7 @@ public class Battle : MonoBehaviour
                     foreach (BoardTile tile in inspectedTile.containedShip.tiles)
                     {
                         int distance = (int)Vector2.Distance(tile.boardCoordinates, inspectedTile.boardCoordinates);
-                        if (distance <= 10)
+                        if (distance <= Random.Range(1, 3))
                         {
                             RegisterHitOnTile(tile);
                             tile.RevealTo(attackingPlayer);

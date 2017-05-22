@@ -108,8 +108,14 @@ public class BattleInterface : MonoBehaviour
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     BoardTile tileToShoot = battle.ChooseTileToAttackForAIPlayer();
-
-                    battle.ArtilleryAttack(tileToShoot);
+                    if (battle.TorpedoAttackAvailable())
+                    {
+                        battle.TorpedoAttack(tileToShoot.transform.position - battle.GetTorpedoLaunchPosition());
+                    }
+                    else
+                    {
+                        battle.ArtilleryAttack(tileToShoot);
+                    }
                     break;
             }
         }

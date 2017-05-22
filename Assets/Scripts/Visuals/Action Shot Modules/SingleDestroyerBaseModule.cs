@@ -41,7 +41,7 @@ public class SingleDestroyerBaseModule : ActionShotModule
         selectedDestroyer.gameObject.SetActive(true);
         //selectedDestroyer.FireTorpedoLaunchers();
 
-        Cameraman.TakePosition(new Cameraman.CameraPosition(0.35f, selectedDestroyer.torpedoLaunchers[0].transform.position + Vector3.up * 0.4f - new Vector3(BattleInterface.battle.recentTurnInformation.target.x, 0, BattleInterface.battle.recentTurnInformation.target.y) * 0.4f, new Vector3(20f, Mathf.Atan2(BattleInterface.battle.recentTurnInformation.target.x, BattleInterface.battle.recentTurnInformation.target.y) * Mathf.Rad2Deg, 0f)));
+        Cameraman.TakePosition(new Cameraman.CameraPosition(0.35f, selectedDestroyer.torpedoLaunchers[0].transform.position + Vector3.up * 0.4f - new Vector3(BattleInterface.battle.recentTurnInformation.target.x, 0, BattleInterface.battle.recentTurnInformation.target.y) * 0.5f, new Vector3(20f, Mathf.Atan2(BattleInterface.battle.recentTurnInformation.target.x, BattleInterface.battle.recentTurnInformation.target.y) * Mathf.Rad2Deg, 0f)));
 
         foreach (BoardTile hit in BattleInterface.battle.recentTurnInformation.torpedoInfo.impacts)
         {
