@@ -12,7 +12,7 @@ public class MoveInformator : ScriptableObject
         /// <summary>
         /// The locations where the torpedoes stopped and hit a target.
         /// </summary>
-        public List<Vector3> hits;
+        public List<BoardTile> impacts;
     }
 
     /// <summary>
@@ -55,6 +55,6 @@ public class MoveInformator : ScriptableObject
         sunkShips = new List<Ship>();
         hitShips = new List<Ship>();
         hitTiles = new List<BoardTile>();
-        torpedoInfo.hits = new List<Vector3>();
+        torpedoInfo.impacts = new List<BoardTile>();
     }
 }

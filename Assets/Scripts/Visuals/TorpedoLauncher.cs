@@ -8,15 +8,35 @@ public class TorpedoLauncher : Weapon
     /// The point at which the torpedo should be spawned when reloading the tube.
     /// </summary>
     public Transform torpedoSummonPoint;
-    // Use this for initialization
-    protected override void Start()
+    /// <summary>
+    /// The torpedo currently loaded in the tube.
+    /// </summary>
+    public Torpedo torpedo;
+
+    /// <summary>
+    /// Prepares the launcher for firing.
+    /// </summary>
+    public override void PrepareForFiring()
     {
-        base.Start();
+        base.PrepareForFiring();
+        if (torpedo == null)
+        {
+            torpedo = Instantiate(GameController.torpedo).GetComponent<Torpedo>();
+            torpedo.transform.position = torpedoSummonPoint.position;
+            torpedo.transform.rotation = torpedoSummonPoint.rotation;
+            torpedo.transform.Rotate(Vector3.up * 90f);
+            torpedo.transform.parent = turret.ship.owner.battle.transform;
+        }
     }
 
-    // Update is called once per frame
-    protected override void Update()
+    /// <summary>
+    /// Fires the torpedo launcher.
+    /// </summary>
+    public override Projectile Fire()
     {
-        base.Update();
+        torpedo.Launch();
+        torpedo.targetShip.IncomingProjectile(torpedo);
+
+        return torpedo;
     }
 }

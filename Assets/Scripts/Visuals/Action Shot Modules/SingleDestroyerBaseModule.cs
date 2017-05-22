@@ -35,6 +35,13 @@ public class SingleDestroyerBaseModule : ActionShotModule
         selectedDestroyer.transform.position = finalPos;
         selectedDestroyer.PrepareTorpedoLaunchers(new Vector3(BattleInterface.battle.recentTurnInformation.target.x, 0, BattleInterface.battle.recentTurnInformation.target.y) + position);
         selectedDestroyer.gameObject.SetActive(true);
+        selectedDestroyer.FireTorpedoLaunchers();
+
+        foreach (BoardTile hit in BattleInterface.battle.recentTurnInformation.torpedoInfo.impacts)
+        {
+            GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            tmp.transform.position = hit.transform.position - Vector3.up * hit.transform.position.y;
+        }
     }
 
     /// <summary>

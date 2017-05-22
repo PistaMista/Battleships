@@ -22,9 +22,33 @@ public class Torpedo : Projectile
     /// </summary>
     public float propellerSpinUpTime;
     /// <summary>
+    /// How fast the torpedo slows down after being launched.
+    /// </summary>
+    public float drag;
+    /// <summary>
+    /// The speed of the torpedo underwater.
+    /// </summary>
+    public float underWaterVelocity;
+    /// <summary>
+    /// The speed of the torpedo after being launched.
+    /// </summary>
+    public float initialVelocity;
+    /// <summary>
     /// The current acceleration of the propeller.
     /// </summary>
     float propellerAcceleration;
+    /// <summary>
+    /// The distance this torpedo should travel before detonating.
+    /// </summary> 
+    public float targetDistance;
+    /// <summary>
+    /// The ship this torpedo is going to hit.
+    /// </summary>
+    public Ship targetShip;
+    /// <summary>
+    /// The direction the torpedo was launched in.
+    /// </summary> 
+    public Vector3 launchDirection;
 
     protected override void Start()
     {
@@ -35,10 +59,32 @@ public class Torpedo : Projectile
     protected override void Update()
     {
         base.Update();
-        if (travelTimeLeft != 0)
+        if (travelTimeLeft >= 0)
         {
             currentPropellerSpeed = Mathf.SmoothDamp(currentPropellerSpeed, maxPropellerSpeed, ref propellerAcceleration, propellerSpinUpTime);
             propeller.transform.Rotate(Vector3.forward * currentPropellerSpeed * Time.deltaTime);
+
+            if (transform.position.y > -0.1f)
+            {
+                velocity -= (launchDirection * drag + Vector3.up * GameController.gravity / 12f) * Time.deltaTime;
+            }
+            else
+            {
+                velocity = launchDirection * underWaterVelocity;
+            }
+            transform.position += velocity * Time.deltaTime;
         }
+    }
+
+    /// <summary>
+    /// Launches the torpedo.
+    /// </summary>
+    public void Launch()
+    {
+        float dropTime = Mathf.Sqrt((transform.position.y + 0.1f) / (GameController.gravity / 6f));
+        float horizontalTravel = dropTime * (initialVelocity - dropTime * drag / 2f);
+        targetDistance -= horizontalTravel;
+        travelTimeLeft = dropTime + targetDistance / underWaterVelocity;
+        velocity = launchDirection * initialVelocity;
     }
 }

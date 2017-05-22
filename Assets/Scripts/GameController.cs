@@ -92,6 +92,8 @@ public class GameController : MonoBehaviour
     public float defaultGravity;
     //The prefab for cannon shells
     public GameObject defaultCannonShell;
+    //The prefab for torpedoes
+    public GameObject defaultTorpedo;
     //The effect used for ship explosions
     public GameObject defaultShipExplosion;
     //The effect used for ship fires
@@ -152,6 +154,10 @@ public class GameController : MonoBehaviour
     /// </summary>
     public static GameObject cannonShell;
     /// <summary>
+    /// The prefab for torpedoes.
+    /// </summary>
+    public static GameObject torpedo;
+    /// <summary>
     /// The prefab for ship explosions.
     /// </summary>
     public static GameObject shipExplosion;
@@ -194,6 +200,7 @@ public class GameController : MonoBehaviour
         playerOverheadStatusMarkers = defaultPlayerOverheadStatusMarkers;
         gravity = defaultGravity;
         cannonShell = defaultCannonShell;
+        torpedo = defaultTorpedo;
         shipExplosion = defaultShipExplosion;
         shipFire = defaultShipFire;
         seaLevel = defaultSeaLevel;

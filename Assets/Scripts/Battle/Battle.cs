@@ -367,14 +367,14 @@ public class Battle : MonoBehaviour
                     foreach (BoardTile tile in inspectedTile.containedShip.tiles)
                     {
                         int distance = (int)Vector2.Distance(tile.boardCoordinates, inspectedTile.boardCoordinates);
-                        if (distance <= 2)
+                        if (distance <= 10)
                         {
                             RegisterHitOnTile(tile);
                             tile.RevealTo(attackingPlayer);
                         }
                     }
 
-                    recentTurnInformation.torpedoInfo.hits.Add(inspectedTile.transform.position - Vector3.up * inspectedTile.transform.position.y);
+                    recentTurnInformation.torpedoInfo.impacts.Add(inspectedTile);
 
                     if (inspectedTile.containedShip.eliminated)
                     {
@@ -393,9 +393,9 @@ public class Battle : MonoBehaviour
             }
         }
 
-        foreach (Vector3 hit in recentTurnInformation.torpedoInfo.hits)
+        foreach (BoardTile hit in recentTurnInformation.torpedoInfo.impacts)
         {
-            Debug.Log("Torpedo Hit: " + hit);
+            Debug.Log("Torpedo Hit: " + hit.transform.position);
         }
 
         if (onAttack != null)
