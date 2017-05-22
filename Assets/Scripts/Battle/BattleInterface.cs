@@ -282,7 +282,8 @@ public class BattleInterface : MonoBehaviour
                     battle.ChangeState(BattleState.FIRING);
                     break;
                 case AttackType.TORPEDO:
-                    battle.ChangeState(BattleState.SHOWING_HIT_TILE, 2f);
+                    //battle.ChangeState(BattleState.SHOWING_HIT_TILE, 2f);
+                    battle.ChangeState(BattleState.FIRING);
                     break;
             }
         }

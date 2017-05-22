@@ -24,17 +24,32 @@ public class Actionman : MonoBehaviour
     /// </summary>
     public static void ActionView()
     {
-        int randomModuleID = Random.Range(1, 3);
-        //TEST
-        randomModuleID = 1;
-        //TEST
-        switch (randomModuleID)
+        int randomModuleID = 1;
+        switch (BattleInterface.battle.recentTurnInformation.type)
         {
-            case 1:
-                currentActionShot = (BarrelInlineFollowActionShotModule)ScriptableObject.CreateInstance("BarrelInlineFollowActionShotModule");
+            case AttackType.ARTILLERY:
+                //randomModuleID = Random.Range(1, 3);
+                //TEST
+                randomModuleID = 1;
+                //TEST
+                switch (randomModuleID)
+                {
+                    case 1:
+                        currentActionShot = (BarrelInlineFollowActionShotModule)ScriptableObject.CreateInstance("BarrelInlineFollowActionShotModule");
+                        break;
+                    case 2:
+                        currentActionShot = (AerialViewActionShotModule)ScriptableObject.CreateInstance("AerialViewActionShotModule");
+                        break;
+                }
                 break;
-            case 2:
-                currentActionShot = (AerialViewActionShotModule)ScriptableObject.CreateInstance("AerialViewActionShotModule");
+            case AttackType.TORPEDO:
+                randomModuleID = 1;
+                switch (randomModuleID)
+                {
+                    case 1:
+                        currentActionShot = (SingleDestroyerBaseModule)ScriptableObject.CreateInstance("SingleDestroyerBaseModule");
+                        break;
+                }
                 break;
         }
 

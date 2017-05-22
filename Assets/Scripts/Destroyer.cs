@@ -9,4 +9,14 @@ public class Destroyer : Ship
     /// </summary>
     public Turret[] torpedoLaunchers;
 
+    /// <summary>
+    /// Prepares the torpedo launcher for firing.
+    /// </summary>
+    public void PrepareTorpedoLaunchers(Vector3 targetPosition)
+    {
+        foreach (Turret launcher in torpedoLaunchers)
+        {
+            launcher.PrepareToFireAt(targetPosition);
+        }
+    }
 }

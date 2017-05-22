@@ -121,7 +121,7 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
                         Vector3 targetPosition = relativePosition.normalized * referenceDistance;
                         targetPosition.y = BattleInterface.battle.defendingPlayer.board.transform.position.y;
                         Vector2 deterministic = Vector2.zero;
-                        hits = BattleInterface.battle.GetTorpedoHits(launchPosition, torpedoFiringDirection * 30f);
+                        hits = BattleInterface.battle.GetTorpedoHits(launchPosition, launchPosition + torpedoFiringDirection * 30f);
                         for (int i = 0; i < hits.Length; i++)
                         {
                             BoardTile hit = hits[i];
