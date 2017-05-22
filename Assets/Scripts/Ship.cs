@@ -248,6 +248,12 @@ public class Ship : MonoBehaviour
                     AddFire();
                 }
                 break;
+            case AttackType.TORPEDO:
+                if (eliminated && sinkTimeLeft > sinkTime)
+                {
+                    BeginSinking();
+                }
+                break;
         }
     }
 

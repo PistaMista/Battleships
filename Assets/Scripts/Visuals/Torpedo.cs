@@ -49,6 +49,10 @@ public class Torpedo : Projectile
     /// The direction the torpedo was launched in.
     /// </summary> 
     public Vector3 launchDirection;
+    /// <summary>
+    /// Whether this torpedo is underwater.
+    /// </summary>
+    public bool underwater;
 
     protected override void Start()
     {
@@ -67,12 +71,30 @@ public class Torpedo : Projectile
             if (transform.position.y > -0.1f)
             {
                 velocity -= (launchDirection * drag + Vector3.up * GameController.gravity / 12f) * Time.deltaTime;
+                underwater = false;
             }
             else
             {
                 velocity = launchDirection * underWaterVelocity;
+                if (!underwater)
+                {
+                    GameObject tmp = Instantiate(GameController.waterSplashEffect);
+                    Vector3 position = gameObject.transform.position;
+                    position.y = GameController.seaLevel;
+
+                    tmp.transform.position = position;
+                    tmp.transform.parent = weapon.turret.ship.owner.battle.gameObject.transform;
+                }
+                underwater = true;
             }
             transform.position += velocity * Time.deltaTime;
+        }
+        else
+        {
+            if (underwater)
+            {
+                Detonate();
+            }
         }
     }
 
@@ -83,8 +105,22 @@ public class Torpedo : Projectile
     {
         float dropTime = Mathf.Sqrt((transform.position.y + 0.1f) / (GameController.gravity / 6f));
         float horizontalTravel = dropTime * (initialVelocity - dropTime * drag / 2f);
-        targetDistance -= horizontalTravel;
+        targetDistance -= horizontalTravel - 1;
         travelTimeLeft = dropTime + targetDistance / underWaterVelocity;
         velocity = launchDirection * initialVelocity;
+    }
+
+    /// <summary>
+    /// Detonates the torpedo.
+    /// </summary>
+    void Detonate()
+    {
+        GameObject tmp = Instantiate(GameController.torpedoDetonation);
+        Vector3 position = gameObject.transform.position;
+        position.y = GameController.seaLevel;
+
+        tmp.transform.position = position;
+        tmp.transform.parent = weapon.turret.ship.owner.battle.gameObject.transform;
+        Destroy(this.gameObject);
     }
 }

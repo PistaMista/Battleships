@@ -98,6 +98,8 @@ public class GameController : MonoBehaviour
     public GameObject defaultShipExplosion;
     //The effect used for ship fires
     public GameObject defaultShipFire;
+    //The effect used for torpedo detonations
+    public GameObject defaultTorpedoDetonation;
     //The sea level
     public float defaultSeaLevel;
     //Skips showing action shots of AI vs AI attacks in main battles
@@ -166,6 +168,10 @@ public class GameController : MonoBehaviour
     /// </summary>
     public static GameObject shipFire;
     /// <summary>
+    /// The prefab for torpedo detonations.
+    /// </summary>
+    public static GameObject torpedoDetonation;
+    /// <summary>
     /// The sea level height.
     /// </summary>
     public static float seaLevel;
@@ -203,6 +209,7 @@ public class GameController : MonoBehaviour
         torpedo = defaultTorpedo;
         shipExplosion = defaultShipExplosion;
         shipFire = defaultShipFire;
+        torpedoDetonation = defaultTorpedoDetonation;
         seaLevel = defaultSeaLevel;
         waterSplashEffect = defaultWaterSplashEffect;
         skipAIvsAIActionShots = defaultSkipAIvsAIActionShots;

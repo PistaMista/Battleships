@@ -26,6 +26,7 @@ public class TorpedoLauncher : Weapon
             torpedo.transform.rotation = torpedoSummonPoint.rotation;
             torpedo.transform.Rotate(Vector3.up * 90f);
             torpedo.transform.parent = turret.ship.owner.battle.transform;
+            torpedo.weapon = this;
         }
     }
 
@@ -34,9 +35,12 @@ public class TorpedoLauncher : Weapon
     /// </summary>
     public override Projectile Fire()
     {
+
         torpedo.Launch();
         torpedo.targetShip.IncomingProjectile(torpedo);
 
-        return torpedo;
+        Torpedo firedTorpedo = torpedo;
+        torpedo = null;
+        return firedTorpedo;
     }
 }

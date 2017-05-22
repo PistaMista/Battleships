@@ -9,6 +9,10 @@ public class SingleDestroyerBaseModule : ActionShotModule
     /// </summary>
     protected Destroyer selectedDestroyer;
     /// <summary>
+    /// Whether the torpedoes were fired or not.
+    /// </summary>
+    bool fired;
+    /// <summary>
     /// Prepares the action shot.
     /// </summary>
     public override void Prepare()
@@ -35,12 +39,16 @@ public class SingleDestroyerBaseModule : ActionShotModule
         selectedDestroyer.transform.position = finalPos;
         selectedDestroyer.PrepareTorpedoLaunchers(new Vector3(BattleInterface.battle.recentTurnInformation.target.x, 0, BattleInterface.battle.recentTurnInformation.target.y) + position);
         selectedDestroyer.gameObject.SetActive(true);
-        selectedDestroyer.FireTorpedoLaunchers();
+        //selectedDestroyer.FireTorpedoLaunchers();
+
+        Cameraman.TakePosition(new Cameraman.CameraPosition(0.35f, selectedDestroyer.torpedoLaunchers[0].transform.position + Vector3.up * 0.4f - new Vector3(BattleInterface.battle.recentTurnInformation.target.x, 0, BattleInterface.battle.recentTurnInformation.target.y) * 0.4f, new Vector3(20f, Mathf.Atan2(BattleInterface.battle.recentTurnInformation.target.x, BattleInterface.battle.recentTurnInformation.target.y) * Mathf.Rad2Deg, 0f)));
 
         foreach (BoardTile hit in BattleInterface.battle.recentTurnInformation.torpedoInfo.impacts)
         {
-            GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            tmp.transform.position = hit.transform.position - Vector3.up * hit.transform.position.y;
+            if (hit.containedShip.eliminated)
+            {
+                hit.containedShip.gameObject.SetActive(true);
+            }
         }
     }
 
@@ -50,5 +58,15 @@ public class SingleDestroyerBaseModule : ActionShotModule
     public override void Refresh()
     {
         base.Refresh();
+        if (Cameraman.transitionProgress > 99.7f && !fired)
+        {
+            fired = true;
+            selectedDestroyer.FireTorpedoLaunchers();
+        }
+
+        if (lifetime > 12f)
+        {
+            Actionman.EndActionView();
+        }
     }
 }
