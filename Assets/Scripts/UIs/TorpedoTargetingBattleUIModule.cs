@@ -65,9 +65,9 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
                 dummyTorpedo.transform.localScale = Vector3.one * BattleInterface.battle.defendingPlayer.board.dimensions;
                 launchPosition = BattleInterface.battle.GetTorpedoLaunchPosition();
                 ResetDummyPosition();
-                Vector3 position = dummyTorpedo.transform.position;
+                Vector3 position = BattleInterface.battle.defendingPlayer.board.transform.position;
                 position.y = 0;
-                referenceDistance = Vector3.Distance(position, launchPosition);
+                referenceDistance = Vector3.Distance(position, launchPosition) - BattleInterface.battle.defendingPlayer.board.dimensions / 2f;
             }
             else
             {
@@ -118,7 +118,7 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
                         //BattleInterface.battle.defendingPlayer.board.Set(BoardState.ENEMY);
                         torpedoFiringDirection = relativePosition.normalized;
                         Vector3 targetRotation = new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0);
-                        Vector3 targetPosition = relativePosition.normalized * referenceDistance;
+                        Vector3 targetPosition = relativePosition.normalized * referenceDistance + launchPosition;
                         targetPosition.y = BattleInterface.battle.defendingPlayer.board.transform.position.y;
                         Vector2 deterministic = Vector2.zero;
                         hits = BattleInterface.battle.GetTorpedoHits(launchPosition, launchPosition + torpedoFiringDirection * 30f);
