@@ -32,6 +32,10 @@ public class Ship : MonoBehaviour
     /// </summary>
     public int lengthRemaining;
     /// <summary>
+    /// The chance this ship has of evading a torpedo barrage.
+    /// </summary>
+    public int torpedoEvasionChance;
+    /// <summary>
     /// The weapon turrets mounted on this ship.
     /// </summary>
     public Turret[] turrets;

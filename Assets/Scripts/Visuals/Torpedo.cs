@@ -91,7 +91,7 @@ public class Torpedo : Projectile
         }
         else
         {
-            if (underwater)
+            if (underwater && targetShip != null)
             {
                 Detonate();
             }

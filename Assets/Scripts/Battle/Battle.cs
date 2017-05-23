@@ -362,7 +362,7 @@ public class Battle : MonoBehaviour
             BoardTile inspectedTile = hits[i];
             if (inspectedTile.containedShip)
             {
-                if (!inspectedTile.containedShip.eliminated)
+                if (!inspectedTile.containedShip.eliminated && Random.Range(1, 100) > inspectedTile.containedShip.torpedoEvasionChance)
                 {
                     foreach (BoardTile tile in inspectedTile.containedShip.tiles)
                     {

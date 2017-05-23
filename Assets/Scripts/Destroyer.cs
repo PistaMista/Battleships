@@ -21,18 +21,27 @@ public class Destroyer : Ship
             int id = 0;
             foreach (TorpedoLauncher tube in launcher.weapons)
             {
-                BoardTile hitTile = owner.battle.recentTurnInformation.torpedoInfo.impacts[id];
-                Vector3 hitPosition = hitTile.transform.position;
-                hitPosition.y = 0;
-                if (id + 1 < owner.battle.recentTurnInformation.torpedoInfo.impacts.Count)
+                if (owner.battle.recentTurnInformation.torpedoInfo.impacts.Count > 0)
                 {
-                    id++;
-                }
+                    BoardTile hitTile = owner.battle.recentTurnInformation.torpedoInfo.impacts[id];
+                    Vector3 hitPosition = hitTile.transform.position;
+                    hitPosition.y = 0;
+                    if (id + 1 < owner.battle.recentTurnInformation.torpedoInfo.impacts.Count)
+                    {
+                        id++;
+                    }
 
-                tube.torpedo.targetShip = hitTile.containedShip;
+                    tube.torpedo.targetShip = hitTile.containedShip;
+                    tube.torpedo.targetDistance = Vector3.Distance(launchPoint, hitPosition);
+                }
+                else
+                {
+                    tube.torpedo.targetShip = null;
+                }
                 tube.torpedo.launchDirection = new Vector3(owner.battle.recentTurnInformation.target.x, 0, owner.battle.recentTurnInformation.target.y);
-                tube.torpedo.targetDistance = Vector3.Distance(launchPoint, hitPosition);
+
             }
+
         }
     }
 

@@ -171,6 +171,13 @@ public class Player : MonoBehaviour
                 GameController.humanPlayers--;
             }
         }
+        else
+        {
+            foreach (Ship sh in livingShips)
+            {
+                sh.torpedoEvasionChance += 7;
+            }
+        }
     }
 
     /// <summary>

@@ -35,9 +35,16 @@ public class TorpedoLauncher : Weapon
     /// </summary>
     public override Projectile Fire()
     {
-
+        if (torpedo.targetShip)
+        {
+            torpedo.targetShip.IncomingProjectile(torpedo);
+        }
+        else
+        {
+            torpedo.targetDistance = 30f;
+        }
         torpedo.Launch();
-        torpedo.targetShip.IncomingProjectile(torpedo);
+
 
         Torpedo firedTorpedo = torpedo;
         torpedo = null;
