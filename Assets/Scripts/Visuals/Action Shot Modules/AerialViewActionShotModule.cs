@@ -16,11 +16,11 @@ public class AerialViewActionShotModule : FleetAttackFormationBaseModule
     {
         base.Prepare();
         Vector3 fleetPosition = Vector3.zero;
-        if (BattleInterface.battle.recentAttackInfo.hitShip != null)
+        if (BattleInterface.battle.recentTurnInformation.hitShips.Count > 0)
         {
             if ((GameController.humanPlayers == 1 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
             {
-                BattleInterface.battle.recentAttackInfo.hitShip.gameObject.SetActive(true);
+                BattleInterface.battle.recentTurnInformation.hitShips[0].gameObject.SetActive(true);
             }
         }
 
@@ -35,7 +35,7 @@ public class AerialViewActionShotModule : FleetAttackFormationBaseModule
 
         fleetPosition.y = GameController.seaLevel;
 
-        Vector3 targetCameraPosition = Vector3.Lerp(fleetPosition, BattleInterface.battle.recentAttackInfo.attackedTileWorldPosition, 0.5f);
+        Vector3 targetCameraPosition = Vector3.Lerp(fleetPosition, BattleInterface.battle.recentTurnInformation.hitTiles[0].transform.position, 0.5f);
         targetCameraPosition.y = 35f;
 
         Cameraman.TakePosition(new Cameraman.CameraPosition(0.45f, targetCameraPosition, Vector3.right * 90f));
@@ -43,7 +43,7 @@ public class AerialViewActionShotModule : FleetAttackFormationBaseModule
         foreach (Ship ship in attackers)
         {
             //ship.PrepareToFireAt(BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].worldPosition, BattleInterface.battle.defendingPlayer.board.tiles[(int)BattleInterface.battle.recentlyShot.x, (int)BattleInterface.battle.recentlyShot.y].containedShip);
-            float time = ship.PrepareToFireAt(BattleInterface.battle.recentAttackInfo.attackedTileWorldPosition, BattleInterface.battle.recentAttackInfo.hitShip);
+            float time = ship.PrepareToFireAt(BattleInterface.battle.recentTurnInformation.hitTiles[0].transform.position, BattleInterface.battle.recentTurnInformation.hitShips[0]);
             timeNeeded = (time > timeNeeded) ? time : timeNeeded;
         }
 

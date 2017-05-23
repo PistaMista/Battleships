@@ -2,6 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ShipType
+{
+    CRUISER,
+    BATTLESHIP,
+    DESTROYER
+}
+
 public class Ship : MonoBehaviour
 {
     /// <summary>
@@ -15,7 +22,7 @@ public class Ship : MonoBehaviour
     /// <summary>
     /// The positions on the board that this ship occupies.
     /// </summary>
-    public Vector2[] tiles;
+    public BoardTile[] tiles;
     /// <summary>
     /// Whether this ship has been eliminated.
     /// </summary>
@@ -24,6 +31,10 @@ public class Ship : MonoBehaviour
     /// The number of ship segments still intact.
     /// </summary>
     public int lengthRemaining;
+    /// <summary>
+    /// The chance this ship has of evading a torpedo barrage.
+    /// </summary>
+    public int torpedoEvasionChance;
     /// <summary>
     /// The weapon turrets mounted on this ship.
     /// </summary>
@@ -55,15 +66,6 @@ public class Ship : MonoBehaviour
     float sinkTimeLeft;
 
     /// <summary>
-    /// The time it will take for incoming projectiles to arrive. Deprecated.
-    /// </summary>
-    float incomingProjectileTravelTime = -1f;
-    /// <summary>
-    /// The type of incoming projectile. Deprecated.
-    /// </summary>
-    AttackType incomingProjectileDamageType;
-
-    /// <summary>
     /// The world position of this ship's place on the playing board.
     /// </summary>
     public Vector3 boardPosition;
@@ -80,11 +82,15 @@ public class Ship : MonoBehaviour
 	/// </summary>
     public List<Player> revealedTo;
     /// <summary>
+    /// The type of this ship.
+    /// </summary>
+    public ShipType type;
+    /// <summary>
     /// The awake function.
     /// </summary> 
     void Awake()
     {
-        tiles = new Vector2[length];
+        tiles = new BoardTile[length];
         effects = new List<GameObject>();
         lengthRemaining = length;
         revealedTo = new List<Player>();
@@ -235,7 +241,7 @@ public class Ship : MonoBehaviour
     {
         switch (projectile.type)
         {
-            case AttackType.SHELL:
+            case AttackType.ARTILLERY:
                 if (eliminated && sinkTimeLeft > sinkTime)
                 {
                     BeginSinking();
@@ -244,6 +250,12 @@ public class Ship : MonoBehaviour
                 if (Random.Range(0, 20) == 0)
                 {
                     AddFire();
+                }
+                break;
+            case AttackType.TORPEDO:
+                if (eliminated && sinkTimeLeft > sinkTime)
+                {
+                    BeginSinking();
                 }
                 break;
         }
@@ -256,5 +268,27 @@ public class Ship : MonoBehaviour
     {
         transform.position = boardPosition;
         transform.rotation = Quaternion.Euler(boardRotation);
+    }
+
+    /// <summary>
+    /// Checks if all the tiles of this ship are revealed to a player.
+    /// </summary>
+    /// <returns></returns>
+    public bool IsRevealedTo(Player player)
+    {
+        if (player == owner)
+        {
+            return true;
+        }
+
+        foreach (BoardTile tile in tiles)
+        {
+            if (!tile.revealedTo.Contains(player))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

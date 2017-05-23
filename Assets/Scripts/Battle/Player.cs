@@ -25,11 +25,11 @@ public class Player : MonoBehaviour
     /// <summary>
     /// The positions of tiles on enemy boards this player has hit.
     /// </summary>
-    public Dictionary<int, List<Vector2>> hits;
+    public Dictionary<int, List<BoardTile>> hits;
     /// <summary>
     /// The positions of tiles on enemy boards this player has missed.
     /// </summary>
-    public Dictionary<int, List<Vector2>> misses;
+    public Dictionary<int, List<BoardTile>> misses;
     /// <summary>
     /// Whether this player is controlled by AI.
     /// </summary>
@@ -52,12 +52,17 @@ public class Player : MonoBehaviour
     public Battle battle;
 
     /// <summary>
+    /// The amount of turns left until torpedoes are recharged.
+    /// </summary>
+    public int torpedoRecharge = 1;
+
+    /// <summary>
     /// The awake function.
     /// </summary>    
     void Awake()
     {
-        hits = new Dictionary<int, List<Vector2>>();
-        misses = new Dictionary<int, List<Vector2>>();
+        hits = new Dictionary<int, List<BoardTile>>();
+        misses = new Dictionary<int, List<BoardTile>>();
         allShips = new List<Ship>();
         livingShips = new List<Ship>();
     }
@@ -166,7 +171,15 @@ public class Player : MonoBehaviour
                 GameController.humanPlayers--;
             }
         }
+        else
+        {
+            foreach (Ship sh in livingShips)
+            {
+                sh.torpedoEvasionChance += 7;
+            }
+        }
     }
+
     /// <summary>
     /// Assigns a ship to the player's fleet.
     /// </summary>

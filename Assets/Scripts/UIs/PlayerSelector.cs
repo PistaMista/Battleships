@@ -7,6 +7,14 @@ public class PlayerSelector : MonoBehaviour
 {
     //The colors of players which will be available
     /// <summary>
+    /// The slider used to select board dimensions.
+    /// </summary>
+    public Slider defaultBoardDimensionSelector;
+    /// <summary>
+    /// Text to display the estimated game time.
+    /// </summary>
+    public Text defaultGameTimeIndicator;
+    /// <summary>
     /// The available player colors.
     /// </summary>
     public Color[] defaultAvailablePlayerColors;
@@ -63,6 +71,14 @@ public class PlayerSelector : MonoBehaviour
     /// The perimeter circle.
     /// </summary>
     static Image perimeter;
+    /// <summary>
+    /// The slider used to select board dimensions.
+    /// </summary>
+    static Slider boardDimensionSelector;
+    /// <summary>
+    /// Text to display estimated game time.
+    /// </summary>
+    static Text gameTimeIndicator;
 
     /// <summary>
     /// Awake function.
@@ -74,7 +90,9 @@ public class PlayerSelector : MonoBehaviour
         humanPlayerIcon = defaultHumanPlayerIcon;
         AIPlayerIcon = defaultAIPlayerIcon;
         perimeter = defaultPerimeter;
-        perimeter.rectTransform.localScale = new Vector3(1, 1, 1) * Screen.height / 2f;
+        perimeter.rectTransform.localScale = new Vector3(1, 1, 1) * Screen.height / 2f * (1200f / Screen.width);
+        boardDimensionSelector = defaultBoardDimensionSelector;
+        gameTimeIndicator = defaultGameTimeIndicator;
 
         //topAnchors = new List<Image>();
         //centerAnchors = new List<Image>();
@@ -90,12 +108,12 @@ public class PlayerSelector : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (InputController.beginPress)
+        if (InputController.GetBeginPress(63))
         {
             currentlyDragged = GetAnchorAtPosition(InputController.currentScreenInputPosition);
         }
 
-        if (InputController.tap && currentlyDragged != null)
+        if (InputController.GetTap(63) && currentlyDragged != null)
         {
             if (selectedPlayers.ContainsKey(currentlyDragged.color))
             {
@@ -103,7 +121,7 @@ public class PlayerSelector : MonoBehaviour
             }
             UpdateGraphics();
         }
-        else if (InputController.endPress)
+        else if (InputController.GetEndPress(63))
         {
             if (currentlyDragged != null)
             {
@@ -126,14 +144,14 @@ public class PlayerSelector : MonoBehaviour
                     }
                 }
             }
-
+            UpdateEstGameTime();
             UpdateGraphics();
             currentlyDragged = null;
         }
 
 
 
-        if (InputController.dragging && currentlyDragged != null)
+        if (InputController.IsDragging(63) && currentlyDragged != null)
         {
             currentlyDragged.rectTransform.position = InputController.currentScreenInputPosition;
         }
@@ -153,7 +171,7 @@ public class PlayerSelector : MonoBehaviour
             for (int i = 0; i < centerAnchors.Count; i++)
             {
 
-                initializers[i] = new GameController.PlayerInitializer(centerAnchors[i].color, selectedPlayers[centerAnchors[i].color]);
+                initializers[i] = new GameController.PlayerInitializer(centerAnchors[i].color, selectedPlayers[centerAnchors[i].color], (int)boardDimensionSelector.value);
             }
 
             GameController.NewBattle(initializers, true);
@@ -171,19 +189,19 @@ public class PlayerSelector : MonoBehaviour
     /// </summary>
     void OnEnable()
     {
-        Reset();
+        //Reset();
     }
 
     /// <summary>
     /// Resets the selection screen.
     /// </summary>
-    static void Reset()
+    public static void Reset()
     {
         if (anchors != null)
         {
-            if (anchors.Length > 0)
+            foreach (Image anchor in anchors)
             {
-                foreach (Image anchor in anchors)
+                if (anchor != null)
                 {
                     Destroy(anchor.gameObject);
                 }
@@ -244,7 +262,7 @@ public class PlayerSelector : MonoBehaviour
 
         for (int i = 0; i < topAnchors.Count; i++)
         {
-            topAnchors[i].rectTransform.position = new Vector2(lengthStep * (i + 1), Screen.height - topAnchors[i].rectTransform.rect.height);
+            topAnchors[i].rectTransform.position = new Vector2(lengthStep * (i + 1), (Screen.height - topAnchors[i].rectTransform.rect.height / (1200f / Screen.width)));
             topAnchors[i].rectTransform.rotation = Quaternion.Euler(Vector3.zero);
         }
 
@@ -278,5 +296,13 @@ public class PlayerSelector : MonoBehaviour
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Executed when the player changes the board dimensions using the slider.
+    /// </summary>
+    public void UpdateEstGameTime()
+    {
+        gameTimeIndicator.text = Mathf.CeilToInt(GameController.GetGameTime(centerAnchors.Count, (int)boardDimensionSelector.value) / 60f).ToString() + " minutes.";
     }
 }

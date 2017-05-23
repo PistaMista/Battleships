@@ -7,30 +7,17 @@ public class BattleInterface : MonoBehaviour
     /// <summary>
     /// The marker to show what tile is being shot.
     /// </summary>
-    public GameObject defaultRecentlyShotTileMarker;
-    /// <summary>
-    /// The marker to show what tile is being shot.
-    /// </summary>
     static GameObject recentlyShotTileMarker;
-    /// <summary>
-    /// The speed at which the marker lands on tile being shot.
-    /// </summary>
-    static float markerDescentSpeed;
     /// <summary>
     /// The battle the interface is attached to.
     /// </summary>
     public static Battle battle;
-    /// <summary>
-    /// The instance of the marker to show the tile being shot.
-    /// </summary>
-    static GameObject recentlyShotTileIndicator;
 
     /// <summary>
     /// The awake function.
     /// </summary>
     void Awake()
     {
-        recentlyShotTileMarker = defaultRecentlyShotTileMarker;
     }
 
     /// <summary>
@@ -40,7 +27,7 @@ public class BattleInterface : MonoBehaviour
     {
         if (battle)
         {
-            if (InputController.beginPress && !battle.attackingPlayer.AI)
+            if (InputController.GetTap(63) && !battle.attackingPlayer.AI)
             {
                 switch (battle.state)
                 {
@@ -74,12 +61,11 @@ public class BattleInterface : MonoBehaviour
                         battle.switchTime = 0f;
                         break;
                     case BattleState.CHOOSING_TILE_TO_SHOOT:
+
                         BoardTile candidateTargetTile = battle.defendingPlayer.board.GetTileAtWorldPosition(InputController.currentInputPosition);
 
 
                         battle.ArtilleryAttack(candidateTargetTile);
-
-
                         break;
                 }
             }
@@ -122,8 +108,14 @@ public class BattleInterface : MonoBehaviour
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
                     BoardTile tileToShoot = battle.ChooseTileToAttackForAIPlayer();
-
-                    battle.ArtilleryAttack(tileToShoot);
+                    if (battle.TorpedoAttackAvailable())
+                    {
+                        battle.TorpedoAttack(tileToShoot.transform.position - battle.GetTorpedoLaunchPosition());
+                    }
+                    else
+                    {
+                        battle.ArtilleryAttack(tileToShoot);
+                    }
                     break;
             }
         }
@@ -138,7 +130,7 @@ public class BattleInterface : MonoBehaviour
         BattleInterface.battle = battle;
         battle.onBattleStateChange += OnBattleStateChange;
         battle.onPlayerSwitch += OnPlayerSwitch;
-        battle.onFire += OnFire;
+        battle.onAttack += OnFire;
         SetUpOverhead();
     }
 
@@ -148,7 +140,6 @@ public class BattleInterface : MonoBehaviour
     public static void Dettach()
     {
         battle = null;
-        Destroy(recentlyShotTileIndicator);
     }
 
     /// <summary>
@@ -190,6 +181,7 @@ public class BattleInterface : MonoBehaviour
                 player.SetMacroMarker(1);
             }
         }
+        TorpedoTargetingBattleUIModule.Disable();
     }
 
 
@@ -209,6 +201,7 @@ public class BattleInterface : MonoBehaviour
         else if (!battle.attackingPlayer.AI || GameController.humanPlayers == 0)
         {
             player.board.Set(BoardState.ENEMY);
+            TorpedoTargetingBattleUIModule.Enable();
         }
         else
         {
@@ -245,7 +238,7 @@ public class BattleInterface : MonoBehaviour
         switch (switchingFrom)
         {
             case BattleState.SHOWING_HIT_TILE:
-                Destroy(recentlyShotTileIndicator);
+
                 break;
             case BattleState.FIRING:
                 foreach (Ship ship in battle.attackingPlayer.livingShips)
@@ -255,6 +248,9 @@ public class BattleInterface : MonoBehaviour
                 }
 
 
+                break;
+            case BattleState.CHOOSING_TILE_TO_SHOOT:
+                TorpedoTargetingBattleUIModule.Disable();
                 break;
         }
 
@@ -268,15 +264,6 @@ public class BattleInterface : MonoBehaviour
             case BattleState.SHOWING_HIT_TILE:
                 battle.ChangeState(BattleState.TURN_FINISHED, 1.5f);
                 ViewPlayer(battle.defendingPlayer);
-                recentlyShotTileIndicator = Instantiate(recentlyShotTileMarker);
-                recentlyShotTileIndicator.transform.position = battle.recentAttackInfo.attackedTileWorldPosition + Vector3.up * 0.12f;
-                SquarePulserEffect effect = recentlyShotTileIndicator.GetComponent<SquarePulserEffect>();
-                effect.pulseInterval = 0.45f;
-                effect.insideLength = 0.9f;
-                effect.maxDistance = 2f;
-                effect.pulseSpeed = 7f;
-                effect.squareWidth = 0.35f;
-                effect.color = (battle.recentAttackInfo.hitShip != null) ? Color.red : Color.black;
                 break;
             case BattleState.TURN_FINISHED:
                 SetUpOverhead();
@@ -295,7 +282,16 @@ public class BattleInterface : MonoBehaviour
     {
         if (!(GameController.skipAIvsAIActionShots && battle.attackingPlayer.AI && battle.defendingPlayer.AI && GameController.humanPlayers > 0))
         {
-            battle.ChangeState(BattleState.FIRING);
+            switch (battle.recentTurnInformation.type)
+            {
+                case AttackType.ARTILLERY:
+                    battle.ChangeState(BattleState.FIRING);
+                    break;
+                case AttackType.TORPEDO:
+                    //battle.ChangeState(BattleState.SHOWING_HIT_TILE, 2f);
+                    battle.ChangeState(BattleState.FIRING);
+                    break;
+            }
         }
     }
 

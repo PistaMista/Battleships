@@ -30,16 +30,16 @@ public enum GameState
 }
 
 /// <summary>
-/// All the possible damage types.
+/// All the possible attack types.
 /// </summary>
 public enum AttackType
 {
     /// <summary>
-    /// Artillery shell damage.
+    /// Artillery attacks.
     /// </summary>
-    SHELL,
+    ARTILLERY,
     /// <summary>
-    /// Torpedo damage.
+    /// Torpedo attacks.
     /// </summary>
     TORPEDO
 }
@@ -57,11 +57,13 @@ public class GameController : MonoBehaviour
     {
         public Color playerColor;
         public bool AI;
+        public int boardDimensions;
 
-        public PlayerInitializer(Color color, bool AI)
+        public PlayerInitializer(Color color, bool AI, int boardDimensions)
         {
             playerColor = color;
             this.AI = AI;
+            this.boardDimensions = boardDimensions;
         }
     }
 
@@ -69,7 +71,8 @@ public class GameController : MonoBehaviour
     {
         ChangeState(GameState.TITLE);
     }
-
+    //The time it takes to process a single turn (in seconds)
+    public int defaultTurnProcessingTime;
     //The default values that are adjustable in the inspector
     //The dimensions of the board
     public int defaultPlayerBoardDimensions;
@@ -89,10 +92,14 @@ public class GameController : MonoBehaviour
     public float defaultGravity;
     //The prefab for cannon shells
     public GameObject defaultCannonShell;
+    //The prefab for torpedoes
+    public GameObject defaultTorpedo;
     //The effect used for ship explosions
     public GameObject defaultShipExplosion;
     //The effect used for ship fires
     public GameObject defaultShipFire;
+    //The effect used for torpedo detonations
+    public GameObject defaultTorpedoDetonation;
     //The sea level
     public float defaultSeaLevel;
     //Skips showing action shots of AI vs AI attacks in main battles
@@ -149,6 +156,10 @@ public class GameController : MonoBehaviour
     /// </summary>
     public static GameObject cannonShell;
     /// <summary>
+    /// The prefab for torpedoes.
+    /// </summary>
+    public static GameObject torpedo;
+    /// <summary>
     /// The prefab for ship explosions.
     /// </summary>
     public static GameObject shipExplosion;
@@ -156,6 +167,10 @@ public class GameController : MonoBehaviour
     /// The prefab for ship fires.
     /// </summary>
     public static GameObject shipFire;
+    /// <summary>
+    /// The prefab for torpedo detonations.
+    /// </summary>
+    public static GameObject torpedoDetonation;
     /// <summary>
     /// The sea level height.
     /// </summary>
@@ -172,6 +187,10 @@ public class GameController : MonoBehaviour
     /// The total amount of board tiles in the game. Used to limit the length of each match.
     /// </summary>
     public static int totalBoardTileLimit;
+    /// <summary>
+    /// The time it takes to process a single turn. (in seconds)
+    /// </summary>
+    public static int turnProcessingTime;
 
     /// <summary>
     /// Awake function.
@@ -187,11 +206,14 @@ public class GameController : MonoBehaviour
         playerOverheadStatusMarkers = defaultPlayerOverheadStatusMarkers;
         gravity = defaultGravity;
         cannonShell = defaultCannonShell;
+        torpedo = defaultTorpedo;
         shipExplosion = defaultShipExplosion;
         shipFire = defaultShipFire;
+        torpedoDetonation = defaultTorpedoDetonation;
         seaLevel = defaultSeaLevel;
         waterSplashEffect = defaultWaterSplashEffect;
         skipAIvsAIActionShots = defaultSkipAIvsAIActionShots;
+        turnProcessingTime = defaultTurnProcessingTime;
 
         switchTimesNill = nullifyBattleSwitchTimes;
         secondaryBattles = new List<Battle>();
@@ -203,7 +225,7 @@ public class GameController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (state == GameState.TITLE && InputController.beginPress)
+        if (state == GameState.TITLE && InputController.GetBeginPress(63))
         {
             ChangeState(GameState.PLAYER_SELECTION);
         }
@@ -219,7 +241,8 @@ public class GameController : MonoBehaviour
         Player[] players = new Player[playersToAdd.Length];
         //state = GameState.PLACING_SHIPS;
         humanPlayers = 0;
-        playerBoardDimensions = Mathf.FloorToInt(Mathf.Sqrt((float)totalBoardTileLimit / (float)players.Length));
+        //playerBoardDimensions = Mathf.Clamp(Mathf.FloorToInt(Mathf.Sqrt((float)totalBoardTileLimit / (float)players.Length)), 6, 20);
+
         //For all players create their own board
         for (int i = 0; i < players.Length; i++)
         {
@@ -228,8 +251,8 @@ public class GameController : MonoBehaviour
             Vector3 boardPosition = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * playerBoardDistanceFromCenter + Vector3.up * playerBoardElevation;
             Player player = players[i];
             player.board = new GameObject("Board " + i).AddComponent<Board>();
-            player.board.Initialize(playerBoardDimensions, boardPosition, player, playerBoardGridMaterial);
-            Cameraman.AddPosition(3f, new Vector3(boardPosition.x, playerBoardDimensions + playerBoardElevation, boardPosition.z), new Vector3(90, 0, 0), "Board " + (i + 1));
+            player.board.Initialize(playersToAdd[i].boardDimensions, boardPosition, player, playerBoardGridMaterial);
+            Cameraman.AddPosition(3f, new Vector3(boardPosition.x, playersToAdd[i].boardDimensions + playerBoardElevation, boardPosition.z), new Vector3(90, 0, 0), "Board " + (i + 1));
             player.color = playersToAdd[i].playerColor;
             player.AI = playersToAdd[i].AI;
             player.ID = i;
@@ -243,8 +266,8 @@ public class GameController : MonoBehaviour
             {
                 if (x != i)
                 {
-                    player.hits.Add(x, new List<Vector2>());
-                    player.misses.Add(x, new List<Vector2>());
+                    player.hits.Add(x, new List<BoardTile>());
+                    player.misses.Add(x, new List<BoardTile>());
                 }
             }
         }
@@ -279,9 +302,7 @@ public class GameController : MonoBehaviour
     {
         switch (GameController.state)
         {
-            case GameState.PLAYER_SELECTION:
-                Cameraman.SetBlur(false);
-                break;
+
         }
         GameController.state = state;
         switch (state)
@@ -295,9 +316,10 @@ public class GameController : MonoBehaviour
                 }
 
                 Cameraman.TakePosition("Overhead Title View");
+                Interface.SwitchMenu("CANCEL_OVERRIDE");
                 Interface.SwitchMenu("Title Screen");
                 Soundman.ChangeTrack(0, true, true);
-                NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true) }, false);
+                NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true, 7), new PlayerInitializer(Color.red, true, 7) }, false);
                 //NewBattle(new PlayerInitializer[] { new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true), new PlayerInitializer(Color.red, true) }, false);
                 break;
             case GameState.BATTLING:
@@ -309,9 +331,9 @@ public class GameController : MonoBehaviour
                 Soundman.ChangeTrack(-1, true, false);
                 break;
             case GameState.PLAYER_SELECTION:
-                Cameraman.SetBlur(true);
                 Soundman.ChangeTrack(1, true, false);
                 Interface.SwitchMenu("Player Selection Screen");
+                PlayerSelector.Reset();
                 break;
         }
     }
@@ -322,5 +344,33 @@ public class GameController : MonoBehaviour
     public void BackToTitle()
     {
         GameController.ChangeState(GameState.TITLE);
+    }
+
+    /// <summary>
+    /// Gets the minimum game time for an amount of players.
+    /// </summary>
+    /// <returns>Minimum game time (in seconds)</returns>
+    public static int GetGameTime(int players, int boardDimensions)
+    {
+        if (players == 0 || boardDimensions == 0)
+        {
+            return 0;
+        }
+        int result = 0;
+        float totalTileCount = boardDimensions * boardDimensions * players;
+        float totalShipTiles = 0;
+        foreach (GameObject ship in ShipPlacer.shipLoadout)
+        {
+            Ship s = ship.GetComponent<Ship>();
+            totalShipTiles += s.length;
+        }
+
+
+        totalShipTiles *= players;
+        Debug.Log(totalShipTiles);
+
+        result = (int)(12f * (totalShipTiles / ((totalShipTiles / totalTileCount) * 2.2f)));
+        Debug.Log((12f * (totalShipTiles / (((float)totalShipTiles / (float)totalTileCount) * 5f))));
+        return result;
     }
 }

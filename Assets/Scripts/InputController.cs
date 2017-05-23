@@ -26,36 +26,39 @@ public class InputController : MonoBehaviour
     /// <summary>
     /// Whether the screen began to get pressed this frame.
     /// </summary>
-    public static bool beginPress = false;
+    static bool beginPress = false;
     /// <summary>
     /// Whether the screen ended getting pressed this frame.
     /// </summary>
-    public static bool endPress = false;
+    static bool endPress = false;
     /// <summary>
     /// Whether the player released the screen without dragging.
     /// </summary>
-    public static bool tap = false;
+    static bool tap = false;
     /// <summary>
     /// Whether the player is dragging.
     /// </summary>
-    public static bool dragging = false;
+    static bool dragging = false;
     /// <summary>
     /// The initial input world position.
     /// </summary>
-    public static Vector3 initialInputPosition;
+    static Vector3 initialInputPosition;
     /// <summary>
     /// Whether the screen is pressed.
     /// </summary>
-    public static bool pressed = false;
+    static bool pressed = false;
     /// <summary>
     /// The distance between initial and current world input positions.
     /// </summary>
-    public static float deviation = 0f;
+    static float deviation = 0f;
     /// <summary>
     /// The distance the player needs to drag in order to register dragging.
     /// </summary>
     public float dragRegisterDistance = 0.3f;
-
+    /// <summary>
+    /// Determines what data will be returned when asking for variables.
+    /// </summary>
+    public static int securityLevel = 63;
     /// <summary>
     /// The update function.
     /// </summary>
@@ -139,5 +142,46 @@ public class InputController : MonoBehaviour
         }
 
         currentScreenInputPosition = Camera.main.WorldToScreenPoint(currentInputPosition);
+    }
+
+    public static bool IsDragging(int permission)
+    {
+        if ((permission & securityLevel) > 0)
+        {
+            return dragging;
+        }
+        return false;
+    }
+
+    public static bool GetTap(int permission)
+    {
+        if ((permission & securityLevel) > 0)
+        {
+            return tap;
+        }
+        return false;
+    }
+
+    public static bool GetEndPress(int permission)
+    {
+        if ((permission & securityLevel) > 0)
+        {
+            return endPress;
+        }
+        return false;
+    }
+
+    public static bool GetBeginPress(int permission)
+    {
+        if ((permission & securityLevel) > 0)
+        {
+            return beginPress;
+        }
+        return false;
+    }
+
+    public void ChangeSecurityLevel(int level)
+    {
+        InputController.securityLevel = level;
     }
 }

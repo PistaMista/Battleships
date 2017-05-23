@@ -19,7 +19,7 @@ public class BoardTile : MonoBehaviour
     /// <summary>
     /// The list of players who are able to detect a ship in this tile, without shooting at it.
     /// </summary>
-    List<Player> revealedTo;
+    public List<Player> revealedTo;
     /// <summary>
     /// The coordinates of this tile on the board.
     /// </summary>
@@ -74,6 +74,9 @@ public class BoardTile : MonoBehaviour
     {
         switch (boardState)
         {
+            case BoardState.OVERHEAD:
+                flashFallColor = Color.clear;
+                break;
             case BoardState.FRIENDLY:
                 if (containedShip != null)
                 {
@@ -85,7 +88,7 @@ public class BoardTile : MonoBehaviour
                         {
                             if (player.hits.ContainsKey(board.owner.ID))
                             {
-                                if (player.hits[board.owner.ID].Contains(boardCoordinates))
+                                if (player.hits[board.owner.ID].Contains(this))
                                 {
                                     hitBy.Add(player.color);
                                 }
@@ -99,12 +102,45 @@ public class BoardTile : MonoBehaviour
                         DrawShipStrip(Color.green);
                         DrawSideStrips(new Color[] { new Color(10f / 255f, 120f / 255f, 0f, 1f) });
                     }
+
+                    if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.state == BattleState.SHOWING_HIT_TILE)
+                    {
+                        if (board.owner.battle.recentTurnInformation.hitTiles.Contains(this))
+                        {
+                            flashFallColor = board.owner.battle.recentTurnInformation.attacker.color;
+                            StartCoroutine(Flash(true));
+                        }
+                        else
+                        {
+                            flashFallColor = Color.clear;
+                        }
+                    }
+                    else
+                    {
+                        flashFallColor = Color.clear;
+                    }
                 }
                 else
                 {
                     if (hit)
                     {
                         SetMarker(Color.black, board.grid.transform);
+                        if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.state == BattleState.SHOWING_HIT_TILE)
+                        {
+                            if (board.owner.battle.recentTurnInformation.hitTiles.Contains(this))
+                            {
+                                flashFallColor = Color.black;
+                                StartCoroutine(Flash(false));
+                            }
+                            else
+                            {
+                                flashFallColor = Color.clear;
+                            }
+                        }
+                        else
+                        {
+                            flashFallColor = Color.clear;
+                        }
                     }
                 }
                 break;
@@ -116,15 +152,57 @@ public class BoardTile : MonoBehaviour
                 }
                 break;
             case BoardState.ENEMY:
-                if (board.owner.battle.attackingPlayer.hits[board.owner.ID].Contains(boardCoordinates))
+                Color color = Color.clear;
+                if (board.owner.battle.attackingPlayer.hits[board.owner.ID].Contains(this))
                 {
-                    SetMarker(Color.red, board.grid.transform);
+                    //SetMarker(Color.red, board.grid.transform);
+                    color = Color.red;
+                }
+                else if (board.owner.battle.attackingPlayer.misses[board.owner.ID].Contains(this))
+                {
+                    //SetMarker(Color.black, board.grid.transform);
+                    color = Color.black;
+                }
+                else if (revealedTo.Contains(board.owner.battle.attackingPlayer))
+                {
+                    color = Color.magenta;
                 }
 
-                if (board.owner.battle.attackingPlayer.misses[board.owner.ID].Contains(boardCoordinates))
+                bool shipRevealed = false;
+                if (containedShip != null)
                 {
-                    SetMarker(Color.black, board.grid.transform);
+                    shipRevealed = containedShip.IsRevealedTo(board.owner.battle.attackingPlayer);
                 }
+
+                if (!shipRevealed)
+                {
+                    SetMarker(color, board.grid.transform);
+                }
+                else
+                {
+                    DrawShipStrip(color);
+                    color.a = 0.4f;
+                    DrawSideStrips(new Color[] { color });
+                }
+
+                color.a = 0.4f;
+                if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.state == BattleState.SHOWING_HIT_TILE)
+                {
+                    if (board.owner.battle.recentTurnInformation.hitTiles.Contains(this))
+                    {
+                        flashFallColor = color;
+                        StartCoroutine(Flash(shipRevealed));
+                    }
+                    else
+                    {
+                        flashFallColor = Color.clear;
+                    }
+                }
+                else
+                {
+                    flashFallColor = Color.clear;
+                }
+
                 break;
         }
     }
@@ -175,16 +253,16 @@ public class BoardTile : MonoBehaviour
             strip.transform.localPosition = Vector3.zero;
             shipDirection = Vector2.zero;
             middleSegment = false;
-            foreach (Vector2 position in containedShip.tiles)
+            foreach (BoardTile tile in containedShip.tiles)
             {
-                int distance = (int)(Mathf.Abs(position.x - boardCoordinates.x) + Mathf.Abs(position.y - boardCoordinates.y));
+                int distance = (int)(Mathf.Abs(tile.boardCoordinates.x - boardCoordinates.x) + Mathf.Abs(tile.boardCoordinates.y - boardCoordinates.y));
                 if (distance == 1)
                 {
                     if (shipDirection != Vector2.zero)
                     {
                         middleSegment = true;
                     }
-                    shipDirection = position - boardCoordinates;
+                    shipDirection = tile.boardCoordinates - boardCoordinates;
                 }
             }
 
@@ -205,6 +283,10 @@ public class BoardTile : MonoBehaviour
     }
 
     /// <summary>
+    /// The parent object for the side strips.
+    /// </summary>
+    GameObject sideStrips;
+    /// <summary>
     /// Draws the side strip, showing the color of players who have hit this tile.
     /// </summary>
     void DrawSideStrips(Color[] colors)
@@ -212,6 +294,11 @@ public class BoardTile : MonoBehaviour
         float totalStripWidth = 0.45f - stripWidth / 2f;
         float individualStripWidth = totalStripWidth / colors.Length;
         float startingPosition = stripWidth / 2f + individualStripWidth / 2f;
+        Destroy(sideStrips);
+        sideStrips = new GameObject("Side Strips");
+        sideStrips.transform.parent = marker.gameObject.transform;
+        sideStrips.transform.localPosition = Vector3.zero;
+
         if (middleSegment)
         {
             for (int color = 0; color < colors.Length; color++)
@@ -224,7 +311,7 @@ public class BoardTile : MonoBehaviour
                     Vector3 stripWidthScaleModifier = new Vector3((stripLengthScaleModifier.x == 0) ? individualStripWidth : 0, 0f, (stripLengthScaleModifier.z == 0) ? individualStripWidth : 0);
 
                     GameObject strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    strip.transform.parent = marker.transform;
+                    strip.transform.parent = sideStrips.transform;
                     strip.transform.localPosition = positionModifier;
                     strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
 
@@ -261,7 +348,7 @@ public class BoardTile : MonoBehaviour
                     stripWidthScaleModifier = new Vector3((stripLengthScaleModifier.x == 0) ? individualStripWidth : 0, 0f, (stripLengthScaleModifier.z == 0) ? individualStripWidth : 0);
 
                     strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    strip.transform.parent = marker.transform;
+                    strip.transform.parent = sideStrips.transform;
                     strip.transform.localPosition = positionModifier + secondaryPositionModifier;
                     strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
 
@@ -278,7 +365,7 @@ public class BoardTile : MonoBehaviour
                 stripWidthScaleModifier = new Vector3((stripLengthScaleModifier.x == 0) ? individualStripWidth : 0, 0f, (stripLengthScaleModifier.z == 0) ? individualStripWidth : 0);
 
                 strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                strip.transform.parent = marker.transform;
+                strip.transform.parent = sideStrips.transform;
                 strip.transform.localPosition = positionModifier;
                 strip.transform.localScale = stripLengthScaleModifier + stripWidthScaleModifier;
 
@@ -288,6 +375,69 @@ public class BoardTile : MonoBehaviour
                 block.SetColor("_Color", colors[color]);
                 renderer.SetPropertyBlock(block);
             }
+        }
+    }
+
+    /// <summary>
+    /// Reveals this tile to a player.
+    /// </summary>
+    /// <param name="player">The player, who to reveal the tile to.</param>
+    public void RevealTo(Player player)
+    {
+        if (!revealedTo.Contains(player))
+        {
+            revealedTo.Add(player);
+        }
+    }
+
+    /// <summary>
+    /// The color which this tile will flash when hit.
+    /// </summary>
+    Color flashFallColor;
+    /// <summary>
+    /// Whether the tile has flashed.
+    /// </summary>
+    bool flashed = false;
+
+    /// <summary>
+    /// Flashes the tile.
+    /// </summary>
+    /// <returns>Nothing.</returns>
+    IEnumerator Flash(bool sideStrips)
+    {
+        if (flashed)
+        {
+            if (sideStrips)
+            {
+                DrawSideStrips(new Color[] { flashFallColor });
+            }
+            else
+            {
+                SetMarker(flashFallColor, board.grid.transform);
+            }
+        }
+        else
+        {
+            if (sideStrips)
+            {
+                DrawSideStrips(new Color[] { Color.white });
+            }
+            else
+            {
+                SetMarker(Color.white, board.grid.transform);
+            }
+        }
+
+        flashed = !flashed;
+
+        yield return new WaitForSeconds(0.35f);
+        if (flashFallColor != Color.clear && marker != null)
+        {
+            StartCoroutine(Flash(sideStrips));
+        }
+        else
+        {
+            flashed = false;
         }
     }
 }

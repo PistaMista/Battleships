@@ -231,17 +231,17 @@ public class Board : MonoBehaviour
                 break;
             case BoardState.ENEMY:
                 DrawGrid(dimensions, GameController.playerBoardGridMaterial);
-                Vector2[] hits = owner.battle.attackingPlayer.hits[owner.ID].ToArray();
-                Vector2[] misses = owner.battle.attackingPlayer.misses[owner.ID].ToArray();
+                BoardTile[] hits = owner.battle.attackingPlayer.hits[owner.ID].ToArray();
+                BoardTile[] misses = owner.battle.attackingPlayer.misses[owner.ID].ToArray();
 
-                foreach (Vector2 pos in hits)
+                foreach (BoardTile tile in hits)
                 {
-                    SetMarker(pos, Color.red);
+                    SetMarker(tile.boardCoordinates, Color.red);
                 }
 
-                foreach (Vector2 pos in misses)
+                foreach (BoardTile tile in misses)
                 {
-                    SetMarker(pos, Color.black);
+                    SetMarker(tile.boardCoordinates, Color.black);
                 }
                 break;
             case BoardState.FRIENDLY:

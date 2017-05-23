@@ -5,32 +5,7 @@ public enum BattleState { CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_
 
 public class Battle : MonoBehaviour
 {
-    /// <summary>
-    /// Holds the information about the most recent attack.
-    /// </summary>
-    public struct RecentAttackInformation
-    {
-        /// <summary>
-        /// The position of the tile which was shot or the direction of launched torpedoes.
-        /// </summary>
-        public Vector2 target;
-        /// <summary>
-        /// The weapon used for the attack.
-        /// </summary>
-        public AttackType type;
-        /// <summary>
-        /// Whether the hit ship was sunk by this attack. Deprecated.
-        /// </summary>
-        public bool shipSunk;
-        /// <summary>
-        /// The ship which was hit. Deprecated.
-        /// </summary>
-        public Ship hitShip;
-        /// <summary>
-        /// The world position of the attacked tile.
-        /// </summary>
-        public Vector3 attackedTileWorldPosition;
-    }
+
     /// <summary>
     /// Whether the battle is in progress.
     /// </summary>
@@ -100,15 +75,15 @@ public class Battle : MonoBehaviour
     /// <summary>
     /// On firing guns.
     /// </summary>
-    public delegate void OnFire();
+    public delegate void OnAttack();
     /// <summary>
     /// On firing guns.
     /// </summary>
-    public OnFire onFire;
+    public OnAttack onAttack;
     /// <summary>
     /// Stores information about the most recent attack.
     /// </summary>
-    public RecentAttackInformation recentAttackInfo;
+    public MoveInformator recentTurnInformation;
 
 
     /// <summary>
@@ -212,6 +187,8 @@ public class Battle : MonoBehaviour
 
         attackingPlayerID = -1;
         NextPlayer();
+        recentTurnInformation = (MoveInformator)ScriptableObject.CreateInstance("MoveInformator");
+        recentTurnInformation.Reset();
 
         if (isMainBattle)
         {
@@ -241,6 +218,8 @@ public class Battle : MonoBehaviour
         }
 
         attackingPlayer = players[attackingPlayerID];
+        attackingPlayer.torpedoRecharge = (attackingPlayer.torpedoRecharge == 0) ? 0 : attackingPlayer.torpedoRecharge - 1;
+
         while (!attackingPlayer.alive)
         {
             attackingPlayerID++;
@@ -285,44 +264,144 @@ public class Battle : MonoBehaviour
     /// <returns>Hit successful.</returns>
     public bool ArtilleryAttack(BoardTile tile)
     {
-        if (defendingPlayer)
+
+        if (tile != null)
         {
-            if (tile != null)
+            if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile))
             {
-                if (!attackingPlayer.hits[defendingPlayer.ID].Contains(tile.boardCoordinates) && !attackingPlayer.misses[defendingPlayer.ID].Contains(tile.boardCoordinates))
+                recentTurnInformation.Reset();
+                recentTurnInformation.target = tile.boardCoordinates;
+                //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
+                recentTurnInformation.type = AttackType.ARTILLERY;
+                recentTurnInformation.attacker = attackingPlayer;
+
+                targetState = BattleState.TURN_FINISHED;
+                switchTime = 0.5f;
+
+                if (tile.containedShip && Random.Range(0, 10) == 0)
                 {
-                    recentAttackInfo.target = tile.boardCoordinates;
-                    recentAttackInfo.attackedTileWorldPosition = tile.transform.position;
-                    recentAttackInfo.type = AttackType.SHELL;
-
-                    targetState = BattleState.TURN_FINISHED;
-                    switchTime = 0.5f;
-
-                    RegisterHitOnTile(tile);
-
-                    if (onFire != null)
+                    if (!tile.containedShip.eliminated)
                     {
-                        onFire();
+                        foreach (BoardTile t in tile.containedShip.tiles)
+                        {
+                            t.RevealTo(attackingPlayer);
+                            RegisterHitOnTile(t);
+                        }
                     }
-
-                    if (!defendingPlayer.alive)
-                    {
-                        playersAlive--;
-                    }
-
-                    if (!isMainBattle)
-                    {
-                        FireGunsAtTargetTile(tile);
-                        ChangeState(BattleState.FIRING);
-                    }
-
-                    return true;
                 }
+                else
+                {
+                    RegisterHitOnTile(tile);
+                }
+
+                if (onAttack != null)
+                {
+                    onAttack();
+                }
+
+                if (!defendingPlayer.alive)
+                {
+                    playersAlive--;
+                }
+
+                if (!isMainBattle)
+                {
+                    FireGunsAtTargetTile(tile);
+                    ChangeState(BattleState.FIRING);
+                }
+
+                return true;
             }
         }
 
+
         Debug.LogWarning("There was an attempt to shoot an invalid tile: " + tile + ". Things may break.");
         return false;
+    }
+
+    /// <summary>
+    /// Executes a torpedo attack in the direction from the launch point.
+    /// </summary>
+    /// <param name="direction"></param>
+    public void TorpedoAttack(Vector3 direction)
+    {
+        recentTurnInformation.Reset();
+        recentTurnInformation.target = new Vector2(direction.x, direction.z).normalized;
+        //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
+        recentTurnInformation.type = AttackType.TORPEDO;
+        recentTurnInformation.attacker = attackingPlayer;
+
+        targetState = BattleState.TURN_FINISHED;
+        switchTime = 0.5f;
+
+        int destroyers = 0;
+        foreach (Ship ship in attackingPlayer.livingShips)
+        {
+            if (ship.type == ShipType.DESTROYER && ship.lengthRemaining == ship.length)
+            {
+                destroyers++;
+            }
+        }
+
+        switch (destroyers)
+        {
+            case 2:
+                attackingPlayer.torpedoRecharge = 3;
+                break;
+            case 1:
+                attackingPlayer.torpedoRecharge = 5;
+                break;
+        }
+
+        int torpedoes = 5;
+        Vector3 launchPosition = GetTorpedoLaunchPosition();
+        BoardTile[] hits = GetTorpedoHits(launchPosition, launchPosition + direction.normalized * 30f);
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            BoardTile inspectedTile = hits[i];
+            if (inspectedTile.containedShip)
+            {
+                if (!inspectedTile.containedShip.eliminated && Random.Range(1, 100) > inspectedTile.containedShip.torpedoEvasionChance)
+                {
+                    foreach (BoardTile tile in inspectedTile.containedShip.tiles)
+                    {
+                        int distance = (int)Vector2.Distance(tile.boardCoordinates, inspectedTile.boardCoordinates);
+                        if (distance <= Random.Range(1, 3))
+                        {
+                            RegisterHitOnTile(tile);
+                            tile.RevealTo(attackingPlayer);
+                        }
+                    }
+
+                    recentTurnInformation.torpedoInfo.impacts.Add(inspectedTile);
+
+                    if (inspectedTile.containedShip.eliminated)
+                    {
+                        torpedoes--;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (torpedoes == 0)
+            {
+                break;
+            }
+        }
+
+        foreach (BoardTile hit in recentTurnInformation.torpedoInfo.impacts)
+        {
+            Debug.Log("Torpedo Hit: " + hit.transform.position);
+        }
+
+        if (onAttack != null)
+        {
+            onAttack();
+        }
     }
 
     /// <summary>
@@ -335,27 +414,32 @@ public class Battle : MonoBehaviour
         {
             if (!tile.containedShip.eliminated)
             {
-                attackingPlayer.hits[defendingPlayer.ID].Add(tile.boardCoordinates);
-                recentAttackInfo.hitShip = tile.containedShip;
+                attackingPlayer.hits[defendingPlayer.ID].Add(tile);
+                if (!recentTurnInformation.hitShips.Contains(tile.containedShip))
+                {
+                    recentTurnInformation.hitShips.Add(tile.containedShip);
+                }
                 if (!tile.hit)
                 {
                     tile.containedShip.RegisterHit();
-                    recentAttackInfo.shipSunk = tile.containedShip.eliminated;
+                    if (tile.containedShip.eliminated)
+                    {
+                        recentTurnInformation.sunkShips.Add(tile.containedShip);
+                    }
                 }
             }
             else
             {
-                attackingPlayer.misses[defendingPlayer.ID].Add(tile.boardCoordinates);
-                recentAttackInfo.hitShip = null;
+                attackingPlayer.misses[defendingPlayer.ID].Add(tile);
             }
         }
         else
         {
-            attackingPlayer.misses[defendingPlayer.ID].Add(tile.boardCoordinates);
-            recentAttackInfo.hitShip = null;
+            attackingPlayer.misses[defendingPlayer.ID].Add(tile);
         }
 
         tile.hit = true;
+        recentTurnInformation.hitTiles.Add(tile);
     }
 
     /// <summary>
@@ -402,29 +486,29 @@ public class Battle : MonoBehaviour
     /// <returns>Position of optimal tile to target.</returns>
     public BoardTile ChooseTileToAttackForAIPlayer()
     {
-        List<Vector2> hits = attackingPlayer.hits[defendingPlayer.ID];
-        List<Vector2> misses = attackingPlayer.misses[defendingPlayer.ID];
+        List<BoardTile> hits = attackingPlayer.hits[defendingPlayer.ID];
+        List<BoardTile> misses = attackingPlayer.misses[defendingPlayer.ID];
 
-        List<Vector2> processedTiles = new List<Vector2>();
-        Dictionary<int, List<Vector2>> rankedTiles = new Dictionary<int, List<Vector2>>();
+        List<BoardTile> processedTiles = new List<BoardTile>();
+        Dictionary<int, List<BoardTile>> rankedTiles = new Dictionary<int, List<BoardTile>>();
 
         int highestRank = 0;
 
         for (int i = 1; i <= 10; i++)
         {
-            rankedTiles.Add(i, new List<Vector2>());
+            rankedTiles.Add(i, new List<BoardTile>());
         }
 
         Vector2[] cardinalDirections = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
 
         //Eliminate the misses
-        foreach (Vector2 miss in misses)
+        foreach (BoardTile miss in misses)
         {
             processedTiles.Add(miss);
         }
 
         //Analyze hits
-        foreach (Vector2 hit in hits)
+        foreach (BoardTile hit in hits)
         {
             if (!processedTiles.Contains(hit))
             {
@@ -434,10 +518,11 @@ public class Battle : MonoBehaviour
                 Vector2 examinedDirection = Vector2.zero;
                 foreach (Vector2 direction in cardinalDirections)
                 {
-                    Vector2 checkedPosition = hit + direction;
+                    Vector2 checkedPosition = hit.boardCoordinates + direction;
                     if (defendingPlayer.board.IsPositionValid(checkedPosition))
                     {
-                        if (hits.Contains(checkedPosition))
+                        BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
+                        if (hits.Contains(checkedTile))
                         {
                             examinedDirection = direction;
                             break;
@@ -451,22 +536,22 @@ public class Battle : MonoBehaviour
                     {
                         for (int i = 1; i < defendingPlayer.board.dimensions; i++)
                         {
-                            Vector2 checkedPosition = hit + examinedDirection * i * direction;
+                            Vector2 checkedPosition = hit.boardCoordinates + examinedDirection * i * direction;
                             if (defendingPlayer.board.IsPositionValid(checkedPosition))
                             {
-                                //if (!processedTiles.Contains(checkedPosition))
-                                //{
-                                processedTiles.Add(checkedPosition);
-                                if (!hits.Contains(checkedPosition) && !misses.Contains(checkedPosition))
+
+                                BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
+                                processedTiles.Add(checkedTile);
+                                if (!hits.Contains(checkedTile) && !misses.Contains(checkedTile))
                                 {
-                                    rankedTiles[10].Add(checkedPosition);
+                                    rankedTiles[10].Add(checkedTile);
                                     if (10 > highestRank)
                                     {
                                         highestRank = 10;
                                     }
                                     break;
                                 }
-                                else if (misses.Contains(checkedPosition))
+                                else if (misses.Contains(checkedTile))
                                 {
                                     break;
                                 }
@@ -483,14 +568,18 @@ public class Battle : MonoBehaviour
                 {
                     foreach (Vector2 direction in cardinalDirections)
                     {
-                        Vector2 checkedPosition = hit + direction;
-                        if (defendingPlayer.board.IsPositionValid(checkedPosition) && !processedTiles.Contains(checkedPosition))
+                        Vector2 checkedPosition = hit.boardCoordinates + direction;
+                        if (defendingPlayer.board.IsPositionValid(checkedPosition))
                         {
-                            processedTiles.Add(checkedPosition);
-                            rankedTiles[10].Add(checkedPosition);
-                            if (10 > highestRank)
+                            BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
+                            if (!processedTiles.Contains(checkedTile))
                             {
-                                highestRank = 10;
+                                processedTiles.Add(checkedTile);
+                                rankedTiles[10].Add(checkedTile);
+                                if (10 > highestRank)
+                                {
+                                    highestRank = 10;
+                                }
                             }
                         }
                     }
@@ -501,18 +590,14 @@ public class Battle : MonoBehaviour
 
 
         //Add the other tiles
-        for (int x = 0; x < defendingPlayer.board.dimensions; x++)
+        foreach (BoardTile candidateTile in defendingPlayer.board.tiles)
         {
-            for (int y = 0; y < defendingPlayer.board.dimensions; y++)
+            if (!processedTiles.Contains(candidateTile))
             {
-                Vector2 candidatePosition = new Vector2(x, y);
-                if (!processedTiles.Contains(candidatePosition))
+                rankedTiles[1].Add(candidateTile);
+                if (1 > highestRank)
                 {
-                    rankedTiles[1].Add(candidatePosition);
-                    if (1 > highestRank)
-                    {
-                        highestRank = 1;
-                    }
+                    highestRank = 1;
                 }
             }
         }
@@ -530,8 +615,7 @@ public class Battle : MonoBehaviour
             }
         }
 
-        Vector2 randomPosition = rankedTiles[targetRank][Random.Range(0, rankedTiles[targetRank].Count - 1)];
-        result = defendingPlayer.board.tiles[(int)randomPosition.x, (int)randomPosition.y];
+        result = rankedTiles[targetRank][Random.Range(0, rankedTiles[targetRank].Count - 1)];
 
         //Debug.Log(result);
         return result;
@@ -595,5 +679,83 @@ public class Battle : MonoBehaviour
         // }
 
         return highestTravelTime;
+    }
+
+    /// <summary>
+    /// Returns the position from which torpedoes will be launched if the player decides to use them.
+    /// </summary>
+    /// <returns></returns>
+    public Vector3 GetTorpedoLaunchPosition()
+    {
+        Vector3 position = Vector2.zero;
+
+        if (Mathf.Abs(defendingPlayer.board.transform.position.z) < Mathf.Abs(defendingPlayer.board.transform.position.x))
+        {
+            position = defendingPlayer.board.transform.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(defendingPlayer.board.transform.position.x);
+        }
+        else
+        {
+            position = defendingPlayer.board.transform.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(defendingPlayer.board.transform.position.z);
+        }
+
+        position.y = 0;
+        return position;
+    }
+
+    /// <summary>
+    /// Gets all the tiles in the line between launchPoint and stoppingPoint.
+    /// </summary>
+    /// <param name="launchPoint"></param>
+    /// <param name="stoppingPoint"></param>
+    /// <returns></returns>
+    public BoardTile[] GetTorpedoHits(Vector3 launchPoint, Vector3 stoppingPoint)
+    {
+        List<BoardTile> hits = new List<BoardTile>();
+
+        launchPoint.y = 0;
+        stoppingPoint.y = 0;
+
+        int steps = Mathf.CeilToInt(Vector3.Distance(launchPoint, stoppingPoint));
+
+        for (int i = 0; i < steps; i++)
+        {
+            Vector3 inspectedWorldPosition = Vector3.Lerp(launchPoint, stoppingPoint, (float)i / (float)steps);
+            BoardTile inspectedTile = defendingPlayer.board.GetTileAtWorldPosition(inspectedWorldPosition);
+
+            if (inspectedTile != null && !hits.Contains(inspectedTile))
+            {
+                hits.Add(inspectedTile);
+            }
+        }
+
+        return hits.ToArray();
+    }
+
+    /// <summary>
+    /// Checks if a torpedo attack is available this turn.
+    /// </summary>
+    /// <returns></returns>
+    public bool TorpedoAttackAvailable()
+    {
+        int destroyers = 0;
+        foreach (Ship ship in attackingPlayer.livingShips)
+        {
+            if (ship.type == ShipType.DESTROYER && ship.lengthRemaining == ship.length)
+            {
+                destroyers++;
+            }
+        }
+
+        if (destroyers > 0 && attackingPlayer.torpedoRecharge == 0)
+        {
+            return true;
+        }
+
+        if (destroyers == 0)
+        {
+            attackingPlayer.torpedoRecharge = 9999999;
+        }
+
+        return false;
     }
 }

@@ -101,8 +101,6 @@ public class SquarePulserEffect : MonoBehaviour
                 i--;
             }
         }
-
-        Debug.Log(cubes.Count);
     }
 
     /// <summary>
