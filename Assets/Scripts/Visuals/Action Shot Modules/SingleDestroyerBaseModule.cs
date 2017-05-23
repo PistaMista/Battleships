@@ -64,7 +64,7 @@ public class SingleDestroyerBaseModule : ActionShotModule
             selectedDestroyer.FireTorpedoLaunchers();
         }
 
-        if (lifetime > 12f)
+        if (lifetime > 12f || (BattleInterface.battle.recentTurnInformation.torpedoInfo.impacts.Count == 0 && lifetime > 4f))
         {
             Actionman.EndActionView();
         }
