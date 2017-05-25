@@ -75,15 +75,18 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
                 if (BattleInterface.battle.attackingPlayer.torpedoRecharge < 8)
                 {
                     int bars = BattleInterface.battle.attackingPlayer.torpedoRecharge;
-                    float barSpacing = (float)BattleInterface.battle.defendingPlayer.board.dimensions / (bars + 3);
+                    float barScale = (float)BattleInterface.battle.defendingPlayer.board.dimensions / 8f;
+                    float barSpacing = barScale * 1.2f;
                     float initialPosition = -(barSpacing * bars / 2f - barSpacing / 2f);
+                    float barWidth = barScale * 1.5f;
+
 
                     for (int i = 0; i < bars; i++)
                     {
                         float actualPosition = initialPosition + i * barSpacing;
                         GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
                         tmp.transform.parent = UIParent.transform;
-                        tmp.transform.localScale = new Vector3(1f, 0.1f, barSpacing / 2f);
+                        tmp.transform.localScale = new Vector3(barWidth, 0.1f, barScale);
                         tmp.transform.localPosition = new Vector3(0f, 0f, actualPosition);
                         Renderer renderer = tmp.GetComponent<Renderer>();
                         MaterialPropertyBlock block = new MaterialPropertyBlock();
