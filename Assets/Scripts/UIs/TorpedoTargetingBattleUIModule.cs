@@ -149,12 +149,15 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
                     }
                     else
                     {
-                        if (InputController.GetEndPress(63) && hits.Length > 0)
+                        if (hits != null)
                         {
-                            Debug.Log("Fire!");
-                            //ResetTargetingUI();
-                            BattleInterface.battle.TorpedoAttack(torpedoFiringDirection);
-                            Disable();
+                            if (InputController.GetEndPress(63) && hits.Length > 0)
+                            {
+                                Debug.Log("Fire!");
+                                //ResetTargetingUI();
+                                BattleInterface.battle.TorpedoAttack(torpedoFiringDirection);
+                                Disable();
+                            }
                         }
                         ResetDummyPosition();
                     }
