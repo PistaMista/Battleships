@@ -17,6 +17,10 @@ public class AircraftCarrier : Ship
     /// </summary> 
     public List<Aircraft> hangarAircraft;
     /// <summary>
+    /// The active squadron of aircraft.
+    /// </summary>
+    public ActiveAircraft activeSquadron;
+    /// <summary>
     /// The number of aircraft which can be put on the flight deck.
     /// </summary>
     public int flightDeckCapacity;
@@ -65,14 +69,19 @@ public class AircraftCarrier : Ship
         Vector3 startingPos = new Vector3(-0.2f, 0.3f, -1.85f);
         float zSpacing = 0.35f;
         float xSpacing = 0.15f;
+        activeSquadron = new GameObject("Active Squadron").AddComponent<ActiveAircraft>();
+        activeSquadron.aircraft = new List<Aircraft>();
+        activeSquadron.transform.parent = transform;
 
         for (int i = 0; i < flightDeckCapacity && i < hangarAircraft.Count; i++)
         {
             Vector3 finalPosition = startingPos + Vector3.forward * zSpacing * i + Vector3.right * xSpacing * centering;
             Aircraft aircraft = hangarAircraft[0];
             aircraft.Prepare(finalPosition, Vector3.up * 180f, i);
+            aircraft.transform.parent = activeSquadron.transform;
 
             hangarAircraft.Remove(aircraft);
+            activeSquadron.aircraft.Add(aircraft);
             centering *= -1;
         }
     }
