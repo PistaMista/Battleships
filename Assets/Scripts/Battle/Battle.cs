@@ -278,7 +278,7 @@ public class Battle : MonoBehaviour
                 targetState = BattleState.TURN_FINISHED;
                 switchTime = 0.5f;
 
-                if (tile.containedShip && Random.Range(0, 10) == 0)
+                if (tile.containedShip && Random.Range(0, 10) == 0 && tile.containedShip.type != ShipType.AIRCRAFT_CARRIER)
                 {
                     if (!tile.containedShip.eliminated)
                     {

@@ -42,15 +42,15 @@ public class FleetAttackFormationBaseModule : ActionShotModule
             if (ship.lengthRemaining == ship.length)
             {
                 attackers.Add(ship);
-                switch (ship.length)
+                switch (ship.type)
                 {
-                    case 3:
+                    case ShipType.DESTROYER:
                         destroyers.Add(ship);
                         break;
-                    case 4:
+                    case ShipType.CRUISER:
                         cruisers.Add(ship);
                         break;
-                    case 5:
+                    case ShipType.BATTLESHIP:
                         battleships.Add(ship);
                         break;
                 }
