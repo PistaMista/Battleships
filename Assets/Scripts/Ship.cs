@@ -6,7 +6,8 @@ public enum ShipType
 {
     CRUISER,
     BATTLESHIP,
-    DESTROYER
+    DESTROYER,
+    AIRCRAFT_CARRIER
 }
 
 public class Ship : MonoBehaviour
