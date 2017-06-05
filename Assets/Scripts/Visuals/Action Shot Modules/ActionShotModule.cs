@@ -40,22 +40,22 @@ public class ActionShotModule : ScriptableObject
         //Prepares the interface
         Interface.SwitchMenu("Firing Screen");
 
-        foreach (Player player in BattleInterface.battle.players)
+        foreach (Player player in FieldInterface.battle.players)
         {
             player.board.Set(BoardState.DISABLED);
             player.SetMacroMarker(-1);
         }
 
-        if (!BattleInterface.battle.attackingPlayer.AI || (GameController.humanPlayers < 2 && !BattleInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
+        if (!FieldInterface.battle.attackingPlayer.AI || (GameController.humanPlayers < 2 && !FieldInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
         {
-            BattleInterface.battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
+            FieldInterface.battle.ChangeState(BattleState.SHOWING_HIT_TILE, 0.5f);
         }
         else
         {
-            BattleInterface.battle.ChangeState(BattleState.TURN_FINISHED, 1f);
+            FieldInterface.battle.ChangeState(BattleState.TURN_FINISHED, 1f);
         }
 
-        BattleInterface.battle.switchTime = Mathf.Infinity;
+        FieldInterface.battle.switchTime = Mathf.Infinity;
     }
     /// <summary>
     /// Refreshes the action shot.

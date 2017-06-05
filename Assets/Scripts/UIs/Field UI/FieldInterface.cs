@@ -26,6 +26,9 @@ public class FieldInterface : MonoBehaviour
                 ReconsiderModules();
                 currentState_last = battle.currentState;
                 nextState_last = battle.nextState;
+
+                Debug.Log("CS: " + battle.currentState);
+                Debug.Log("NS: " + battle.nextState);
             }
             linked = true;
         }

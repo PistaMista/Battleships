@@ -25,7 +25,7 @@ public class Actionman : MonoBehaviour
     public static void ActionView()
     {
         int randomModuleID = 1;
-        switch (BattleInterface.battle.recentTurnInformation.type)
+        switch (FieldInterface.battle.recentTurnInformation.type)
         {
             case AttackType.ARTILLERY:
                 //randomModuleID = Random.Range(1, 3);
@@ -62,7 +62,7 @@ public class Actionman : MonoBehaviour
     public static void EndActionView()
     {
         Destroy(currentActionShot);
-        BattleInterface.battle.switchTime = 1f;
+        FieldInterface.battle.switchTime = 1f;
     }
 
     /// <summary>

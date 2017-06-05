@@ -23,20 +23,26 @@ public class FieldUIModule : MonoBehaviour
     /// <summary>
     /// Whether this module is allowed to accept user input.
     /// </summary>
-    bool inputEnabled;
+    public bool inputEnabled;
 
     /// <summary>
     /// Tells the module to decide whether it has to be enabled right now.
     /// </summary>
     public void ReconsiderActivity()
     {
-        if (CheckConditions() && !gameObject.activeInHierarchy)
+        if (CheckConditions())
         {
-            Enable();
+            if (!gameObject.activeInHierarchy)
+            {
+                Enable();
+            }
         }
-        else if (gameObject.activeInHierarchy)
+        else
         {
-            Disable();
+            if (gameObject.activeInHierarchy)
+            {
+                Disable();
+            }
         }
     }
 

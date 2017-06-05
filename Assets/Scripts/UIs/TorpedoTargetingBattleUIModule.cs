@@ -58,24 +58,24 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
     {
         if (!activated)
         {
-            attackAvailable = BattleInterface.battle.TorpedoAttackAvailable();
+            attackAvailable = FieldInterface.battle.TorpedoAttackAvailable();
             if (attackAvailable)
             {
                 UIParent = dummyTorpedo;
-                dummyTorpedo.transform.localScale = Vector3.one * BattleInterface.battle.defendingPlayer.board.dimensions;
-                launchPosition = BattleInterface.battle.GetTorpedoLaunchPosition();
+                dummyTorpedo.transform.localScale = Vector3.one * FieldInterface.battle.defendingPlayer.board.dimensions;
+                launchPosition = FieldInterface.battle.GetTorpedoLaunchPosition();
                 ResetDummyPosition();
-                Vector3 position = BattleInterface.battle.defendingPlayer.board.transform.position;
+                Vector3 position = FieldInterface.battle.defendingPlayer.board.transform.position;
                 position.y = 0;
-                referenceDistance = Vector3.Distance(position, launchPosition) - BattleInterface.battle.defendingPlayer.board.dimensions / 2f;
+                referenceDistance = Vector3.Distance(position, launchPosition) - FieldInterface.battle.defendingPlayer.board.dimensions / 2f;
             }
             else
             {
                 UIParent = new GameObject("Recharge Time Indicator");
-                if (BattleInterface.battle.attackingPlayer.torpedoRecharge < 8)
+                if (FieldInterface.battle.attackingPlayer.torpedoRecharge < 8)
                 {
-                    int bars = BattleInterface.battle.attackingPlayer.torpedoRecharge;
-                    float barScale = (float)BattleInterface.battle.defendingPlayer.board.dimensions / 8f;
+                    int bars = FieldInterface.battle.attackingPlayer.torpedoRecharge;
+                    float barScale = (float)FieldInterface.battle.defendingPlayer.board.dimensions / 8f;
                     float barSpacing = barScale * 1.2f;
                     float initialPosition = -(barSpacing * bars / 2f - barSpacing / 2f);
                     float barWidth = barScale * 1.5f;
@@ -112,19 +112,19 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
         {
             if (attackAvailable)
             {
-                if (BattleInterface.battle.switchTime <= 0)
+                if (FieldInterface.battle.switchTime <= 0)
                 {
                     if (InputController.IsDragging(63))
                     {
                         Vector3 relativePosition = InputController.currentInputPosition - launchPosition;
                         //dummyTorpedo.transform.rotation = Quaternion.Euler(new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0));
-                        //BattleInterface.battle.defendingPlayer.board.Set(BoardState.ENEMY);
+                        //FieldInterface.battle.defendingPlayer.board.Set(BoardState.ENEMY);
                         torpedoFiringDirection = relativePosition.normalized;
                         Vector3 targetRotation = new Vector3(0, Mathf.Atan2(relativePosition.x, relativePosition.z) * Mathf.Rad2Deg, 0);
                         Vector3 targetPosition = relativePosition.normalized * referenceDistance + launchPosition;
-                        targetPosition.y = BattleInterface.battle.defendingPlayer.board.transform.position.y;
+                        targetPosition.y = FieldInterface.battle.defendingPlayer.board.transform.position.y;
                         Vector2 deterministic = Vector2.zero;
-                        hits = BattleInterface.battle.GetTorpedoHits(launchPosition, launchPosition + torpedoFiringDirection * 30f);
+                        hits = FieldInterface.battle.GetTorpedoHits(launchPosition, launchPosition + torpedoFiringDirection * 30f);
                         for (int i = 0; i < hits.Length; i++)
                         {
                             BoardTile hit = hits[i];
@@ -134,11 +134,11 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
 
                         if (deterministic != refreshDecisionTemplate)
                         {
-                            BattleInterface.battle.defendingPlayer.board.Set(BoardState.ENEMY);
+                            FieldInterface.battle.defendingPlayer.board.Set(BoardState.ENEMY);
                             for (int i = 0; i < hits.Length; i++)
                             {
                                 BoardTile hit = hits[i];
-                                hit.SetMarker(Color.yellow, BattleInterface.battle.defendingPlayer.board.grid.transform);
+                                hit.SetMarker(Color.yellow, FieldInterface.battle.defendingPlayer.board.grid.transform);
                             }
                             Debug.Log("Refresh: " + deterministic);
                             refreshDecisionTemplate = deterministic;
@@ -155,7 +155,7 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
                             {
                                 Debug.Log("Fire!");
                                 //ResetTargetingUI();
-                                BattleInterface.battle.TorpedoAttack(torpedoFiringDirection);
+                                FieldInterface.battle.TorpedoAttack(torpedoFiringDirection);
                                 Disable();
                             }
                         }
@@ -192,7 +192,7 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
     /// </summary>
     static void ResetDummyPosition()
     {
-        UIParent.transform.position = BattleInterface.battle.defendingPlayer.board.transform.position + Vector3.right * ((BattleInterface.battle.defendingPlayer.board.dimensions / 2f + 1) + BattleInterface.battle.defendingPlayer.board.dimensions * 0.075f);
+        UIParent.transform.position = FieldInterface.battle.defendingPlayer.board.transform.position + Vector3.right * ((FieldInterface.battle.defendingPlayer.board.dimensions / 2f + 1) + FieldInterface.battle.defendingPlayer.board.dimensions * 0.075f);
         UIParent.transform.rotation = Quaternion.Euler(Vector3.zero);
     }
 }

@@ -161,7 +161,7 @@ public class Battle : MonoBehaviour
         if (isMainBattle)
         {
             GameController.ChangeState(GameState.BATTLING);
-            BattleInterface.Attach(this); //OUTDATED
+            //BattleInterface.Attach(this); //OUTDATED
         }
         else
         {
@@ -425,10 +425,7 @@ public class Battle : MonoBehaviour
         switch (state)
         {
             case BattleState.TURN_FINISHED:
-                if (!isMainBattle)
-                {
-                    ChangeState(BattleState.CHOOSING_TARGET, 1f);
-                }
+                ChangeState(BattleState.CHOOSING_TARGET, 1f);
                 NextPlayer();
                 break;
         }

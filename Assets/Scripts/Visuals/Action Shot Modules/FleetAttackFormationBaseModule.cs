@@ -15,15 +15,15 @@ public class FleetAttackFormationBaseModule : ActionShotModule
         Vector3 fleetPosition = Vector3.zero;
         float fleetRotation = 0f;
 
-        if (Mathf.Abs(BattleInterface.battle.defendingPlayer.board.transform.position.z) < Mathf.Abs(BattleInterface.battle.defendingPlayer.board.transform.position.x))
+        if (Mathf.Abs(FieldInterface.battle.defendingPlayer.board.transform.position.z) < Mathf.Abs(FieldInterface.battle.defendingPlayer.board.transform.position.x))
         {
-            fleetPosition = BattleInterface.battle.defendingPlayer.board.transform.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.x) * 1.5f;
-            fleetRotation = 90f * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.x);
+            fleetPosition = FieldInterface.battle.defendingPlayer.board.transform.position - Vector3.right * GameController.playerBoardDistanceFromCenter * Mathf.Sign(FieldInterface.battle.defendingPlayer.board.transform.position.x) * 1.5f;
+            fleetRotation = 90f * Mathf.Sign(FieldInterface.battle.defendingPlayer.board.transform.position.x);
         }
         else
         {
-            fleetPosition = BattleInterface.battle.defendingPlayer.board.transform.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.z) * 1.5f;
-            fleetRotation = 90f - 90f * Mathf.Sign(BattleInterface.battle.defendingPlayer.board.transform.position.z);
+            fleetPosition = FieldInterface.battle.defendingPlayer.board.transform.position - Vector3.forward * GameController.playerBoardDistanceFromCenter * Mathf.Sign(FieldInterface.battle.defendingPlayer.board.transform.position.z) * 1.5f;
+            fleetRotation = 90f - 90f * Mathf.Sign(FieldInterface.battle.defendingPlayer.board.transform.position.z);
         }
 
         fleetPosition.y = GameController.seaLevel;
@@ -37,7 +37,7 @@ public class FleetAttackFormationBaseModule : ActionShotModule
         cruisers = new List<Ship>();
         battleships = new List<Ship>();
         attackers = new List<Ship>();
-        foreach (Ship ship in BattleInterface.battle.attackingPlayer.livingShips)
+        foreach (Ship ship in FieldInterface.battle.attackingPlayer.livingShips)
         {
             if (ship.lengthRemaining == ship.length)
             {
@@ -59,7 +59,7 @@ public class FleetAttackFormationBaseModule : ActionShotModule
 
         if (attackers.Count == 0)
         {
-            foreach (Ship ship in BattleInterface.battle.attackingPlayer.livingShips)
+            foreach (Ship ship in FieldInterface.battle.attackingPlayer.livingShips)
             {
 
                 attackers.Add(ship);
@@ -79,7 +79,7 @@ public class FleetAttackFormationBaseModule : ActionShotModule
         }
 
         Vector3 position = Vector3.zero;
-        //Place the BattleInterface.battleships
+        //Place the FieldInterface.battleships
         for (int i = 0; i < battleships.Count; i++)
         {
             Ship ship = battleships[i];

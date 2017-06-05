@@ -19,7 +19,7 @@ public class SingleDestroyerBaseModule : ActionShotModule
     {
         base.Prepare();
 
-        foreach (Ship ship in BattleInterface.battle.attackingPlayer.livingShips)
+        foreach (Ship ship in FieldInterface.battle.attackingPlayer.livingShips)
         {
             if (ship.type == ShipType.DESTROYER && ship.lengthRemaining == ship.length)
             {
@@ -28,8 +28,8 @@ public class SingleDestroyerBaseModule : ActionShotModule
             }
         }
 
-        Vector3 position = BattleInterface.battle.GetTorpedoLaunchPosition();
-        bool alternateOrientation = (Mathf.Abs(position.z - BattleInterface.battle.defendingPlayer.board.transform.position.z) > 1);
+        Vector3 position = FieldInterface.battle.GetTorpedoLaunchPosition();
+        bool alternateOrientation = (Mathf.Abs(position.z - FieldInterface.battle.defendingPlayer.board.transform.position.z) > 1);
         selectedDestroyer.transform.rotation = Quaternion.Euler(new Vector3(0, alternateOrientation ? 90 : 0, 0));
 
         Vector3 relativeLauncherPos = selectedDestroyer.torpedoLaunchers[0].transform.position - selectedDestroyer.transform.position;
@@ -37,13 +37,13 @@ public class SingleDestroyerBaseModule : ActionShotModule
         finalPos.y = 0;
 
         selectedDestroyer.transform.position = finalPos;
-        selectedDestroyer.PrepareTorpedoLaunchers(new Vector3(BattleInterface.battle.recentTurnInformation.target.x, 0, BattleInterface.battle.recentTurnInformation.target.y) + position);
+        selectedDestroyer.PrepareTorpedoLaunchers(new Vector3(FieldInterface.battle.recentTurnInformation.target.x, 0, FieldInterface.battle.recentTurnInformation.target.y) + position);
         selectedDestroyer.gameObject.SetActive(true);
         //selectedDestroyer.FireTorpedoLaunchers();
 
-        Cameraman.TakePosition(new Cameraman.CameraPosition(0.35f, selectedDestroyer.torpedoLaunchers[0].transform.position + Vector3.up * 0.4f - new Vector3(BattleInterface.battle.recentTurnInformation.target.x, 0, BattleInterface.battle.recentTurnInformation.target.y) * 0.5f, new Vector3(20f, Mathf.Atan2(BattleInterface.battle.recentTurnInformation.target.x, BattleInterface.battle.recentTurnInformation.target.y) * Mathf.Rad2Deg, 0f)));
+        Cameraman.TakePosition(new Cameraman.CameraPosition(0.35f, selectedDestroyer.torpedoLaunchers[0].transform.position + Vector3.up * 0.4f - new Vector3(FieldInterface.battle.recentTurnInformation.target.x, 0, FieldInterface.battle.recentTurnInformation.target.y) * 0.5f, new Vector3(20f, Mathf.Atan2(FieldInterface.battle.recentTurnInformation.target.x, FieldInterface.battle.recentTurnInformation.target.y) * Mathf.Rad2Deg, 0f)));
 
-        foreach (BoardTile hit in BattleInterface.battle.recentTurnInformation.torpedoInfo.impacts)
+        foreach (BoardTile hit in FieldInterface.battle.recentTurnInformation.torpedoInfo.impacts)
         {
             if (hit.containedShip.eliminated)
             {
@@ -64,7 +64,7 @@ public class SingleDestroyerBaseModule : ActionShotModule
             selectedDestroyer.FireTorpedoLaunchers();
         }
 
-        if (lifetime > 12f || (BattleInterface.battle.recentTurnInformation.torpedoInfo.impacts.Count == 0 && lifetime > 4f))
+        if (lifetime > 12f || (FieldInterface.battle.recentTurnInformation.torpedoInfo.impacts.Count == 0 && lifetime > 4f))
         {
             Actionman.EndActionView();
         }
