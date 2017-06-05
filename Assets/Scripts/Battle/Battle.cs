@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum BattleState { CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_FINISHED, FRIENDLY_SHIP_PREVIEW, SHOWING_HIT_TILE }
+public enum BattleState { NONE, ALL, CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_FINISHED, FRIENDLY_SHIP_PREVIEW, SHOWING_HIT_TILE }
 
 public class Battle : MonoBehaviour
 {
@@ -41,7 +41,7 @@ public class Battle : MonoBehaviour
     /// <summary>
     /// The current state of the battle.
     /// </summary>
-    public BattleState state;
+    public BattleState currentState;
     /// <summary>
     /// The delay before switching to the next state.
     /// </summary>
@@ -49,7 +49,7 @@ public class Battle : MonoBehaviour
     /// <summary>
     /// The state to switch to after switch time is over.
     /// </summary>
-    public BattleState targetState;
+    public BattleState nextState;
 
     //Delegates for external modules to tap into
     /// <summary>
@@ -95,9 +95,9 @@ public class Battle : MonoBehaviour
         {
             if (switchTime <= 0)
             {
-                if (state != targetState)
+                if (currentState != nextState)
                 {
-                    ChangeState(targetState);
+                    ChangeState(nextState);
                 }
             }
             else
@@ -124,7 +124,7 @@ public class Battle : MonoBehaviour
     {
         if (switchTime <= -0.1f)
         {
-            switch (state)
+            switch (currentState)
             {
                 case BattleState.CHOOSING_TARGET:
                     int randomTargetID = Random.Range(0, players.Length);
@@ -193,7 +193,7 @@ public class Battle : MonoBehaviour
         if (isMainBattle)
         {
             GameController.ChangeState(GameState.BATTLING);
-            BattleInterface.Attach(this);
+            BattleInterface.Attach(this); //OUTDATED
         }
         else
         {
@@ -202,6 +202,8 @@ public class Battle : MonoBehaviour
                 player.ShipsShown(true, false);
             }
         }
+
+        ChangeState(BattleState.CHOOSING_TARGET);
     }
 
     /// <summary>
@@ -275,7 +277,7 @@ public class Battle : MonoBehaviour
                 recentTurnInformation.type = AttackType.ARTILLERY;
                 recentTurnInformation.attacker = attackingPlayer;
 
-                targetState = BattleState.TURN_FINISHED;
+                nextState = BattleState.TURN_FINISHED;
                 switchTime = 0.5f;
 
                 if (tile.containedShip && Random.Range(0, 10) == 0 && tile.containedShip.type != ShipType.AIRCRAFT_CARRIER)
@@ -331,7 +333,7 @@ public class Battle : MonoBehaviour
         recentTurnInformation.type = AttackType.TORPEDO;
         recentTurnInformation.attacker = attackingPlayer;
 
-        targetState = BattleState.TURN_FINISHED;
+        nextState = BattleState.TURN_FINISHED;
         switchTime = 0.5f;
 
         int destroyers = 0;
@@ -448,10 +450,10 @@ public class Battle : MonoBehaviour
     /// <param name="state">The state to change to.</param>
     public void ChangeState(BattleState state)
     {
-        BattleState lastState = this.state;
+        BattleState lastState = this.currentState;
 
-        this.targetState = state;
-        this.state = state;
+        this.nextState = state;
+        this.currentState = state;
         switch (state)
         {
             case BattleState.TURN_FINISHED:
@@ -476,7 +478,7 @@ public class Battle : MonoBehaviour
     /// <param name="switchTime">The delay before changing.</param>    
     public void ChangeState(BattleState state, float switchTime)
     {
-        targetState = state;
+        nextState = state;
         this.switchTime = switchTime;
     }
 

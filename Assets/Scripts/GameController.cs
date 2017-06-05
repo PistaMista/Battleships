@@ -285,6 +285,7 @@ public class GameController : MonoBehaviour
             }
 
             secondaryBattles = new List<Battle>();
+            FieldInterface.battle = battle;
         }
         else
         {

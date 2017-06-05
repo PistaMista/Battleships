@@ -5,10 +5,6 @@ using UnityEngine;
 public class BattleInterface : MonoBehaviour
 {
     /// <summary>
-    /// The marker to show what tile is being shot.
-    /// </summary>
-    static GameObject recentlyShotTileMarker;
-    /// <summary>
     /// The battle the interface is attached to.
     /// </summary>
     public static Battle battle;
@@ -29,7 +25,7 @@ public class BattleInterface : MonoBehaviour
         {
             if (InputController.GetTap(63) && !battle.attackingPlayer.AI)
             {
-                switch (battle.state)
+                switch (battle.currentState)
                 {
                     case BattleState.CHOOSING_TARGET:
                         if (battle.switchTime <= -0.25f)
@@ -83,7 +79,7 @@ public class BattleInterface : MonoBehaviour
     {
         if (battle.switchTime <= -0.1f)
         {
-            switch (battle.state)
+            switch (battle.currentState)
             {
                 case BattleState.CHOOSING_TARGET:
                     int randomTargetID = Random.Range(0, battle.players.Length);

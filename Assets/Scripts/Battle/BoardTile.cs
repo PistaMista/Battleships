@@ -103,7 +103,7 @@ public class BoardTile : MonoBehaviour
                         DrawSideStrips(new Color[] { new Color(10f / 255f, 120f / 255f, 0f, 1f) });
                     }
 
-                    if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.state == BattleState.SHOWING_HIT_TILE)
+                    if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.currentState == BattleState.SHOWING_HIT_TILE)
                     {
                         if (board.owner.battle.recentTurnInformation.hitTiles.Contains(this))
                         {
@@ -125,7 +125,7 @@ public class BoardTile : MonoBehaviour
                     if (hit)
                     {
                         SetMarker(Color.black, board.grid.transform);
-                        if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.state == BattleState.SHOWING_HIT_TILE)
+                        if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.currentState == BattleState.SHOWING_HIT_TILE)
                         {
                             if (board.owner.battle.recentTurnInformation.hitTiles.Contains(this))
                             {
@@ -186,7 +186,7 @@ public class BoardTile : MonoBehaviour
                 }
 
                 color.a = 0.4f;
-                if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.state == BattleState.SHOWING_HIT_TILE)
+                if (board.owner.battle.recentTurnInformation.hitTiles != null && board.owner.battle.currentState == BattleState.SHOWING_HIT_TILE)
                 {
                     if (board.owner.battle.recentTurnInformation.hitTiles.Contains(this))
                     {
