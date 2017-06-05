@@ -290,11 +290,13 @@ public class GameController : MonoBehaviour
             }
 
             secondaryBattles = new List<Battle>();
+            battle.switchTimeModifier = 1f;
             FieldInterface.battle = battle;
         }
         else
         {
             secondaryBattles.Add(battle);
+            battle.switchTimeModifier = 0.15f;
         }
 
         battle.Initialize(players);

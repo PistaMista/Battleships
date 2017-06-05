@@ -50,6 +50,10 @@ public class Battle : MonoBehaviour
     /// The state to switch to after switch time is over.
     /// </summary>
     public BattleState nextState;
+    /// <summary>
+    /// Modifies the state switch times.
+    /// </summary>
+    public float switchTimeModifier;
 
     //Delegates for external modules to tap into
     /// <summary>
@@ -444,7 +448,7 @@ public class Battle : MonoBehaviour
     public void ChangeState(BattleState state, float switchTime)
     {
         nextState = state;
-        this.switchTime = switchTime;
+        this.switchTime = switchTime * switchTimeModifier;
     }
 
     /// <summary>
