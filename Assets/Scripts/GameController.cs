@@ -246,7 +246,15 @@ public class GameController : MonoBehaviour
         //For all players create their own board
         for (int i = 0; i < players.Length; i++)
         {
-            players[i] = new GameObject("Player " + (i + 1)).AddComponent<Player>();
+            if (playersToAdd[i].AI)
+            {
+                players[i] = new GameObject("Player " + (i + 1)).AddComponent<AIPlayer>();
+            }
+            else
+            {
+                humanPlayers++;
+                players[i] = new GameObject("Player " + (i + 1)).AddComponent<Player>();
+            }
             float angle = 360 / players.Length * i * Mathf.Deg2Rad;
             Vector3 boardPosition = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * playerBoardDistanceFromCenter + Vector3.up * playerBoardElevation;
             Player player = players[i];
@@ -257,10 +265,7 @@ public class GameController : MonoBehaviour
             player.AI = playersToAdd[i].AI;
             player.ID = i;
 
-            if (!player.AI)
-            {
-                humanPlayers++;
-            }
+
 
             for (int x = 0; x < players.Length; x++)
             {

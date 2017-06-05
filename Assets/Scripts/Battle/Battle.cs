@@ -110,42 +110,10 @@ public class Battle : MonoBehaviour
 
             switchTime -= Time.deltaTime;
 
-            if (!isMainBattle)
-            {
-                AIPlayerActions();
-            }
-        }
-    }
-
-    /// <summary>
-    /// Processes actions for AI players.
-    /// </summary>    
-    void AIPlayerActions()
-    {
-        if (switchTime <= -0.1f)
-        {
-            switch (currentState)
-            {
-                case BattleState.CHOOSING_TARGET:
-                    int randomTargetID = Random.Range(0, players.Length);
-                    while (randomTargetID == attackingPlayerID)
-                    {
-                        randomTargetID = Random.Range(0, players.Length);
-                    }
-
-                    if (SelectTarget(players[randomTargetID]))
-                    {
-                        ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 0.2f);
-                    }
-                    break;
-                case BattleState.CHOOSING_TILE_TO_SHOOT:
-                    BoardTile tileToShoot = ChooseTileToAttackForAIPlayer();
-
-                    Debug.Log(ArtilleryAttack(tileToShoot));
-
-                    ChangeState(BattleState.TURN_FINISHED, 0.2f);
-                    break;
-            }
+            //if (!isMainBattle)
+            //{
+            //   AIPlayerActions();
+            //}
         }
     }
 
@@ -309,7 +277,7 @@ public class Battle : MonoBehaviour
                 if (!isMainBattle)
                 {
                     FireGunsAtTargetTile(tile);
-                    ChangeState(BattleState.FIRING);
+                    //ChangeState(BattleState.FIRING);
                 }
 
                 return true;
@@ -739,6 +707,11 @@ public class Battle : MonoBehaviour
     /// <returns></returns>
     public bool TorpedoAttackAvailable()
     {
+        if (this != GameController.mainBattle)
+        {
+            return false;
+        }
+
         int destroyers = 0;
         foreach (Ship ship in attackingPlayer.livingShips)
         {

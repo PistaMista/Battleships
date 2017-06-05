@@ -70,7 +70,7 @@ public class Player : MonoBehaviour
     /// <summary>
     /// The update function.
     /// </summary>
-    void Update()
+    protected virtual void Update()
     {
         //TEST
         if (Input.GetMouseButtonDown(0))

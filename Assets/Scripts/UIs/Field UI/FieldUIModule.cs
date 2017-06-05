@@ -5,6 +5,8 @@ using UnityEngine;
 public class FieldUIModule : MonoBehaviour
 {
 
+
+
     /// <summary>
     /// The current state activation conditions.
     /// </summary>
@@ -13,6 +15,15 @@ public class FieldUIModule : MonoBehaviour
     /// The next state activation conditions.
     /// </summary>
     public BattleState[] nextStateConditions;
+    /// <summary>
+    /// The input activation conditions.
+    /// </summary>
+    public bool[] controlEnabledConditions;
+
+    /// <summary>
+    /// Whether this module is allowed to accept user input.
+    /// </summary>
+    bool inputEnabled;
 
     /// <summary>
     /// Tells the module to decide whether it has to be enabled right now.
@@ -35,7 +46,7 @@ public class FieldUIModule : MonoBehaviour
     /// <returns>Whether the module should be enabled.</returns>
     bool CheckConditions()
     {
-        if (currentStateConditions.Length != nextStateConditions.Length)
+        if (currentStateConditions.Length != nextStateConditions.Length || controlEnabledConditions.Length != nextStateConditions.Length)
         {
             Debug.LogError("UI MODULE ERROR: Condition lengths do not match. Module will never be enabled.");
         }
@@ -47,11 +58,24 @@ public class FieldUIModule : MonoBehaviour
                 bool nextStateCondition = FieldInterface.battle.nextState == nextStateConditions[i] || nextStateConditions[i] == BattleState.ALL;
                 if (currentStateCondition && nextStateCondition)
                 {
+                    inputEnabled = controlEnabledConditions[i];
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// Updates the UI module when it is enabled.
+    /// </summary>
+    void Update()
+    {
+        UpdateVisuals();
+        if (inputEnabled)
+        {
+            UpdateInput();
+        }
     }
 
     /// <summary>
@@ -68,5 +92,21 @@ public class FieldUIModule : MonoBehaviour
     protected virtual void Disable()
     {
         gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// Updates the visuals of the module.
+    /// </summary>
+    protected virtual void UpdateVisuals()
+    {
+
+    }
+
+    /// <summary>
+    /// Accepts input from the player.
+    /// </summary>
+    protected virtual void UpdateInput()
+    {
+
     }
 }
