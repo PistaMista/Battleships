@@ -25,7 +25,6 @@ public class TorpedoTargetingBattleUIModule : MonoBehaviour
     /// </summary>
     static Vector2 refreshDecisionTemplate;
 
-    //VERSION 2
     /// <summary>
     /// The tiles which will be hit in the attack.
     /// </summary>

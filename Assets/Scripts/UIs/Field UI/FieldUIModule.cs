@@ -78,7 +78,7 @@ public class FieldUIModule : MonoBehaviour
     void Update()
     {
         UpdateVisuals();
-        if (inputEnabled)
+        if (inputEnabled && !FieldInterface.battle.attackingPlayer.AI)
         {
             UpdateInput();
         }
