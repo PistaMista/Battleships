@@ -318,7 +318,6 @@ public class GameController : MonoBehaviour
             case GameState.TITLE:
                 if (mainBattle)
                 {
-                    BattleInterface.Dettach();
                     mainBattle.End();
 
                 }
