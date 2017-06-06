@@ -179,7 +179,7 @@ public class TorpedoTargeting_FieldUIModule : FieldUIModule
     /// </summary>
     void ResetDummyPosition()
     {
-        dummyTorpedo.transform.position = FieldInterface.battle.defendingPlayer.board.transform.position + Vector3.right * ((FieldInterface.battle.defendingPlayer.board.dimensions / 2f + 1) + FieldInterface.battle.defendingPlayer.board.dimensions * 0.075f);
+        dummyTorpedo.transform.localPosition = Vector3.zero;
         dummyTorpedo.transform.rotation = Quaternion.Euler(Vector3.zero);
     }
 }

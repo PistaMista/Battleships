@@ -19,6 +19,10 @@ public class FieldUIModule : MonoBehaviour
     /// The input activation conditions.
     /// </summary>
     public bool[] controlEnabledConditions;
+    /// <summary>
+    /// Whether this module should enable when AI players are on turn.
+    /// </summary>
+    public bool enableForAIPlayers;
 
     /// <summary>
     /// Whether this module is allowed to accept user input.
@@ -32,7 +36,7 @@ public class FieldUIModule : MonoBehaviour
     {
         if (CheckConditions())
         {
-            if (!gameObject.activeInHierarchy)
+            if (!gameObject.activeInHierarchy && (enableForAIPlayers || !FieldInterface.battle.attackingPlayer.AI))
             {
                 Enable();
             }
