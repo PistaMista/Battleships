@@ -47,6 +47,10 @@ public class Player : MonoBehaviour
     /// </summary>
     public List<Ship> livingShips;
     /// <summary>
+    /// This player's aircraft carrier.
+    /// </summary>
+    public AircraftCarrier aircraftCarrier;
+    /// <summary>
     /// The battle this player is taking part in.
     /// </summary>
     public Battle battle;
@@ -134,8 +138,8 @@ public class Player : MonoBehaviour
                     SquarePulserEffect effect = macroMarker.GetComponent<SquarePulserEffect>();
                     effect.color = color;
                     effect.pulseInterval = 0.4f;
-                    effect.maxDistance = 1.25f;
-                    effect.pulseSpeed = 5f;
+                    effect.maxDistance = 0.5f;
+                    effect.pulseSpeed = 2f;
                     effect.squareWidth = 0.15f;
                     effect.insideLength = board.dimensions * 0.1f - effect.squareWidth;
                     macroMarker.transform.position = board.transform.position;
@@ -188,6 +192,10 @@ public class Player : MonoBehaviour
     {
         allShips.Add(ship);
         livingShips.Add(ship);
+        if (ship.type == ShipType.AIRCRAFT_CARRIER)
+        {
+            aircraftCarrier = (AircraftCarrier)ship;
+        }
         ship.owner = this;
     }
 }

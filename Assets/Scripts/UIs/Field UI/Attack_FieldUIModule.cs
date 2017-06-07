@@ -19,7 +19,14 @@ public class Attack_FieldUIModule : FieldUIModule
             FieldInterface.battle.defendingPlayer.board.Set(BoardState.FRIENDLY);
         }
         Cameraman.TakePosition("Board " + (FieldInterface.battle.defendingPlayer.ID + 1), 0.3f);
-        Interface.SwitchMenu("Attack Screen");
+        if (!FieldInterface.battle.attackingPlayer.AI)
+        {
+            Interface.SwitchMenu("Attack Screen");
+        }
+        else
+        {
+            Interface.SwitchMenu("Firing Screen");
+        }
     }
 
     /// <summary>

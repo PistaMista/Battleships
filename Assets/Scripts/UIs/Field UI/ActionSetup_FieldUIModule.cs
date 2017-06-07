@@ -10,9 +10,9 @@ public class ActionSetup_FieldUIModule : FieldUIModule
     /// </summary>
     protected override void Enable()
     {
-        base.Enable();
         if (!(FieldInterface.battle.attackingPlayer.AI && FieldInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0)
         {
+            base.Enable();
             FieldInterface.battle.ChangeState(BattleState.SHOWING_HIT_TILE, 1f);
             Actionman.ActionView();
         }
