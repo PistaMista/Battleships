@@ -78,4 +78,35 @@ public class ActiveAircraft : MonoBehaviour
         this.target = target;
         travelTime = 2;
     }
+
+    /// <summary>
+    /// Rolls the dice for the aircraft spotting the attacking player.
+    /// </summary>
+    public void Spot()
+    {
+        float spottingChance = aircraft.Count * ((FieldInterface.battle.recentTurnInformation.type == AttackType.ARTILLERY) ? 9 : 12);
+
+        if (Random.Range(0, 100) < spottingChance)
+        {
+            if (FieldInterface.battle.recentTurnInformation.type == AttackType.ARTILLERY)
+            {
+                Ship selectedShip = target.livingShips[Random.Range(0, target.livingShips.Count)];
+                selectedShip.RevealTo(carrier.owner);
+            }
+            else
+            {
+                List<Destroyer> destroyers = new List<Destroyer>();
+                foreach (Ship ship in target.livingShips)
+                {
+                    if (ship.type == ShipType.DESTROYER)
+                    {
+                        destroyers.Add((Destroyer)ship);
+                    }
+                }
+
+                Ship selectedShip = destroyers[Random.Range(0, destroyers.Count)];
+                selectedShip.RevealTo(carrier.owner);
+            }
+        }
+    }
 }

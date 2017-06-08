@@ -89,6 +89,8 @@ public class TorpedoTargeting_FieldUIModule : FieldUIModule
         {
             dummyTorpedo.SetActive(false);
         }
+
+        hits = null;
     }
 
     /// <summary>

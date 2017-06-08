@@ -38,11 +38,6 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
             aircraftUnavailableIndicator.SetActive(true);
         }
 
-        Renderer renderer = targetIndicatorMesh.gameObject.GetComponent<Renderer>();
-        MaterialPropertyBlock block = new MaterialPropertyBlock();
-        block.SetColor("_EmissionColor", FieldInterface.battle.attackingPlayer.color);
-        renderer.SetPropertyBlock(block);
-
         if (linkedCarrier.activeSquadron != null)
         {
             if (linkedCarrier.activeSquadron.target != null)
@@ -50,6 +45,16 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
                 MarkTargetedPlayer();
             }
         }
+
+        if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron != null)
+        {
+            UpdateIndicatorMesh(true);
+        }
+        else
+        {
+            targetIndicatorMesh.mesh = new Mesh();
+        }
+        MarkThreats();
     }
 
     /// <summary>
@@ -59,6 +64,7 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
     {
         base.Disable();
         Destroy(targetMarkerParent);
+        Destroy(warningMarkerParent);
     }
 
     /// <summary>
@@ -69,18 +75,19 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
         base.UpdateVisuals();
         if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron != null)
         {
-            UpdateIndicatorMesh();
-        }
-        else
-        {
-            targetIndicatorMesh.mesh = new Mesh();
+            UpdateIndicatorMesh(false);
         }
 
         if (targetMarkerParent != null)
         {
             Vector3 position = targetMarkerParent.transform.position;
-            position.y = inputEnabled ? 3.6f : 0.1f;
+            position.y = FieldInterface.battle.nextState == BattleState.CHOOSING_TARGET ? 3.6f : 0.1f;
             targetMarkerParent.transform.position = position;
+        }
+
+        if (warningMarkerParent != null)
+        {
+            warningMarkerParent.SetActive(FieldInterface.battle.nextState == BattleState.CHOOSING_TARGET);
         }
     }
 
@@ -120,10 +127,11 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
     float currentStateChange;
     float currentAngle = 0;
     float currentAngleChange;
-    void UpdateIndicatorMesh()
+    void UpdateIndicatorMesh(bool instant)
     {
-        float targetState = (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget == null) ? 0f : 1f;
-        SetIndicatorMesh(Mathf.SmoothDamp(currentIndicatorState, targetState, ref currentStateChange, 0.1f, 10f), 5f, 7f, GameController.playerBoardDistanceFromCenter - FieldInterface.battle.attackingPlayer.board.dimensions / 2f);
+        float targetState = (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget == null) ? -0.1f : 1f;
+
+        SetIndicatorMesh(Mathf.Clamp01(instant ? targetState : Mathf.SmoothDamp(currentIndicatorState, targetState, ref currentStateChange, 0.1f, 10f)), 5f, 7f, GameController.playerBoardDistanceFromCenter - FieldInterface.battle.attackingPlayer.board.dimensions / 2f);
 
         float targetAngle = 0;
         if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget != null)
@@ -132,20 +140,20 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
 
         }
 
-        currentAngle = Mathf.SmoothDamp(currentAngle, targetAngle, ref currentAngleChange, 0.2f, 360f);
+        currentAngle = instant ? targetAngle : Mathf.SmoothDamp(currentAngle, targetAngle, ref currentAngleChange, 0.2f, 360f);
         targetIndicatorMesh.gameObject.transform.rotation = Quaternion.Euler(0, -currentAngle, 0);
     }
 
     /// <summary>
     /// Sets the target indicator mesh.
     /// </summary>
-    /// <param name="state">The state of the mesh. 0 means semi-circle 1 means arrow.</param>
+    /// <param name="state">The state of the mesh. 0 means circle 1 means arrow.</param>
     void SetIndicatorMesh(float state, float innerRadius, float outerRadius, float arrowRadius)
     {
         if (currentIndicatorState != state)
         {
             Mesh mesh = new Mesh();
-            float degreeFill = 270f * (1 - state * 0.75f);
+            float degreeFill = 360f * (1 - state * 0.75f);
             int sideSteps = (int)(degreeFill / 20f);
             Vector3[] vertices = new Vector3[2 + sideSteps * 4];
             vertices[0] = new Vector3(0, 0, innerRadius);
@@ -243,6 +251,49 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
             GameObject eye = Instantiate(markerEye);
             eye.transform.parent = targetMarkerParent.transform;
             eye.transform.localPosition = Vector3.zero;
+        }
+    }
+    /// <summary>
+    /// Warning indicator.
+    /// </summary>
+    public GameObject warningIndicator;
+    GameObject warningMarkerParent;
+    /// <summary>
+    /// Marks players who have sent aircraft to the attacking player.
+    /// </summary>
+    void MarkThreats()
+    {
+        warningMarkerParent = new GameObject("Threat Markers");
+        warningMarkerParent.transform.parent = transform;
+
+        foreach (Player player in FieldInterface.battle.players)
+        {
+            if (player != FieldInterface.battle.attackingPlayer)
+            {
+                if (player.aircraftCarrier.activeSquadron != null)
+                {
+                    if (player.aircraftCarrier.activeSquadron.target == FieldInterface.battle.attackingPlayer)
+                    {
+                        GameObject warning = Instantiate(warningIndicator);
+                        warning.transform.parent = warningMarkerParent.transform;
+
+                        Player attackerTarget = null;
+                        if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron != null)
+                        {
+                            attackerTarget = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.target;
+                        }
+
+                        if (player == attackerTarget)
+                        {
+                            warning.transform.position = player.board.transform.position + new Vector3(0, 1f, 5f);
+                        }
+                        else
+                        {
+                            warning.transform.position = player.board.transform.position + new Vector3(0, 1f, 0f);
+                        }
+                    }
+                }
+            }
         }
     }
 }

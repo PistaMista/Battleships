@@ -199,6 +199,14 @@ public class Battle : MonoBehaviour
             attackingPlayer.aircraftCarrier.activeSquadron.Refresh();
         }
 
+        if (originalAttacker != null)
+        {
+            foreach (ActiveAircraft squadron in originalAttacker.overheadSquadrons)
+            {
+                squadron.Spot();
+            }
+        }
+
         while (!attackingPlayer.alive)
         {
             attackingPlayerID++;
@@ -289,7 +297,6 @@ public class Battle : MonoBehaviour
                     //ChangeState(BattleState.FIRING);
                 }
 
-                AircraftSpotting();
                 return true;
             }
         }
@@ -382,8 +389,6 @@ public class Battle : MonoBehaviour
         {
             onAttack();
         }
-
-        AircraftSpotting();
     }
 
     /// <summary>
@@ -602,41 +607,5 @@ public class Battle : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Rolls the dice for the aircraft spotting the attacking player.
-    /// </summary>
-    void AircraftSpotting()
-    {
-        foreach (ActiveAircraft squadron in attackingPlayer.overheadSquadrons)
-        {
-            float spottingChance = squadron.aircraft.Count * ((recentTurnInformation.type == AttackType.ARTILLERY) ? 9 : 12);
-            if (squadron.carrier.owner == attackingPlayer)
-            {
-                continue;
-            }
 
-            if (Random.Range(0, 100) < spottingChance)
-            {
-                if (recentTurnInformation.type == AttackType.ARTILLERY)
-                {
-                    Ship selectedShip = attackingPlayer.livingShips[Random.Range(0, attackingPlayer.livingShips.Count)];
-                    selectedShip.RevealTo(squadron.carrier.owner);
-                }
-                else
-                {
-                    List<Destroyer> destroyers = new List<Destroyer>();
-                    foreach (Ship ship in attackingPlayer.livingShips)
-                    {
-                        if (ship.type == ShipType.DESTROYER)
-                        {
-                            destroyers.Add((Destroyer)ship);
-                        }
-                    }
-
-                    Ship selectedShip = destroyers[Random.Range(0, destroyers.Count)];
-                    selectedShip.RevealTo(squadron.carrier.owner);
-                }
-            }
-        }
-    }
 }
