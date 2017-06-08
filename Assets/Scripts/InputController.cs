@@ -50,7 +50,7 @@ public class InputController : MonoBehaviour
     /// <summary>
     /// The distance between initial and current world input positions.
     /// </summary>
-    static float deviation = 0f;
+    public static float deviation = 0f;
     /// <summary>
     /// The distance the player needs to drag in order to register dragging.
     /// </summary>

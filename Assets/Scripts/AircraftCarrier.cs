@@ -72,6 +72,7 @@ public class AircraftCarrier : Ship
         activeSquadron = new GameObject("Active Squadron").AddComponent<ActiveAircraft>();
         activeSquadron.aircraft = new List<Aircraft>();
         activeSquadron.transform.parent = transform;
+        activeSquadron.carrier = this;
 
         for (int i = 0; i < flightDeckCapacity && i < hangarAircraft.Count; i++)
         {

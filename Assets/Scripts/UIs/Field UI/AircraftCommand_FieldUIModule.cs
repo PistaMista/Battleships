@@ -42,6 +42,14 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
         MaterialPropertyBlock block = new MaterialPropertyBlock();
         block.SetColor("_EmissionColor", FieldInterface.battle.attackingPlayer.color);
         renderer.SetPropertyBlock(block);
+
+        if (linkedCarrier.activeSquadron != null)
+        {
+            if (linkedCarrier.activeSquadron.target != null)
+            {
+                MarkTargetedPlayer();
+            }
+        }
     }
 
     /// <summary>
@@ -50,6 +58,7 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
     protected override void Disable()
     {
         base.Disable();
+        Destroy(targetMarkerParent);
     }
 
     /// <summary>
@@ -66,6 +75,13 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
         {
             targetIndicatorMesh.mesh = new Mesh();
         }
+
+        if (targetMarkerParent != null)
+        {
+            Vector3 position = targetMarkerParent.transform.position;
+            position.y = inputEnabled ? 3.6f : 0.1f;
+            targetMarkerParent.transform.position = position;
+        }
     }
 
     /// <summary>
@@ -74,9 +90,9 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
     protected override void UpdateInput()
     {
         base.UpdateInput();
-        if (InputController.IsDragging(63))
+        if (InputController.IsDragging(63) && InputController.deviation > 1f)
         {
-            FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.target = TargetedPlayer();
+            FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget = TargetedPlayer();
         }
     }
 
@@ -106,13 +122,13 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
     float currentAngleChange;
     void UpdateIndicatorMesh()
     {
-        float targetState = (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.target == null) ? 0f : 1f;
+        float targetState = (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget == null) ? 0f : 1f;
         SetIndicatorMesh(Mathf.SmoothDamp(currentIndicatorState, targetState, ref currentStateChange, 0.1f, 10f), 5f, 7f, GameController.playerBoardDistanceFromCenter - FieldInterface.battle.attackingPlayer.board.dimensions / 2f);
 
         float targetAngle = 0;
-        if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.target != null)
+        if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget != null)
         {
-            targetAngle = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.target.ID * (360f / FieldInterface.battle.players.Length) - 90f;
+            targetAngle = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget.ID * (360f / FieldInterface.battle.players.Length) - 90f;
 
         }
 
@@ -192,5 +208,41 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
             targetIndicatorMesh.mesh = mesh;
         }
         currentIndicatorState = state;
+    }
+
+
+    public GameObject markerEye;
+    public GameObject markerChevron;
+    /// <summary>
+    /// The marker used to mark the targeted player of the aircraft.
+    /// </summary>
+    GameObject targetMarkerParent;
+    /// <summary>
+    /// Marks the targeted player.
+    /// </summary>
+    void MarkTargetedPlayer()
+    {
+        targetMarkerParent = new GameObject("Spotting Target Marker");
+        targetMarkerParent.transform.parent = transform;
+        targetMarkerParent.transform.position = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.target.board.transform.position + Vector3.up;
+
+        int turnsLeft = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.travelTime;
+        if (turnsLeft > 0)
+        {
+            Vector3 initialPosition = new Vector3(0, 0, -(Mathf.Clamp01((turnsLeft - 1)) * 0.5f + Mathf.Clamp((turnsLeft - 2) / 2f, 0, 10)));
+            for (int i = 0; i < turnsLeft; i++)
+            {
+                Vector3 position = initialPosition + Vector3.forward * i;
+                GameObject chevron = Instantiate(markerChevron);
+                chevron.transform.parent = targetMarkerParent.transform;
+                chevron.transform.localPosition = position;
+            }
+        }
+        else
+        {
+            GameObject eye = Instantiate(markerEye);
+            eye.transform.parent = targetMarkerParent.transform;
+            eye.transform.localPosition = Vector3.zero;
+        }
     }
 }

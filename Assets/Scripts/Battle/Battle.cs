@@ -194,6 +194,11 @@ public class Battle : MonoBehaviour
         attackingPlayer = players[attackingPlayerID];
         attackingPlayer.torpedoRecharge = (attackingPlayer.torpedoRecharge == 0) ? 0 : attackingPlayer.torpedoRecharge - 1;
 
+        if (attackingPlayer.aircraftCarrier.activeSquadron != null)
+        {
+            attackingPlayer.aircraftCarrier.activeSquadron.Refresh();
+        }
+
         while (!attackingPlayer.alive)
         {
             attackingPlayerID++;
@@ -258,9 +263,9 @@ public class Battle : MonoBehaviour
                     {
                         foreach (BoardTile t in tile.containedShip.tiles)
                         {
-                            t.RevealTo(attackingPlayer);
                             RegisterHitOnTile(t);
                         }
+                        tile.containedShip.RevealTo(attackingPlayer);
                     }
                 }
                 else
@@ -284,6 +289,7 @@ public class Battle : MonoBehaviour
                     //ChangeState(BattleState.FIRING);
                 }
 
+                AircraftSpotting();
                 return true;
             }
         }
@@ -376,6 +382,8 @@ public class Battle : MonoBehaviour
         {
             onAttack();
         }
+
+        AircraftSpotting();
     }
 
     /// <summary>
@@ -449,147 +457,6 @@ public class Battle : MonoBehaviour
     {
         nextState = state;
         this.switchTime = switchTime * switchTimeModifier;
-    }
-
-    /// <summary>
-    /// Calculates the optimal position of tile to attack for AI players.
-    /// </summary>
-    /// <returns>Position of optimal tile to target.</returns>
-    public BoardTile ChooseTileToAttackForAIPlayer()
-    {
-        List<BoardTile> hits = attackingPlayer.hits[defendingPlayer.ID];
-        List<BoardTile> misses = attackingPlayer.misses[defendingPlayer.ID];
-
-        List<BoardTile> processedTiles = new List<BoardTile>();
-        Dictionary<int, List<BoardTile>> rankedTiles = new Dictionary<int, List<BoardTile>>();
-
-        int highestRank = 0;
-
-        for (int i = 1; i <= 10; i++)
-        {
-            rankedTiles.Add(i, new List<BoardTile>());
-        }
-
-        Vector2[] cardinalDirections = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
-
-        //Eliminate the misses
-        foreach (BoardTile miss in misses)
-        {
-            processedTiles.Add(miss);
-        }
-
-        //Analyze hits
-        foreach (BoardTile hit in hits)
-        {
-            if (!processedTiles.Contains(hit))
-            {
-                processedTiles.Add(hit);
-
-
-                Vector2 examinedDirection = Vector2.zero;
-                foreach (Vector2 direction in cardinalDirections)
-                {
-                    Vector2 checkedPosition = hit.boardCoordinates + direction;
-                    if (defendingPlayer.board.IsPositionValid(checkedPosition))
-                    {
-                        BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
-                        if (hits.Contains(checkedTile))
-                        {
-                            examinedDirection = direction;
-                            break;
-                        }
-                    }
-                }
-
-                if (examinedDirection != Vector2.zero)
-                {
-                    for (int direction = -1; direction <= 1; direction += 2)
-                    {
-                        for (int i = 1; i < defendingPlayer.board.dimensions; i++)
-                        {
-                            Vector2 checkedPosition = hit.boardCoordinates + examinedDirection * i * direction;
-                            if (defendingPlayer.board.IsPositionValid(checkedPosition))
-                            {
-
-                                BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
-                                processedTiles.Add(checkedTile);
-                                if (!hits.Contains(checkedTile) && !misses.Contains(checkedTile))
-                                {
-                                    rankedTiles[10].Add(checkedTile);
-                                    if (10 > highestRank)
-                                    {
-                                        highestRank = 10;
-                                    }
-                                    break;
-                                }
-                                else if (misses.Contains(checkedTile))
-                                {
-                                    break;
-                                }
-                                //}
-                                //else
-                                //{
-                                //   break;
-                                //}
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (Vector2 direction in cardinalDirections)
-                    {
-                        Vector2 checkedPosition = hit.boardCoordinates + direction;
-                        if (defendingPlayer.board.IsPositionValid(checkedPosition))
-                        {
-                            BoardTile checkedTile = defendingPlayer.board.tiles[(int)checkedPosition.x, (int)checkedPosition.y];
-                            if (!processedTiles.Contains(checkedTile))
-                            {
-                                processedTiles.Add(checkedTile);
-                                rankedTiles[10].Add(checkedTile);
-                                if (10 > highestRank)
-                                {
-                                    highestRank = 10;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-
-        //Add the other tiles
-        foreach (BoardTile candidateTile in defendingPlayer.board.tiles)
-        {
-            if (!processedTiles.Contains(candidateTile))
-            {
-                rankedTiles[1].Add(candidateTile);
-                if (1 > highestRank)
-                {
-                    highestRank = 1;
-                }
-            }
-        }
-
-        BoardTile result = null;
-        //Choose a tile to attack
-        int targetRank = Random.Range(0, highestRank - 1);
-        //Choose a rank to pick a tile from
-        for (int i = 1; i <= 10; i++)
-        {
-            if (targetRank < i && rankedTiles[i].Count > 0)
-            {
-                targetRank = i;
-                break;
-            }
-        }
-
-        result = rankedTiles[targetRank][Random.Range(0, rankedTiles[targetRank].Count - 1)];
-
-        //Debug.Log(result);
-        return result;
     }
 
     /// <summary>
@@ -733,5 +600,43 @@ public class Battle : MonoBehaviour
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Rolls the dice for the aircraft spotting the attacking player.
+    /// </summary>
+    void AircraftSpotting()
+    {
+        foreach (ActiveAircraft squadron in attackingPlayer.overheadSquadrons)
+        {
+            float spottingChance = squadron.aircraft.Count * ((recentTurnInformation.type == AttackType.ARTILLERY) ? 9 : 12);
+            if (squadron.carrier.owner == attackingPlayer)
+            {
+                continue;
+            }
+
+            if (Random.Range(0, 100) < spottingChance)
+            {
+                if (recentTurnInformation.type == AttackType.ARTILLERY)
+                {
+                    Ship selectedShip = attackingPlayer.livingShips[Random.Range(0, attackingPlayer.livingShips.Count)];
+                    selectedShip.RevealTo(squadron.carrier.owner);
+                }
+                else
+                {
+                    List<Destroyer> destroyers = new List<Destroyer>();
+                    foreach (Ship ship in attackingPlayer.livingShips)
+                    {
+                        if (ship.type == ShipType.DESTROYER)
+                        {
+                            destroyers.Add((Destroyer)ship);
+                        }
+                    }
+
+                    Ship selectedShip = destroyers[Random.Range(0, destroyers.Count)];
+                    selectedShip.RevealTo(squadron.carrier.owner);
+                }
+            }
+        }
     }
 }

@@ -31,6 +31,10 @@ public class Player : MonoBehaviour
     /// </summary>
     public Dictionary<int, List<BoardTile>> misses;
     /// <summary>
+    /// The active aircraft squadrons spotting this player.
+    /// </summary>
+    public List<ActiveAircraft> overheadSquadrons;
+    /// <summary>
     /// Whether this player is controlled by AI.
     /// </summary>
     public bool AI = false;
@@ -69,6 +73,7 @@ public class Player : MonoBehaviour
         misses = new Dictionary<int, List<BoardTile>>();
         allShips = new List<Ship>();
         livingShips = new List<Ship>();
+        overheadSquadrons = new List<ActiveAircraft>();
     }
 
     /// <summary>
@@ -141,7 +146,7 @@ public class Player : MonoBehaviour
                     effect.maxDistance = 0.5f;
                     effect.pulseSpeed = 2f;
                     effect.squareWidth = 0.15f;
-                    effect.insideLength = board.dimensions * 0.1f - effect.squareWidth;
+                    effect.insideLength = board.dimensions * 0.1f - effect.squareWidth * 2f;
                     macroMarker.transform.position = board.transform.position;
                     break;
             }

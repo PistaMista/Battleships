@@ -29,12 +29,12 @@ public class BarrelInlineFollowActionShotModule : FleetAttackFormationBaseModule
         if (FieldInterface.battle.recentTurnInformation.hitShips.Count > 0)
         {
             Ship ship = FieldInterface.battle.recentTurnInformation.hitShips[0];
-            if (ship.eliminated && (ship.IsRevealedTo(FieldInterface.battle.attackingPlayer) || (GameController.humanPlayers == 1 && !FieldInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0))
+            if (ship.eliminated && (ship.revealedTo.Contains(FieldInterface.battle.attackingPlayer) || (GameController.humanPlayers == 1 && !FieldInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0))
             {
                 killingShot = true;
             }
 
-            if ((GameController.humanPlayers == 1 && !FieldInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0 || killingShot)
+            if ((GameController.humanPlayers == 1 && !FieldInterface.battle.defendingPlayer.AI) || GameController.humanPlayers == 0 || killingShot || ship.revealedTo.Contains(FieldInterface.battle.attackingPlayer))
             {
                 FieldInterface.battle.recentTurnInformation.hitShips[0].gameObject.SetActive(true);
             }

@@ -272,24 +272,13 @@ public class Ship : MonoBehaviour
     }
 
     /// <summary>
-    /// Checks if all the tiles of this ship are revealed to a player.
+    /// Reveals the ship to a player.
     /// </summary>
-    /// <returns></returns>
-    public bool IsRevealedTo(Player player)
+    public void RevealTo(Player player)
     {
-        if (player == owner)
+        if (!revealedTo.Contains(player))
         {
-            return true;
+            revealedTo.Add(player);
         }
-
-        foreach (BoardTile tile in tiles)
-        {
-            if (!tile.revealedTo.Contains(player))
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }
