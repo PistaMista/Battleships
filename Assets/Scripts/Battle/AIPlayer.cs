@@ -17,34 +17,96 @@ public class AIPlayer : Player
 
     void Think()
     {
+        if (aircraftCarrier.activeSquadron != null)
+        {
+            Aircraft();
+        }
+
         if (battle.switchTime <= -0.1f && battle.currentState == battle.nextState)
         {
             switch (battle.currentState)
             {
                 case BattleState.CHOOSING_TARGET:
-                    int randomTargetID = Random.Range(0, battle.players.Length);
-                    while (randomTargetID == battle.attackingPlayerID)
-                    {
-                        randomTargetID = Random.Range(0, battle.players.Length);
-                    }
-
-                    if (battle.SelectTarget(battle.players[randomTargetID]))
-                    {
-                        battle.ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1.2f);
-                    }
+                    Target();
                     break;
                 case BattleState.CHOOSING_TILE_TO_SHOOT:
-                    BoardTile tileToShoot = ChooseTileToAttack();
-                    if (battle.TorpedoAttackAvailable())
-                    {
-                        battle.TorpedoAttack(tileToShoot.transform.position - battle.GetTorpedoLaunchPosition());
-                    }
-                    else
-                    {
-                        battle.ArtilleryAttack(tileToShoot);
-                    }
+                    Attack();
                     break;
             }
+        }
+    }
+
+    /// <summary>
+    /// Decides where to send the aircraft.
+    /// </summary>
+    void Aircraft()
+    {
+        int[] playerBias = new int[battle.players.Length];
+        for (int i = 0; i < battle.players.Length; i++)
+        {
+            playerBias[i] = 0;
+            Player player = battle.players[i];
+            if (aircraftCarrier.activeSquadron.target == player)
+            {
+                playerBias[i] += aircraftCarrier.activeSquadron.travelTime * 3;
+            }
+
+            if (player == this)
+            {
+                int totalAircraft = 0;
+                foreach (ActiveAircraft squadron in overheadSquadrons)
+                {
+                    totalAircraft += squadron.aircraft.Count;
+                }
+
+                playerBias[i] += totalAircraft * overheadSquadrons.Count;
+            }
+            else
+            {
+                int attackBias = 0;
+
+                attackBias += (int)((27f - hits[player.ID].Count) / 4f);
+            }
+        }
+
+        int highestID = 0;
+        for (int i = 0; i < playerBias.Length; i++)
+        {
+            highestID = playerBias[highestID] >= playerBias[i] ? highestID : i;
+        }
+
+        aircraftCarrier.activeSquadron.nextTarget = battle.players[highestID];
+    }
+
+    /// <summary>
+    /// Decides which player to attack.
+    /// </summary>
+    void Target()
+    {
+        int randomTargetID = Random.Range(0, battle.players.Length);
+        while (randomTargetID == battle.attackingPlayerID)
+        {
+            randomTargetID = Random.Range(0, battle.players.Length);
+        }
+
+        if (battle.SelectTarget(battle.players[randomTargetID]))
+        {
+            battle.ChangeState(BattleState.CHOOSING_TILE_TO_SHOOT, 1.2f);
+        }
+    }
+    /// <summary>
+    /// Decides the attacking move.
+    /// </summary>
+    void Attack()
+    {
+        BoardTile tileToShoot = ChooseTileToAttack();
+        if (battle.TorpedoAttackAvailable())
+        {
+            battle.TorpedoAttack(tileToShoot.transform.position - battle.GetTorpedoLaunchPosition());
+        }
+        else
+        {
+            battle.ArtilleryAttack(tileToShoot);
         }
     }
 
@@ -55,8 +117,18 @@ public class AIPlayer : Player
     /// <returns>Optimal tile to target.</returns>
     public BoardTile ChooseTileToAttack()
     {
+
+
         List<BoardTile> hits = this.hits[battle.defendingPlayer.ID];
         List<BoardTile> misses = this.misses[battle.defendingPlayer.ID];
+
+        foreach (BoardTile tile in battle.defendingPlayer.board.tiles)
+        {
+            if (tile.revealedTo.Contains(this) && !(hits.Contains(tile) || misses.Contains(tile)))
+            {
+                return tile;
+            }
+        }
 
         List<BoardTile> processedTiles = new List<BoardTile>();
         Dictionary<int, List<BoardTile>> rankedTiles = new Dictionary<int, List<BoardTile>>();

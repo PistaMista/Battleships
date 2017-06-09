@@ -24,13 +24,13 @@ public class ActionSetup_FieldUIModule : FieldUIModule
     protected override void Disable()
     {
         base.Disable();
-        if (FieldInterface.battle != null)
-        {
-            foreach (Ship ship in FieldInterface.battle.attackingPlayer.livingShips)
-            {
-                ship.PositionOnPlayingBoard();
-                ship.gameObject.SetActive(false);
-            }
-        }
+        // if (FieldInterface.battle != null)
+        // {
+        //     foreach (Ship ship in FieldInterface.battle.attackingPlayer.livingShips)
+        //     {
+        //         ship.PositionOnPlayingBoard();
+        //         ship.gameObject.SetActive(false);
+        //     }
+        // }
     }
 }

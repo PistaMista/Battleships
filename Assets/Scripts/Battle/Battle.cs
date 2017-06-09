@@ -201,7 +201,12 @@ public class Battle : MonoBehaviour
 
         attackingPlayer = players[attackingPlayerID];
         attackingPlayer.torpedoRecharge = (attackingPlayer.torpedoRecharge == 0) ? 0 : attackingPlayer.torpedoRecharge - 1;
-        attackingPlayer.aircraftCarrier.TurnAction();
+
+        if (originalAttacker != null)
+        {
+            originalAttacker.OnTurnEnd();
+        }
+        attackingPlayer.OnTurnBegin();
 
 
 

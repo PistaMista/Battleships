@@ -106,8 +106,9 @@ public class AircraftCarrier : Ship
     /// <summary>
     /// Refreshes the aircraft carrier.
     /// </summary>
-    public void TurnAction()
+    public override void OnTurnBegin()
     {
+        base.OnTurnBegin();
         if (activeSquadron == null)
         {
             if (!eliminated)

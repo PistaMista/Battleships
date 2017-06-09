@@ -62,11 +62,6 @@ public class ActiveAircraft : MonoBehaviour
                                 Aircraft aircraft = squadron.aircraft[i];
                                 if (Random.Range(0, 100) < (defenderBonus ? 30 : 8))
                                 {
-                                    //aircraft.ShotDown();
-                                }
-
-                                if (defenderBonus)
-                                {
                                     aircraft.ShotDown();
                                     i--;
                                 }
@@ -141,11 +136,11 @@ public class ActiveAircraft : MonoBehaviour
     /// </summary>
     public void Spot()
     {
-        float spottingChance = aircraft.Count * ((FieldInterface.battle.recentTurnInformation.type == AttackType.ARTILLERY) ? 9 : 12);
+        float spottingChance = aircraft.Count * ((carrier.owner.battle.recentTurnInformation.type == AttackType.ARTILLERY) ? 9 : 12);
 
         if (Random.Range(0, 100) < spottingChance)
         {
-            if (FieldInterface.battle.recentTurnInformation.type == AttackType.ARTILLERY)
+            if (carrier.owner.battle.recentTurnInformation.type == AttackType.ARTILLERY)
             {
                 Ship selectedShip = target.livingShips[Random.Range(0, target.livingShips.Count)];
                 selectedShip.RevealTo(carrier.owner);

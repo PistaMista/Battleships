@@ -203,4 +203,27 @@ public class Player : MonoBehaviour
         }
         ship.owner = this;
     }
+
+    /// <summary>
+    /// Executed when a turn begins.
+    /// </summary>
+    public void OnTurnBegin()
+    {
+        foreach (Ship ship in allShips)
+        {
+            ship.OnTurnBegin();
+        }
+    }
+
+
+    /// <summary>
+    /// Executed when a turn ends.
+    /// </summary>
+    public void OnTurnEnd()
+    {
+        foreach (Ship ship in allShips)
+        {
+            ship.OnTurnEnd();
+        }
+    }
 }

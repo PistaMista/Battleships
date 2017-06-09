@@ -281,4 +281,20 @@ public class Ship : MonoBehaviour
             revealedTo.Add(player);
         }
     }
+
+    /// <summary>
+    /// Executed when a turn begins.
+    /// </summary>
+    public virtual void OnTurnBegin()
+    {
+
+    }
+
+    /// <summary>
+    /// Executed when a turn ends.
+    /// </summary>
+    public virtual void OnTurnEnd()
+    {
+        PositionOnPlayingBoard();
+    }
 }
