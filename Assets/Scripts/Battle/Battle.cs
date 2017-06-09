@@ -191,14 +191,6 @@ public class Battle : MonoBehaviour
             attackingPlayerID = 0;
         }
 
-        attackingPlayer = players[attackingPlayerID];
-        attackingPlayer.torpedoRecharge = (attackingPlayer.torpedoRecharge == 0) ? 0 : attackingPlayer.torpedoRecharge - 1;
-
-        if (attackingPlayer.aircraftCarrier.activeSquadron != null)
-        {
-            attackingPlayer.aircraftCarrier.activeSquadron.Refresh();
-        }
-
         if (originalAttacker != null)
         {
             foreach (ActiveAircraft squadron in originalAttacker.overheadSquadrons)
@@ -206,6 +198,12 @@ public class Battle : MonoBehaviour
                 squadron.Spot();
             }
         }
+
+        attackingPlayer = players[attackingPlayerID];
+        attackingPlayer.torpedoRecharge = (attackingPlayer.torpedoRecharge == 0) ? 0 : attackingPlayer.torpedoRecharge - 1;
+        attackingPlayer.aircraftCarrier.TurnAction();
+
+
 
         while (!attackingPlayer.alive)
         {

@@ -46,6 +46,7 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
             }
         }
 
+        currentIndicatorState = 0.5f;
         if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron != null)
         {
             UpdateIndicatorMesh(true);

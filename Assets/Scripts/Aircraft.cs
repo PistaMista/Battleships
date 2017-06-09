@@ -12,6 +12,10 @@ public class Aircraft : MonoBehaviour
     /// Takeoff order.
     /// </summary>
     public int takeoffOrder;
+    /// <summary>
+    /// Whether the aircraft was shot down.
+    /// </summary>
+    public bool shotDown;
 
     /// <summary>
     /// Prepares the aircraft onto the flight deck.
@@ -25,5 +29,15 @@ public class Aircraft : MonoBehaviour
             transform.localRotation = Quaternion.Euler(targetRotation);
             this.takeoffOrder = takeoffOrder;
         }
+    }
+
+    /// <summary>
+    /// Destroys the aircraft.
+    /// </summary>
+    public void ShotDown()
+    {
+        shotDown = true;
+        transform.parent = null;
+        owner.activeSquadron.aircraft.Remove(this);
     }
 }

@@ -66,24 +66,70 @@ public class AircraftCarrier : Ship
     void PrepareAircraft()
     {
         int centering = 1;
+        int preparedAircraft = 0;
         Vector3 startingPos = new Vector3(-0.2f, 0.3f, -1.85f);
         float zSpacing = 0.35f;
         float xSpacing = 0.15f;
-        activeSquadron = new GameObject("Active Squadron").AddComponent<ActiveAircraft>();
-        activeSquadron.aircraft = new List<Aircraft>();
-        activeSquadron.transform.parent = transform;
-        activeSquadron.carrier = this;
+        if (activeSquadron == null)
+        {
+            activeSquadron = new GameObject("Active Squadron").AddComponent<ActiveAircraft>();
+            activeSquadron.aircraft = new List<Aircraft>();
+            activeSquadron.transform.parent = transform;
+            activeSquadron.carrier = this;
+        }
+        else
+        {
+            if (!activeSquadron.airborne)
+            {
+                preparedAircraft = activeSquadron.aircraft.Count;
+            }
+            else
+            {
+                preparedAircraft = flightDeckCapacity;
+            }
+        }
 
-        for (int i = 0; i < flightDeckCapacity && i < hangarAircraft.Count; i++)
+        for (int i = preparedAircraft; i < flightDeckCapacity && i < hangarAircraft.Count + preparedAircraft; i++)
         {
             Vector3 finalPosition = startingPos + Vector3.forward * zSpacing * i + Vector3.right * xSpacing * centering;
             Aircraft aircraft = hangarAircraft[0];
             aircraft.Prepare(finalPosition, Vector3.up * 180f, i);
             aircraft.transform.parent = activeSquadron.transform;
+            aircraft.owner = this;
 
             hangarAircraft.Remove(aircraft);
             activeSquadron.aircraft.Add(aircraft);
             centering *= -1;
         }
+    }
+
+    /// <summary>
+    /// Refreshes the aircraft carrier.
+    /// </summary>
+    public void TurnAction()
+    {
+        if (activeSquadron == null)
+        {
+            if (!eliminated)
+            {
+                PrepareAircraft();
+            }
+        }
+        else
+        {
+            if (!activeSquadron.airborne)
+            {
+                if (!eliminated)
+                {
+                    PrepareAircraft();
+                }
+                else
+                {
+                    Destroy(activeSquadron);
+                }
+            }
+            activeSquadron.Refresh();
+        }
+
     }
 }

@@ -36,29 +36,65 @@ public class ActiveAircraft : MonoBehaviour
     {
         if (aircraft.Count > 0)
         {
-            if (target == nextTarget)
-            {
-                travelTime = (travelTime > 0) ? travelTime - 1 : travelTime;
-                if (target != null)
-                {
-                    if (travelTime == 0)
-                    {
-                        if (!target.overheadSquadrons.Contains(this))
-                        {
-                            target.overheadSquadrons.Add(this);
-                        }
-                    }
-                }
-            }
-            else
+            if (target != nextTarget)
             {
                 Redirect(nextTarget);
             }
+
+            travelTime = (travelTime > 0) ? travelTime - 1 : travelTime;
+
+            if (travelTime == 0)
+            {
+                if (target != null)
+                {
+                    if (!target.overheadSquadrons.Contains(this))
+                    {
+                        target.overheadSquadrons.Add(this);
+                    }
+
+                    bool defenderBonus = target == carrier.owner;
+                    foreach (ActiveAircraft squadron in target.overheadSquadrons)
+                    {
+                        if (squadron != this)
+                        {
+                            for (int i = 0; i < squadron.aircraft.Count; i++)
+                            {
+                                Aircraft aircraft = squadron.aircraft[i];
+                                if (Random.Range(0, 100) < (defenderBonus ? 30 : 8))
+                                {
+                                    //aircraft.ShotDown();
+                                }
+
+                                if (defenderBonus)
+                                {
+                                    aircraft.ShotDown();
+                                    i--;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    airborne = false;
+                }
+            }
+
         }
         else
         {
+            if (target != null)
+            {
+                if (travelTime == 0)
+                {
+                    target.overheadSquadrons.Remove(this);
+                }
+            }
+
             Destroy(gameObject);
         }
+
+        transform.parent = airborne ? carrier.owner.battle.transform : carrier.transform;
     }
 
     /// <summary>
@@ -73,10 +109,31 @@ public class ActiveAircraft : MonoBehaviour
             {
                 this.target.overheadSquadrons.Remove(this);
             }
+            this.target = target;
+
+            if (this.target == carrier.owner && target == null)
+            {
+                travelTime = 1;
+            }
+            else
+            {
+                travelTime = 1;
+            }
+        }
+        else
+        {
+            if (target == carrier.owner)
+            {
+                travelTime = 1;
+            }
+            else
+            {
+                travelTime = 1;
+            }
         }
 
+        airborne = true;
         this.target = target;
-        travelTime = 2;
     }
 
     /// <summary>
