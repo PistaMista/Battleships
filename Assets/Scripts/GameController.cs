@@ -32,7 +32,7 @@ public enum GameState
 /// <summary>
 /// All the possible attack types.
 /// </summary>
-public enum AttackType
+public enum TurnType
 {
     /// <summary>
     /// Artillery attacks.
@@ -41,7 +41,11 @@ public enum AttackType
     /// <summary>
     /// Torpedo attacks.
     /// </summary>
-    TORPEDO
+    TORPEDO,
+    /// <summary>
+    /// Skip of a turn.
+    /// </summary>
+    SKIP
 }
 
 public class GameController : MonoBehaviour

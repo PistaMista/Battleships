@@ -91,9 +91,16 @@ public class Torpedo : Projectile
         }
         else
         {
-            if (underwater && targetShip != null)
+            if (underwater)
             {
-                Detonate();
+                if (targetShip != null)
+                {
+                    Detonate();
+                }
+                else
+                {
+                    Destroy(gameObject);
+                }
             }
         }
     }
