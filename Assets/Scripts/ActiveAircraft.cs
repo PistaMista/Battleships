@@ -1,17 +1,57 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+///     /// Used by the GUI to show the current state of the aircraft.
+/// </summary>
+public enum AircraftState
+{
+    LANDING,
+    SPOTTING,
+    ATTACKING,
+    DEFENDING
+}
 public class ActiveAircraft : MonoBehaviour
 {
+
+    public AircraftState lastState;
+    AircraftState nextState;
+    public AircraftState NextState
+    {
+        get { return nextState; }
+        set
+        {
+            if (!(value == AircraftState.LANDING && carrier.eliminated))
+            {
+                nextState = value;
+            }
+        }
+    }
+
     /// <summary>
     /// The player targeted by this squadron.
     /// </summary>
-    public Player target;
+    Player target;
+    public Player Target
+    {
+        get { return target; }
+        set { target = value; }
+    }
     /// <summary>
     /// The player this squadron is supposed to target.
     /// </summary>
-    public Player nextTarget;
+    Player nextTarget;
+    public Player NextTarget
+    {
+        get { return nextTarget; }
+        set
+        {
+            if (!(value == null && carrier.eliminated))
+            {
+                nextTarget = value;
+            }
+        }
+    }
     /// <summary>
     /// The aircraft of this squadron.
     /// </summary>
@@ -23,7 +63,8 @@ public class ActiveAircraft : MonoBehaviour
     /// <summary>
     /// The number of turns remaining until the squadron gets to the target.
     /// </summary>
-    public int travelTime = 2;
+    public int travelTime = 0;
+    public int initialTravelTime;
     /// <summary>
     /// The base carrier of this squadron.
     /// </summary>
@@ -36,24 +77,32 @@ public class ActiveAircraft : MonoBehaviour
     {
         if (aircraft.Count > 0)
         {
-            if (target != nextTarget)
+            if (Target == null && carrier.eliminated)
             {
-                Redirect(nextTarget);
+                Redirect(carrier.owner);
+            }
+
+            if (Target != NextTarget)
+            {
+                Redirect(NextTarget);
             }
 
             travelTime = (travelTime > 0) ? travelTime - 1 : travelTime;
 
+
+
             if (travelTime == 0)
             {
-                if (target != null)
+                lastState = NextState;
+                if (Target != null)
                 {
-                    if (!target.overheadSquadrons.Contains(this))
+                    if (!Target.overheadSquadrons.Contains(this))
                     {
-                        target.overheadSquadrons.Add(this);
+                        Target.overheadSquadrons.Add(this);
                     }
 
-                    bool defenderBonus = target == carrier.owner;
-                    foreach (ActiveAircraft squadron in target.overheadSquadrons)
+                    bool defenderBonus = Target == carrier.owner;
+                    foreach (ActiveAircraft squadron in Target.overheadSquadrons)
                     {
                         if (squadron != this)
                         {
@@ -78,11 +127,11 @@ public class ActiveAircraft : MonoBehaviour
         }
         else
         {
-            if (target != null)
+            if (Target != null)
             {
                 if (travelTime == 0)
                 {
-                    target.overheadSquadrons.Remove(this);
+                    Target.overheadSquadrons.Remove(this);
                 }
             }
 
@@ -98,37 +147,49 @@ public class ActiveAircraft : MonoBehaviour
     /// <param name="target">Target.</param>
     void Redirect(Player target)
     {
-        if (this.target != null)
+        if (this.Target != null)
         {
-            if (this.target.overheadSquadrons.Contains(this))
+            if (this.Target.overheadSquadrons.Contains(this))
             {
-                this.target.overheadSquadrons.Remove(this);
+                this.Target.overheadSquadrons.Remove(this);
             }
-            this.target = target;
+        }
 
-            if (this.target == carrier.owner && target == null)
+        travelTime = GetTravelTime(target);
+        initialTravelTime = travelTime;
+        airborne = true;
+        this.Target = target;
+    }
+
+    /// <summary>
+    /// Gets the travel time needed to reach the target.
+    /// </summary>
+    /// <param name="target">Target player.</param>
+    /// <returns>Travel time.</returns>
+    public int GetTravelTime(Player target)
+    {
+        if (this.Target != null)
+        {
+            if (this.Target == carrier.owner && target == null)
             {
-                travelTime = 1;
+                return 1;
             }
             else
             {
-                travelTime = 1;
+                return 3;
             }
         }
         else
         {
             if (target == carrier.owner)
             {
-                travelTime = 1;
+                return 2;
             }
             else
             {
-                travelTime = 1;
+                return 3;
             }
         }
-
-        airborne = true;
-        this.target = target;
     }
 
     /// <summary>
@@ -142,13 +203,13 @@ public class ActiveAircraft : MonoBehaviour
         {
             if (carrier.owner.battle.recentTurnInformation.type == AttackType.ARTILLERY)
             {
-                Ship selectedShip = target.livingShips[Random.Range(0, target.livingShips.Count)];
+                Ship selectedShip = Target.livingShips[Random.Range(0, Target.livingShips.Count)];
                 selectedShip.RevealTo(carrier.owner);
             }
             else
             {
                 List<Destroyer> destroyers = new List<Destroyer>();
-                foreach (Ship ship in target.livingShips)
+                foreach (Ship ship in Target.livingShips)
                 {
                     if (ship.type == ShipType.DESTROYER)
                     {

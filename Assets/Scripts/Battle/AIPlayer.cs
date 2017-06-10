@@ -46,7 +46,7 @@ public class AIPlayer : Player
         {
             playerBias[i] = 0;
             Player player = battle.players[i];
-            if (aircraftCarrier.activeSquadron.target == player)
+            if (aircraftCarrier.activeSquadron.Target == player)
             {
                 playerBias[i] += aircraftCarrier.activeSquadron.travelTime * 3;
             }
@@ -75,7 +75,7 @@ public class AIPlayer : Player
             highestID = playerBias[highestID] >= playerBias[i] ? highestID : i;
         }
 
-        aircraftCarrier.activeSquadron.nextTarget = battle.players[highestID];
+        aircraftCarrier.activeSquadron.NextTarget = battle.players[highestID];
     }
 
     /// <summary>

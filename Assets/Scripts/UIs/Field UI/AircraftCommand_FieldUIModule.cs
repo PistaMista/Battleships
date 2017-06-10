@@ -21,29 +21,47 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
         base.Enable();
         if (!linkedCarrier.eliminated && linkedCarrier.ownedAircraft.Count > 0)
         {
-            reserveAircraftIndicator.gameObject.SetActive(true);
             aircraftUnavailableIndicator.SetActive(false);
-            if (linkedCarrier.activeSquadron == null)
+
+        }
+        else
+        {
+            aircraftUnavailableIndicator.SetActive(true);
+        }
+
+        if (linkedCarrier.activeSquadron == null)
+        {
+            if (!linkedCarrier.eliminated)
             {
                 reserveAircraftIndicator.text = linkedCarrier.hangarAircraft.Count.ToString();
             }
             else
             {
-                reserveAircraftIndicator.text = linkedCarrier.hangarAircraft.Count.ToString() + ">" + (Mathf.Clamp(linkedCarrier.flightDeckCapacity - linkedCarrier.activeSquadron.aircraft.Count, 0, linkedCarrier.hangarAircraft.Count));
+                reserveAircraftIndicator.text = "";
             }
         }
         else
         {
-            reserveAircraftIndicator.gameObject.SetActive(false);
-            aircraftUnavailableIndicator.SetActive(true);
+            if (!linkedCarrier.eliminated)
+            {
+                reserveAircraftIndicator.text = (linkedCarrier.activeSquadron.aircraft.Count) + "/" + (linkedCarrier.flightDeckCapacity) + " + " + linkedCarrier.hangarAircraft.Count.ToString();
+            }
+            else
+            {
+                reserveAircraftIndicator.text = (linkedCarrier.activeSquadron.aircraft.Count) + "/" + (linkedCarrier.flightDeckCapacity);
+            }
         }
 
         if (linkedCarrier.activeSquadron != null)
         {
-            if (linkedCarrier.activeSquadron.target != null)
+            if (linkedCarrier.activeSquadron.travelTime == 0 && linkedCarrier.activeSquadron.Target != null)
             {
-                MarkTargetedPlayer();
+                if (linkedCarrier.activeSquadron.Target.overheadSquadrons.Count > 1)
+                {
+                    linkedCarrier.activeSquadron.NextState = AircraftState.ATTACKING;
+                }
             }
+            DrawStatusIndicator();
         }
 
         currentIndicatorState = 0.5f;
@@ -64,7 +82,7 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
     protected override void Disable()
     {
         base.Disable();
-        Destroy(targetMarkerParent);
+        Destroy(statusMarkerParent);
         Destroy(warningMarkerParent);
     }
 
@@ -77,13 +95,6 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
         if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron != null)
         {
             UpdateIndicatorMesh(false);
-        }
-
-        if (targetMarkerParent != null)
-        {
-            Vector3 position = targetMarkerParent.transform.position;
-            position.y = FieldInterface.battle.nextState == BattleState.CHOOSING_TARGET ? 3.6f : 0.1f;
-            targetMarkerParent.transform.position = position;
         }
 
         if (warningMarkerParent != null)
@@ -100,7 +111,33 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
         base.UpdateInput();
         if (InputController.IsDragging(63) && InputController.deviation > 1f)
         {
-            FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget = TargetedPlayer();
+            ActiveAircraft squadron = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron;
+            Player targetedPlayer = TargetedPlayer();
+            if (targetedPlayer == FieldInterface.battle.attackingPlayer)
+            {
+                squadron.NextState = AircraftState.DEFENDING;
+            }
+            else if (targetedPlayer == null)
+            {
+                squadron.NextState = AircraftState.LANDING;
+            }
+            else
+            {
+                if (squadron.travelTime == 0 && targetedPlayer.overheadSquadrons.Count > 1)
+                {
+                    squadron.NextState = AircraftState.ATTACKING;
+                }
+                else
+                {
+                    squadron.NextState = AircraftState.SPOTTING;
+                }
+            }
+
+            if (targetedPlayer != squadron.NextTarget)
+            {
+                squadron.NextTarget = targetedPlayer;
+                DrawStatusIndicator();
+            }
         }
     }
 
@@ -130,14 +167,14 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
     float currentAngleChange;
     void UpdateIndicatorMesh(bool instant)
     {
-        float targetState = (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget == null) ? -0.1f : 1f;
+        float targetState = (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.NextTarget == null) ? -0.1f : 1f;
 
-        SetIndicatorMesh(Mathf.Clamp01(instant ? targetState : Mathf.SmoothDamp(currentIndicatorState, targetState, ref currentStateChange, 0.1f, 10f)), 5f, 7f, GameController.playerBoardDistanceFromCenter - FieldInterface.battle.attackingPlayer.board.dimensions / 2f);
+        SetIndicatorMesh(Mathf.Clamp01(instant ? targetState : Mathf.SmoothDamp(currentIndicatorState, targetState, ref currentStateChange, 0.1f, 10f)), 5f, 7f, (GameController.playerBoardDistanceFromCenter - FieldInterface.battle.attackingPlayer.board.dimensions / 2f) / 1.2f);
 
         float targetAngle = 0;
-        if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget != null)
+        if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.NextTarget != null)
         {
-            targetAngle = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.nextTarget.ID * (360f / FieldInterface.battle.players.Length) - 90f;
+            targetAngle = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.NextTarget.ID * (360f / FieldInterface.battle.players.Length) - 90f;
 
         }
 
@@ -219,41 +256,74 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
         currentIndicatorState = state;
     }
 
-
-    public GameObject markerEye;
-    public GameObject markerChevron;
     /// <summary>
-    /// The marker used to mark the targeted player of the aircraft.
+    /// The indicators used to make up the status indicator.
     /// </summary>
-    GameObject targetMarkerParent;
+    public GameObject[] indicators;
+    public GameObject emptyChevron;
+    public GameObject fullChevron;
     /// <summary>
-    /// Marks the targeted player.
+    /// The parent of the status marker.
     /// </summary>
-    void MarkTargetedPlayer()
+    GameObject statusMarkerParent;
+    /// <summary>
+    /// Draws the status indicator.
+    /// </summary>
+    void DrawStatusIndicator()
     {
-        targetMarkerParent = new GameObject("Spotting Target Marker");
-        targetMarkerParent.transform.parent = transform;
-        targetMarkerParent.transform.position = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.target.board.transform.position + Vector3.up;
-
-        int turnsLeft = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.travelTime;
-        if (turnsLeft > 0)
+        Destroy(statusMarkerParent);
+        ActiveAircraft squadron = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron;
+        statusMarkerParent = new GameObject("Status Indicator");
+        statusMarkerParent.transform.parent = transform;
+        statusMarkerParent.transform.localPosition = new Vector3(0, 2f, -10f);
+        if (squadron.NextState == squadron.lastState && squadron.travelTime == 0)
         {
-            Vector3 initialPosition = new Vector3(0, 0, -(Mathf.Clamp01((turnsLeft - 1)) * 0.5f + Mathf.Clamp((turnsLeft - 2) / 2f, 0, 10)));
-            for (int i = 0; i < turnsLeft; i++)
-            {
-                Vector3 position = initialPosition + Vector3.forward * i;
-                GameObject chevron = Instantiate(markerChevron);
-                chevron.transform.parent = targetMarkerParent.transform;
-                chevron.transform.localPosition = position;
-            }
+            GameObject tmp = Instantiate(indicators[(int)squadron.lastState]);
+            tmp.transform.parent = statusMarkerParent.transform;
+            tmp.transform.localPosition = Vector3.zero;
         }
         else
         {
-            GameObject eye = Instantiate(markerEye);
-            eye.transform.parent = targetMarkerParent.transform;
-            eye.transform.localPosition = Vector3.zero;
+            int steps = 3;
+            if (squadron.NextTarget == squadron.Target)
+            {
+                steps = 3 + Mathf.Clamp((squadron.initialTravelTime - 1), 0, 20);
+            }
+            else
+            {
+                steps = 3 + Mathf.Clamp((squadron.GetTravelTime(squadron.NextTarget) - 1), 0, 20);
+            }
+            Vector3 initialPosition = new Vector3(-(Mathf.Clamp01((steps - 1)) * 1.5f + Mathf.Clamp((steps - 2) * 1.5f, 0, 10)), 0, 0);
+            for (int i = 0; i < steps; i++)
+            {
+                GameObject tmp;
+                if (i == 0)
+                {
+                    tmp = Instantiate(indicators[(int)squadron.lastState]);
+                }
+                else if (i == steps - 1)
+                {
+                    tmp = Instantiate(indicators[(int)squadron.NextState]);
+                }
+                else
+                {
+                    int fullChevrons = squadron.initialTravelTime - squadron.travelTime;
+                    if ((i - 1) < fullChevrons && squadron.NextTarget == squadron.Target)
+                    {
+                        tmp = Instantiate(fullChevron);
+                    }
+                    else
+                    {
+                        tmp = Instantiate(emptyChevron);
+                    }
+                }
+
+                tmp.transform.parent = statusMarkerParent.transform;
+                tmp.transform.localPosition = initialPosition + Vector3.right * i * 3;
+            }
         }
     }
+
     /// <summary>
     /// Warning indicator.
     /// </summary>
@@ -273,7 +343,7 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
             {
                 if (player.aircraftCarrier.activeSquadron != null)
                 {
-                    if (player.aircraftCarrier.activeSquadron.target == FieldInterface.battle.attackingPlayer)
+                    if (player.aircraftCarrier.activeSquadron.Target == FieldInterface.battle.attackingPlayer)
                     {
                         GameObject warning = Instantiate(warningIndicator);
                         warning.transform.parent = warningMarkerParent.transform;
@@ -281,17 +351,10 @@ public class AircraftCommand_FieldUIModule : FieldUIModule
                         Player attackerTarget = null;
                         if (FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron != null)
                         {
-                            attackerTarget = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.target;
+                            attackerTarget = FieldInterface.battle.attackingPlayer.aircraftCarrier.activeSquadron.Target;
                         }
 
-                        if (player == attackerTarget)
-                        {
-                            warning.transform.position = player.board.transform.position + new Vector3(0, 1f, 5f);
-                        }
-                        else
-                        {
-                            warning.transform.position = player.board.transform.position + new Vector3(0, 1f, 0f);
-                        }
+                        warning.transform.position = player.board.transform.position + new Vector3(0, 1f, 0f);
                     }
                 }
             }
