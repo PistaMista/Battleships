@@ -27,7 +27,7 @@ public class Actionman : MonoBehaviour
         int randomModuleID = 1;
         switch (FieldInterface.battle.recentTurnInformation.type)
         {
-            case AttackType.ARTILLERY:
+            case TurnType.ARTILLERY:
                 //randomModuleID = Random.Range(1, 3);
                 //TEST
                 randomModuleID = 1;
@@ -42,7 +42,7 @@ public class Actionman : MonoBehaviour
                         break;
                 }
                 break;
-            case AttackType.TORPEDO:
+            case TurnType.TORPEDO:
                 randomModuleID = 1;
                 switch (randomModuleID)
                 {

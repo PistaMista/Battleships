@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 /// <summary>
-///     /// Used by the GUI to show the current state of the aircraft.
+/// Used by the GUI to show the current state of the aircraft.
 /// </summary>
 public enum AircraftState
 {
@@ -197,11 +197,11 @@ public class ActiveAircraft : MonoBehaviour
     /// </summary>
     public void Spot()
     {
-        float spottingChance = aircraft.Count * ((carrier.owner.battle.recentTurnInformation.type == AttackType.ARTILLERY) ? 9 : 12);
+        float spottingChance = aircraft.Count * ((carrier.owner.battle.recentTurnInformation.type == TurnType.ARTILLERY) ? 9 : 12);
 
         if (Random.Range(0, 100) < spottingChance)
         {
-            if (carrier.owner.battle.recentTurnInformation.type == AttackType.ARTILLERY)
+            if (carrier.owner.battle.recentTurnInformation.type == TurnType.ARTILLERY)
             {
                 Ship selectedShip = Target.livingShips[Random.Range(0, Target.livingShips.Count)];
                 selectedShip.RevealTo(carrier.owner);

@@ -26,7 +26,7 @@ public class MoveInformator : ScriptableObject
     /// <summary>
     /// The weapon used for the attack.
     /// </summary>
-    public AttackType type;
+    public TurnType type;
     /// <summary>
     /// The ships which were sunk.
     /// </summary>
@@ -51,7 +51,7 @@ public class MoveInformator : ScriptableObject
     {
         attacker = null;
         target = Vector2.zero;
-        type = AttackType.ARTILLERY;
+        type = TurnType.ARTILLERY;
         sunkShips = new List<Ship>();
         hitShips = new List<Ship>();
         hitTiles = new List<BoardTile>();

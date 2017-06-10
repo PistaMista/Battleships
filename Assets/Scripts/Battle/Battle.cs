@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum BattleState { NONE, ALL, CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_FINISHED, FRIENDLY_SHIP_PREVIEW, SHOWING_HIT_TILE }
+public enum BattleState { NONE, ALL, CHOOSING_TARGET, CHOOSING_TILE_TO_SHOOT, FIRING, TURN_FINISHED, FRIENDLY_SHIP_PREVIEW, SHOWING_HIT_TILE, SKIPPING_TURN }
 
 public class Battle : MonoBehaviour
 {
@@ -262,7 +262,7 @@ public class Battle : MonoBehaviour
                 recentTurnInformation.Reset();
                 recentTurnInformation.target = tile.boardCoordinates;
                 //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
-                recentTurnInformation.type = AttackType.ARTILLERY;
+                recentTurnInformation.type = TurnType.ARTILLERY;
                 recentTurnInformation.attacker = attackingPlayer;
 
                 nextState = BattleState.TURN_FINISHED;
@@ -318,7 +318,7 @@ public class Battle : MonoBehaviour
         recentTurnInformation.Reset();
         recentTurnInformation.target = new Vector2(direction.x, direction.z).normalized;
         //recentTurnInformation.attackedTileWorldPosition = tile.transform.position;
-        recentTurnInformation.type = AttackType.TORPEDO;
+        recentTurnInformation.type = TurnType.TORPEDO;
         recentTurnInformation.attacker = attackingPlayer;
 
         nextState = BattleState.TURN_FINISHED;
@@ -392,6 +392,15 @@ public class Battle : MonoBehaviour
         {
             onAttack();
         }
+    }
+
+    /// <summary>
+    /// Skips the current players turn.
+    /// </summary>
+    public void SkipTurn()
+    {
+        ChangeState(BattleState.SKIPPING_TURN);
+        ChangeState(BattleState.TURN_FINISHED, 2f);
     }
 
     /// <summary>

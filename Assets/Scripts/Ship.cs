@@ -242,7 +242,7 @@ public class Ship : MonoBehaviour
     {
         switch (projectile.type)
         {
-            case AttackType.ARTILLERY:
+            case TurnType.ARTILLERY:
                 if (eliminated && sinkTimeLeft > sinkTime)
                 {
                     BeginSinking();
@@ -253,7 +253,7 @@ public class Ship : MonoBehaviour
                     AddFire();
                 }
                 break;
-            case AttackType.TORPEDO:
+            case TurnType.TORPEDO:
                 if (eliminated && sinkTimeLeft > sinkTime)
                 {
                     BeginSinking();
